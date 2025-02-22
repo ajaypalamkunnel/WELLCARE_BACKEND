@@ -6,6 +6,7 @@ import PasswordUtils from "../../../utils/passwordUtils"
 import {sendOTPEmail} from "../../../utils/emailUtils"
 import { IUserService } from "../../../services/interfaces/user/iuserServices";
 import { json } from "body-parser";
+import { error } from "console";
 class UserController implements IUserController{
     
     private userService:IUserService
@@ -30,15 +31,38 @@ class UserController implements IUserController{
     }
 
 
+// resend OTP 
+    async sendOtp(req: Request, res: Response): Promise<Response> {
+        try {
+            const {email} = req.body
+            if(!email){
+                return res.status(400).json({error: "Email is required"})
+            }
+            await this.userService.sendOtp(email)
+            return res.status(200).json({message:"New OTP sent to email"})
+        } catch (error) {
+            return res.status(400).json({error:error instanceof Error ? error.message : "An unexpected error occurred"})
+        }
+    }
 
 
-    sendOtp(req: Request, res: Response): Promise<Response> {
-        throw new Error("Method not implemented.");
+    async verifyOtp(req: Request, res: Response): Promise<void> {
+        try {
+            const {email,otp} = req.body
+            if(!email||!otp){
+                res.status(400).json({error:"Email and OTP are required"})
+                return 
+            }
+
+            await this.userService.verifyOtp(email,otp)
+
+            res.status(200).json({message:"OTP verified successfully. Your account is now activated."})
+        } catch (error) {
+            res.status(400).json({error:error instanceof Error ? error.message : "OTP verification failed"})
+        }
     }
-    verifyOtp(req: Request, res: Response): Promise<Response> {
-        throw new Error("Method not implemented.");
-    }
-    refreshToken(req: Request, res: Response): Promise<Response> {
+
+    refreshToken(req: Request, res: Response): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

@@ -3,6 +3,7 @@ import IUserRepository from "../../../repositories/interfaces/user/IUser";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IUserService } from "../../interfaces/user/iuserServices";
 import { sendOTPEmail } from "../../../utils/emailUtils";
+import { userInfo } from "os";
 
 class UserService implements IUserService {
 
@@ -19,6 +20,10 @@ class UserService implements IUserService {
     // private generateToken(userId:string):string{
 
     // }
+
+    private generteOTP(): string {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
 
 
 
@@ -42,7 +47,7 @@ class UserService implements IUserService {
 
         //Generate OTP 
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = this.generteOTP()
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 5); // 5 minutes expiry
 
@@ -62,12 +67,48 @@ class UserService implements IUserService {
         return { user }
 
     }
-    sendOtp(token: string): Promise<{ email: string; otp: string; message: string; }> {
-        throw new Error("Method not implemented.");
+    async sendOtp(email: string): Promise<void> {
+        const user = await this.userRepository.findUserByEmail(email)
+
+        if (!user) {
+            throw new Error("User not found")
+        }
+
+        const otp = this.generteOTP()
+        const otpExpires = new Date();
+        otpExpires.setMinutes(otpExpires.getMinutes() + 10);
+
+        await this.userRepository.updateUser(user._id.toString(), { otp, otpExpires })
+
+        await sendOTPEmail(email, otp)
+
+
     }
-    verifyOtp(userId: string, otp: string): Promise<string> {
-        throw new Error("Method not implemented.");
+
+
+    async verifyOtp(email: string, otp: string): Promise<void> {
+        const user =  await this.userRepository.findUserByEmail(email)
+
+        if(!user){
+            throw new Error("User not found");
+        }
+
+        if(!user.otp || !user.otpExpires || new Date() > user.otpExpires){
+            throw new Error("OTP expired. Please request a new one.")
+        }
+
+        if(user.otp !== otp){
+            throw new Error("Invalid OTP. Pleae try again")
+        }
+
+        await this.userRepository.updateUser(user._id.toString(),{
+            otp:null,
+            otpExpires:null,
+            status:1  
+        })
     }
+
+
 
     verifyToken(token: string): string {
         throw new Error("Method not implemented.");

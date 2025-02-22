@@ -16,8 +16,8 @@ interface IUser extends Document {
     password: string;
     status: number;
     isVerified: boolean;
-    otp?: string;
-    otpExpires?: Date;
+    otp?: string | null;
+    otpExpires?: Date | null;
     updatedAt?: Date;
     createdAt?: Date;
     personalInfo: IPersonalInfo

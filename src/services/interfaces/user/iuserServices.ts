@@ -7,9 +7,9 @@ export interface IUserService{
 
     registerBasicDetails(userDetails:Partial<IUser>):Promise<{ user: IUser}>
 
-    sendOtp(token:string):Promise<{email: string; otp: string; message: string }>
+    sendOtp(token:string):Promise<void>
 
-    verifyOtp(userId: string, otp: string): Promise<string>;
+    verifyOtp(email: string, otp: string): Promise<void>;
 
 
 
