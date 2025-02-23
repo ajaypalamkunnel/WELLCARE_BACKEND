@@ -67,7 +67,7 @@ class UserService implements IUserService {
         return { user }
 
     }
-    async sendOtp(email: string): Promise<void> {
+    async resendOtp(email: string): Promise<void> {
         const user = await this.userRepository.findUserByEmail(email)
 
         if (!user) {

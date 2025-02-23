@@ -15,6 +15,8 @@ class UserController implements IUserController{
         this.userService = userService
     }
    async registerBasicDetails(req: Request, res: Response): Promise<void> {
+    console.log("hello guys");
+    
         try {
 
             const {user} = await this.userService.registerBasicDetails(req.body)
@@ -32,16 +34,18 @@ class UserController implements IUserController{
 
 
 // resend OTP 
-    async sendOtp(req: Request, res: Response): Promise<Response> {
+    async resendOtp(req: Request, res: Response): Promise<Response> {
+        console.log("koiiiiii");
+        
         try {
             const {email} = req.body
             if(!email){
-                return res.status(400).json({error: "Email is required"})
+                return res.status(400).json({success: false,error: "Email is required"})
             }
-            await this.userService.sendOtp(email)
-            return res.status(200).json({message:"New OTP sent to email"})
+            await this.userService.resendOtp(email)
+            return res.status(200).json({success:true,message:"New OTP sent to email"})
         } catch (error) {
-            return res.status(400).json({error:error instanceof Error ? error.message : "An unexpected error occurred"})
+            return res.status(400).json({success:false,error:error instanceof Error ? error.message : "An unexpected error occurred"})
         }
     }
 
