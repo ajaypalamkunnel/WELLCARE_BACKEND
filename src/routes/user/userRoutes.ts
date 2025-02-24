@@ -13,7 +13,7 @@ router.post("/signup/basic_details",(req,res)=>userController.registerBasicDetai
 router.post("/signup/resend_otp", async (req,res)=>{ await userController.resendOtp(req,res)})
 router.post("/signup/verify_otp",async (req,res)=>{await userController.verifyOtp(req,res)})
 
-
-
+router.post("/login",(req,res)=>userController.postLogin(req,res))
+router.post("/refresh-token",(req,res)=>userController.renewAuthTokens(req,res))
 
 export default router

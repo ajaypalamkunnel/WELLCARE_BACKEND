@@ -20,7 +20,9 @@ interface IUser extends Document {
     otpExpires?: Date | null;
     updatedAt?: Date;
     createdAt?: Date;
-    personalInfo: IPersonalInfo
+    personalInfo: IPersonalInfo;
+    refreshToken: string 
+
 }
 
 const PersonalInfoSchema = new Schema<IPersonalInfo>({
@@ -70,7 +72,8 @@ const UserSchema = new Schema<IUser>({
     personalInfo: {
         type: PersonalInfoSchema,
         //required: true
-    }
+    },
+    refreshToken: { type: String }
 }, { timestamps: true })
 
 

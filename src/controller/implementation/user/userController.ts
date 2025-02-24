@@ -5,8 +5,8 @@ import UserRepository from "../../../repositories/implementation/user/userReposi
 import PasswordUtils from "../../../utils/passwordUtils"
 import {sendOTPEmail} from "../../../utils/emailUtils"
 import { IUserService } from "../../../services/interfaces/user/iuserServices";
-import { json } from "body-parser";
 import { error } from "console";
+
 class UserController implements IUserController{
     
     private userService:IUserService
@@ -66,9 +66,69 @@ class UserController implements IUserController{
         }
     }
 
-    refreshToken(req: Request, res: Response): Promise<void> {
-        throw new Error("Method not implemented.");
+    
+    async postLogin(req:Request,res:Response):Promise<void>{
+        try {
+            const {email,password} = req.body
+
+            if(!email || !password){
+                res.status(400).json({error:"Email and password are required"})
+                return
+            }
+
+            const {accessToken,refreshToken,user} = await this.userService.loginUser(email,password)
+            // console.log("===>",accessToken);
+            // console.log("===>",refreshToken);
+            // **Set Refresh Token in HTTP-Only Cookie**
+
+            res.cookie("refreshToken",refreshToken,{
+                httpOnly:true,
+                secure:process.env.NODE_ENV === "production",
+                sameSite:"strict",
+                maxAge:7 * 24 * 60 * 60 * 1000
+
+            })
+
+
+
+            res.status(200).json({
+                success:true,
+                message:"Login succesful",
+                accessToken,
+                user:{id:user?._id,email:user?.email,fullName:user?.fullName}
+            })
+        } catch (error) {
+            res.status(400).json({error:error instanceof Error ? error.message : "Login failed"})
+        }
     }
+
+   async renewAuthTokens(req: Request, res: Response): Promise<void> {
+        try {
+            const oldRefreshToken = req.cookies.refreshToken;
+
+
+            if(!oldRefreshToken){
+                res.status(401).json({error:"Refresh token not found"})
+                return;
+            }
+
+            const{ accessToken,refreshToken }= await this.userService.renewAuthTokens(oldRefreshToken)
+            
+            
+            res.cookie("refreshToken",refreshToken,{
+                httpOnly:true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite:"strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            })
+
+
+            res.status(200).json({accessToken})
+        } catch (error) {
+            res.status(400).json({ error: error instanceof Error ? error.message : "Failed to refresh token" });
+        }
+    }
+
 
 
     

@@ -21,6 +21,9 @@ class UserRepository implements IUserRepository {
     async deleteUser(id: string): Promise<IUser | null> {
         return await User.findByIdAndDelete(id)
     }
+    async updateRefreshToken(userId:string,refreshToken:string):Promise<IUser|null>{
+        return await User.findByIdAndUpdate(userId,{refreshToken})
+    }
 }
 
 export default UserRepository

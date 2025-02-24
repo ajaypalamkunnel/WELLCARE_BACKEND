@@ -4,6 +4,7 @@ import PasswordUtils from "../../../utils/passwordUtils";
 import { IUserService } from "../../interfaces/user/iuserServices";
 import { sendOTPEmail } from "../../../utils/emailUtils";
 import { userInfo } from "os";
+import JwtUtils from "../../../utils/jwtUtils";
 
 class UserService implements IUserService {
 
@@ -13,7 +14,7 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this.userRepository = userRespository
     }
-
+    
 
     //Genereate jwt
 
@@ -110,8 +111,54 @@ class UserService implements IUserService {
 
 
 
-    verifyToken(token: string): string {
-        throw new Error("Method not implemented.");
+    async loginUser(email: string, password: string): Promise<{ user: IUser | null; accessToken:string;refreshToken:string }> {
+        
+
+        const user = await this.userRepository.findUserByEmail(email)
+
+        if(!user){
+            throw new Error("Invalid email or password.")
+        }
+
+        if(user.status === -1){
+            throw new Error("This user is blocked by admin")
+        }
+
+        const isMatch = await PasswordUtils.comparePassword(password,user.password)
+
+
+        if(!isMatch){
+            throw new Error("Invalid email or password.")
+        }
+
+        const accessToken = JwtUtils.generateAccesToken({userId:user._id,email:user.email})
+        const refreshToken = JwtUtils.generateRefreshToken({userId:user._id})
+
+        await this.userRepository.updateRefreshToken(user._id.toString(),refreshToken)
+        return {accessToken,refreshToken,user}
+    }
+
+
+
+    // token renewl using this method
+    async renewAuthTokens(oldRefreshToken: string): Promise<{accessToken: string; refreshToken: string}> {
+
+        const decode = JwtUtils.verifyToken(oldRefreshToken,true)
+
+        if(!decode || typeof decode === 'string' || !decode.userId){
+            throw new Error("Invalid refresh token");
+        }
+
+        const user = await this.userRepository.findUserByEmail(decode.userId);
+        if(!user || user.refreshToken !== oldRefreshToken){
+            throw new Error("Invalid refresh token")
+        }
+
+        const newAccessToken = JwtUtils.generateAccesToken({userId:user._id,email:user.email})
+        const newRefreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
+
+        return {accessToken:newAccessToken,refreshToken:newRefreshToken}
+        
     }
 
 

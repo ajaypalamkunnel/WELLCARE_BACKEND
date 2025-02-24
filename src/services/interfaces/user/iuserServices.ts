@@ -11,8 +11,10 @@ export interface IUserService{
 
     verifyOtp(email: string, otp: string): Promise<void>;
 
+    loginUser(emial:string,password:string):Promise<{ user: IUser | null; accessToken:string;refreshToken:string}>
 
 
-    verifyToken(token:string):string;
+
+    renewAuthTokens(token:string):Promise<{accessToken: string; refreshToken: string}>;
     
 }
