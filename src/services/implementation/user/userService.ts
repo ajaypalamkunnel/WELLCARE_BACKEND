@@ -5,6 +5,8 @@ import { IUserService } from "../../interfaces/user/iuserServices";
 import { sendOTPEmail } from "../../../utils/emailUtils";
 import { userInfo } from "os";
 import JwtUtils from "../../../utils/jwtUtils";
+import { generteOTP } from "../../../utils/otpGenerator"
+
 
 class UserService implements IUserService {
 
@@ -14,7 +16,8 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this.userRepository = userRespository
     }
-    
+
+
 
     //Genereate jwt
 
@@ -68,6 +71,7 @@ class UserService implements IUserService {
         return { user }
 
     }
+
     async resendOtp(email: string): Promise<void> {
         const user = await this.userRepository.findUserByEmail(email)
 
@@ -88,76 +92,157 @@ class UserService implements IUserService {
 
 
     async verifyOtp(email: string, otp: string): Promise<void> {
-        const user =  await this.userRepository.findUserByEmail(email)
+        const user = await this.userRepository.findUserByEmail(email)
 
-        if(!user){
+        if (!user) {
             throw new Error("User not found");
         }
 
-        if(!user.otp || !user.otpExpires || new Date() > user.otpExpires){
+        if (!user.otp || !user.otpExpires || new Date() > user.otpExpires) {
             throw new Error("OTP expired. Please request a new one.")
         }
 
-        if(user.otp !== otp){
-            throw new Error("Invalid OTP. Pleae try again")
+        if (user.otp !== otp) {
+            throw new Error("Invalid OTP. Please try again")
         }
 
-        await this.userRepository.updateUser(user._id.toString(),{
-            otp:null,
-            otpExpires:null,
-            status:1  
+        await this.userRepository.updateUser(user._id.toString(), {
+            otp: null,
+            otpExpires: null,
+            status: 1
         })
     }
 
 
 
-    async loginUser(email: string, password: string): Promise<{ user: IUser | null; accessToken:string;refreshToken:string }> {
-        
+    async loginUser(email: string, password: string): Promise<{ user: IUser | null; accessToken: string; refreshToken: string }> {
+
 
         const user = await this.userRepository.findUserByEmail(email)
 
-        if(!user){
+        if (!user) {
             throw new Error("Invalid email or password.")
         }
 
-        if(user.status === -1){
+        if (user.status === -1) {
             throw new Error("This user is blocked by admin")
         }
+        if (user.status === 0) {
+            throw new Error("Signup is not completed")
+        }
 
-        const isMatch = await PasswordUtils.comparePassword(password,user.password)
+        const isMatch = await PasswordUtils.comparePassword(password, user.password)
 
 
-        if(!isMatch){
+        if (!isMatch) {
             throw new Error("Invalid email or password.")
         }
 
-        const accessToken = JwtUtils.generateAccesToken({userId:user._id,email:user.email})
-        const refreshToken = JwtUtils.generateRefreshToken({userId:user._id})
+        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
+        const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        await this.userRepository.updateRefreshToken(user._id.toString(),refreshToken)
-        return {accessToken,refreshToken,user}
+        await this.userRepository.updateRefreshToken(user._id.toString(), refreshToken)
+        return { accessToken, refreshToken, user }
     }
 
 
 
     // token renewl using this method
-    async renewAuthTokens(oldRefreshToken: string): Promise<{accessToken: string; refreshToken: string}> {
+    async renewAuthTokens(oldRefreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
 
-        const decode = JwtUtils.verifyToken(oldRefreshToken,true)
+        const decode = JwtUtils.verifyToken(oldRefreshToken, true)
 
-        if(!decode || typeof decode === 'string' || !decode.userId){
+        if (!decode || typeof decode === 'string' || !decode.userId) {
             throw new Error("Invalid refresh token");
         }
 
         const user = await this.userRepository.findUserByEmail(decode.userId);
-        if(!user || user.refreshToken !== oldRefreshToken){
+        if (!user || user.refreshToken !== oldRefreshToken) {
             throw new Error("Invalid refresh token")
         }
 
-        const newAccessToken = JwtUtils.generateAccesToken({userId:user._id,email:user.email})
+        const newAccessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
         const newRefreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        return {accessToken:newAccessToken,refreshToken:newRefreshToken}
+        return { accessToken: newAccessToken, refreshToken: newRefreshToken }
+
+    }
+
+    async forgotPassword(email: string): Promise<void> {
+        console.log("I am from forgotPassword");
+        
+        console.log(email);
+        
+        try {
+            const user = await this.userRepository.findUserByEmail(email)
+
+            if (!user) {
+                throw new Error("User with this email does not exist.")
+            }
+            if (user.status === -1) {
+                throw new Error("This user is blocked by admin")
+            }
+            if (user.status === 0) {
+                throw new Error("Signup is not completed")
+            }
+
+            const otp = generteOTP()
+            const otpExpires = new Date()
+            otpExpires.setMinutes(otpExpires.getMinutes() + 10)
+
+            try {
+                await sendOTPEmail(email, otp);
+            } catch (emailError) {
+                console.error("Failed to send OTP email:", emailError);
+                throw new Error("Failed to send OTP email. Please try again.");
+            }
+    
+            //Save OTP only if email was sent successfully
+            await this.userRepository.updateUser(user._id.toString(), { otp, otpExpires });
+    
+            console.log(`Forgot password OTP sent to ${email}.`);
+            
+        } catch (error) {
+            console.error("Error in forgotPassword service:", error);
+
+            throw new Error(error instanceof Error ? error.message : "An unexpected error occurred.");
+
+        }
+
+
+
+    }
+
+    async updatePasswordUser(email: string, newPassword: string): Promise<void> {
+
+        try {
+
+            const user = await this.userRepository.findUserByEmail(email)
+
+            if (!user) {
+                throw new Error("User with this email does not exist.")
+            }
+            if (user.status === -1) {
+                throw new Error("This user is blocked by admin")
+            }
+            if (user.status === 0) {
+                throw new Error("Signup is not completed")
+            }
+
+            const hashedPassword = await PasswordUtils.hashPassword(newPassword)
+
+            await this.userRepository.updateUser(user._id.toString(),{password:hashedPassword})
+
+            
+        } catch (error) {
+            console.error("Error in forgotPassword:", error);
+
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            } else {
+                throw new Error("An unexpected error occurred while processing the forgot password request.");
+            }
+        }
         
     }
 

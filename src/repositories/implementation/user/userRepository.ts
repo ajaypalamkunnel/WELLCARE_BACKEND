@@ -7,6 +7,8 @@ class UserRepository implements IUserRepository {
         return await newUser.save()
     }
     async findUserByEmail(email: string): Promise<IUser | null> {
+        console.log("Iam from findUserByEmail==>",email);
+        
        return await User.findOne({ email })
     }   
     async findUserById(id: string): Promise<IUser | null> {

@@ -18,6 +18,7 @@ interface IUser extends Document {
     isVerified: boolean;
     otp?: string | null;
     otpExpires?: Date | null;
+    profileUrl?:string|null
     updatedAt?: Date;
     createdAt?: Date;
     personalInfo: IPersonalInfo;
@@ -53,6 +54,9 @@ const UserSchema = new Schema<IUser>({
     isVerified: {
         type: Boolean, //to handle complete registration
         default: false
+    },
+    profileUrl:{
+        type:String
     },
     status: {
         type: Number,

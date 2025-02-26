@@ -14,6 +14,8 @@ router.post("/signup/resend_otp", async (req,res)=>{ await userController.resend
 router.post("/signup/verify_otp",async (req,res)=>{await userController.verifyOtp(req,res)})
 
 router.post("/login",(req,res)=>userController.postLogin(req,res))
+router.post("/forgot-password",(req,res)=>userController.forgotPassword(req,res))
+router.post("/update-password",(req,res)=>userController.updatePassword(req,res))
 router.post("/refresh-token",(req,res)=>userController.renewAuthTokens(req,res))
 
 export default router

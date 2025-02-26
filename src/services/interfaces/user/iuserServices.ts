@@ -1,3 +1,4 @@
+
 import { promises } from "dns";
 import { IUser } from "../../../model/user/userModel";
 import IUserRepository from "../../../repositories/interfaces/user/IUser";
@@ -13,8 +14,10 @@ export interface IUserService{
 
     loginUser(emial:string,password:string):Promise<{ user: IUser | null; accessToken:string;refreshToken:string}>
 
-
-
     renewAuthTokens(token:string):Promise<{accessToken: string; refreshToken: string}>;
+
+    forgotPassword(email:string):Promise<void>
+
+    updatePasswordUser(email:string,newPassword:string):Promise<void>
     
 }

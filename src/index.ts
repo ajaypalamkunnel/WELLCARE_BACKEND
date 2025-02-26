@@ -8,7 +8,7 @@ import connectDB from './config/dbConfig';
 import morgan from 'morgan';
 import userRouter from './routes/user/userRoutes'
 import adminRouter from './routes/admin/adminRoutes'
-import doctorRouter from './routes/admin/adminRoutes'
+import doctorRouter from './routes/doctor/doctorRoutes'
 
 connectDB()
 const app = express()
@@ -34,8 +34,8 @@ app.use(morgan('dev'));
 
 
 app.use("/",userRouter)
-app.use("api/doctor",doctorRouter)
-app.use("api/admin",adminRouter)
+app.use("/api/doctor",doctorRouter)
+app.use("/api/admin",adminRouter)
 
 
 app.get('/',(req,res)=>{

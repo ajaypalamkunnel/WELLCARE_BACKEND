@@ -7,5 +7,7 @@ interface UserController{
     verifyOtp(req:Request,res:Response):Promise<void>
     postLogin(req: Request, res: Response): Promise<void>;
     renewAuthTokens(req: Request, res: Response): Promise<void>;
+    forgotPassword(req:Request,res:Response):Promise<void>
+    updatePassword(req:Request,res:Response):Promise<void>
 }
 export default UserController
