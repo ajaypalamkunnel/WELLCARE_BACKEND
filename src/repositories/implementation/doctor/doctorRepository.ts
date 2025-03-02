@@ -4,6 +4,7 @@ import IDoctorRepository from "../../interfaces/doctor/IDoctor";
 
 class DoctorRepository implements IDoctorRepository{
     
+    
     async createDoctor(doctor: Partial<IDoctor>): Promise<IDoctor> {
         const newDoctor = new Doctor(doctor);
         return await newDoctor.save()
@@ -28,7 +29,14 @@ class DoctorRepository implements IDoctorRepository{
     async updateDoctorRefreshToken(id: string, refreshToken: string): Promise<IDoctor | null> {
         return await Doctor.findByIdAndUpdate(id,{refreshToken});
     }
+
+    async removeRefreshToken(refreshToken: string): Promise<void> {
+        await Doctor.updateOne({refreshToken},{$unset:{refreshToken:1}})
+    }
     
-    
+
+    async findUserDataById(userId: string): Promise<IDoctor | null> {
+       return await Doctor.findById(userId).select("-password -refreshToken")
+    }
 }
 export default DoctorRepository

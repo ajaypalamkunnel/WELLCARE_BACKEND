@@ -9,7 +9,9 @@ import morgan from 'morgan';
 import userRouter from './routes/user/userRoutes'
 import adminRouter from './routes/admin/adminRoutes'
 import doctorRouter from './routes/doctor/doctorRoutes'
-
+import session from 'express-session'
+import passport from 'passport'
+import "./config/passport"
 connectDB()
 const app = express()
 const server = http.createServer(app)
@@ -30,7 +32,22 @@ app.use(cors({
 }))
 
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
+// **Session Middleware (Required for Passport)**
+
+app.use(
+    session({
+        secret:"wellcare",
+        resave:false,
+        saveUninitialized:false,
+        cookie:{secure:false,httpOnly:true}
+    })
+)
+
+// **Initialize Passport**
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 
 app.use("/",userRouter)

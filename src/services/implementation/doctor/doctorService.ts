@@ -15,11 +15,8 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this.doctorRepository = userRepository
     }
-
-
-
-
-
+    
+    
 
     async registerBasicDetails(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor; }> {
 
@@ -206,6 +203,51 @@ class DoctorService implements IDoctorService {
 
 
     }
+
+
+    async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IDoctor | null> {
+        let doctor = await this.doctorRepository.findDoctorByEmail(email)
+
+
+        if(!doctor){
+            console.log("hi iMa doctor");
+            
+            doctor = await this.doctorRepository.createDoctor({
+                fullName:name,
+                email,
+                profileImage:avatar,
+                password:email,
+                isVerified:false,
+                status:1,
+                refreshToken:""
+            });
+            return doctor
+        }
+        return doctor
+    }
+    async generateTokens(user: Partial<IDoctor>): Promise<{ accessToken: string; refreshToken: string; }> {
+        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
+        const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
+
+        return {accessToken,refreshToken}
+    }
+
+
+    // Find doctor by ID
+    async getDoctorById(id: string): Promise<IDoctor | null> {
+        return await this.doctorRepository.findById(id);
+    }
+
+
+    async logoutDoctor(refreshToken: string): Promise<void> {
+        await this.doctorRepository.removeRefreshToken(refreshToken)
+    }
+
+
+    async getDoctorProfile(userId: string): Promise<IDoctor | null> {
+        return await this.doctorRepository.findUserDataById(userId)
+    }
+    
 
 }
 

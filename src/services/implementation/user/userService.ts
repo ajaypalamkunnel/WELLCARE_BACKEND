@@ -16,14 +16,9 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this.userRepository = userRespository
     }
+    
+    
 
-
-
-    //Genereate jwt
-
-    // private generateToken(userId:string):string{
-
-    // }
 
     private generteOTP(): string {
         return Math.floor(100000 + Math.random() * 900000).toString();
@@ -246,6 +241,49 @@ class UserService implements IUserService {
         
     }
 
+
+    async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IUser | null> {
+        let user = await this.userRepository.findUserByEmail(email)
+
+        console.log("===>Findor create user",user);
+        
+        if(!user){
+            console.log("hi Ima patient")
+            user = await this.userRepository.createUser({
+                fullName:name,
+                email,
+                profileUrl:avatar,
+                password:email,
+                isVerified:false,
+                status:1,
+                refreshToken:""
+            });
+            return user
+        }
+        return user
+    }
+    
+   async generateTokens(user: IUser): Promise<{ accessToken: string; refreshToken: string; }> {
+        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
+        const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
+
+        return {accessToken,refreshToken}
+    }
+
+    //for passport.js
+    async getUserById(id: string): Promise<IUser | null> {
+        return await this.userRepository.findUserById(id);
+    }
+
+
+    async logoutUser(refreshToken: string): Promise<void> {
+        await this.userRepository.removeRefreshToken(refreshToken)
+    }
+
+
+    async getUserProfile(userId: string): Promise<IUser | null> {
+        return await this.userRepository.findUserDataById(userId)
+    }
 
 }
 

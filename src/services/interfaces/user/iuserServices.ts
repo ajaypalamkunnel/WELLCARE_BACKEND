@@ -19,5 +19,17 @@ export interface IUserService{
     forgotPassword(email:string):Promise<void>
 
     updatePasswordUser(email:string,newPassword:string):Promise<void>
-    
+
+    findOrCreateUser(
+        email: string,
+        name: string,
+        avatar: string,
+        role: string
+    ): Promise<IUser| null>;
+
+    generateTokens(user: Express.User ): Promise<{ accessToken: string; refreshToken: string }>;
+
+    logoutUser(refreshToken:string):Promise<void>
+
+    getUserProfile(userId:string):Promise<IUser | null>
 }

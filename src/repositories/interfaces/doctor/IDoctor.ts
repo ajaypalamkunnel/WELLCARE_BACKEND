@@ -8,4 +8,6 @@ export default interface IDoctorRepository{
     updateDoctor(id: string, update: Partial<IDoctor>): Promise<IDoctor | null>;
     deleteDoctor(id: string): Promise<IDoctor | null>;
     updateDoctorRefreshToken(id:string,refreshToken:string):Promise<IDoctor|null>
+    removeRefreshToken(refreshToken:string):Promise<void>
+    findUserDataById(userId:string):Promise<IDoctor|null>
 }

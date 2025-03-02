@@ -8,6 +8,9 @@ interface IDoctorController{
     renewAuthTokens(req:Request,res:Response):Promise<void>
     forgotPasswordDoctor(req:Request,res:Response):Promise<void>
     updatePasswordDoctor(req:Request,res:Response):Promise<void>
+    googleAuthCallback(req: Request, res: Response): Promise<void> 
+    logoutDoctor(req:Request,res:Response):Promise<void>
+    getProfile(req:Request,res:Response):Promise<void>
 }
 
 

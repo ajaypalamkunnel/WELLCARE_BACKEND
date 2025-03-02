@@ -2,6 +2,8 @@ import { Router } from "express";
 import UserController from "../../controller/implementation/user/userController"
 import UserService from "../../services/implementation/user/userService"
 import UserRepository from "../../repositories/implementation/user/userRepository"
+import passport from "passport";
+import authMiddleWare from "../../middleware/authMiddleware";
 const router = Router();
 
 
@@ -17,5 +19,18 @@ router.post("/login",(req,res)=>userController.postLogin(req,res))
 router.post("/forgot-password",(req,res)=>userController.forgotPassword(req,res))
 router.post("/update-password",(req,res)=>userController.updatePassword(req,res))
 router.post("/refresh-token",(req,res)=>userController.renewAuthTokens(req,res))
+router.post("/logout",async(req,res)=>{
+    await userController.logout(req,res)
+})
+
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => userController.googleAuthCallback(req, res)
+);
+
+router.get("/profile",authMiddleWare,(req,res)=>userController.getProfile(req,res))
+
 
 export default router
