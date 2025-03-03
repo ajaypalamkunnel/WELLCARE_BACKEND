@@ -193,14 +193,16 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
 
             const user = req.user;
             console.log("&&&&====>", user);
-
+           
             if (!user) {
                 res.redirect(`${process.env.FRONTEND_URL}/login?error=AuthenticationFailed`);
                 return;
             }
 
-            const { accessToken, refreshToken } = await this.userService.generateTokens(user)
-
+            const { accessToken, refreshToken } = await this.userService.generateTokens(user);
+            
+            
+            
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -210,14 +212,16 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
 
 
 
-            res.cookie("accessToken", accessToken, {
+            res.cookie("auth_token", accessToken, {
                 httpOnly: true, // Prevents client-side access
                 secure: process.env.NODE_ENV === "production", // HTTPS only in production
                 sameSite: "strict", // Prevents CSRF attacks
-                maxAge: 15 * 60 * 1000, // 15 minutes (short-lived access token)
+                maxAge: 2 * 60 * 60 * 1000, // 15 minutes (short-lived access token)
             });
+            
+            
 
-            res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=patient`);
+            res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=patient&user=${encodeURIComponent(JSON.stringify(user))}&accesstoken=${accessToken}`);
 
         } catch (error) {
             res.redirect(`${process.env.FRONTEND_URL}/login?error=InternalServerError`);
