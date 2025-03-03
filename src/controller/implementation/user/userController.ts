@@ -234,9 +234,6 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
     });
 
 
-
-
-
     async logout(req: Request, res: Response): Promise<void> {
 
         try {

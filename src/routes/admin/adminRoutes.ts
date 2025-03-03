@@ -12,6 +12,6 @@ const adminService = new AdminService(adminRepository)
 const adminController = new AdminController(adminService)
 
 router.post("/login",(req,res)=>adminController.login(req,res))
-router.get("/google")
+router.post("/logout",(req,res)=>adminController.logout(req,res))
 
 export default router
