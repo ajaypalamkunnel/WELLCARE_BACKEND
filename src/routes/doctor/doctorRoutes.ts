@@ -3,6 +3,7 @@ import DoctorRepository from "../../repositories/implementation/doctor/doctorRep
 import DoctorService from "../../services/implementation/doctor/doctorService";
 import DoctorController from "../../controller/implementation/doctor/doctorController";
 import passport from "passport";
+import authMiddleWare from "../../middleware/authMiddleware";
 
 
 const router = Router();
@@ -23,7 +24,10 @@ router.post("/refresh-token",(req,res)=>doctorController.renewAuthTokens(req,res
 
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 router.get("/auth/google/callback",passport.authenticate("google",{ failureRedirect: "/login" }),
-(req, res) => doctorController.googleAuthCallback(req, res)
-)
+(req, res) => doctorController.googleAuthCallback(req, res))
+
+
+router.get("/profile",authMiddleWare,(req,res)=>doctorController.getProfile(req,res))
+
 
 export default router

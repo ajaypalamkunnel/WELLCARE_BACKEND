@@ -117,8 +117,8 @@ class DoctorService implements IDoctorService {
             throw new Error("Invalid email or Password")
         }
 
-        const doctorAccessToken = JwtUtils.generateAccesToken({ doctorId: doctor._id, email: doctor.email })
-        const doctorRefreshToken = JwtUtils.generateRefreshToken({ doctorId: doctor._id })
+        const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email })
+        const doctorRefreshToken = JwtUtils.generateRefreshToken({ userId: doctor._id })
 
         await this.doctorRepository.updateDoctorRefreshToken(doctor._id.toString(), doctorRefreshToken)
         return { doctorAccessToken, doctorRefreshToken, doctor }
@@ -245,6 +245,8 @@ class DoctorService implements IDoctorService {
 
 
     async getDoctorProfile(userId: string): Promise<IDoctor | null> {
+        console.log("I am from service",userId);
+        
         return await this.doctorRepository.findUserDataById(userId)
     }
     

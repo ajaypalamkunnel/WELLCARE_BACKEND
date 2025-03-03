@@ -219,17 +219,21 @@ class DoctorController implements IDoctorController {
     }
 
     async getProfile(req: Request, res: Response): Promise<void> {
+        
+        
         try {
             if(!req.user){
                 res.status(401).json({error:"Unauthorized"})
                 return 
             }
+           
 
             const user = await this.doctorService.getDoctorProfile(req.user.userId);
             if(!user){
                 res.status(404).json({error:"User not found"})
-                return
+                
             }
+            
 
             res.status(200).json({success:true,user})
         } catch (error) {

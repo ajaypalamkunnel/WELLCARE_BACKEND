@@ -33,6 +33,13 @@ class AdminController implements IAdminController{
                 maxAge:7 * 24 * 60 * 60 * 1000
             })
 
+            res.cookie("accessTokenAdmin", accessTokenAdmin, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 2 * 60 * 60 * 1000, // 2 hours
+              });
+
             res.status(200).json({
                 success:true,
                 message:"Login successfull",
