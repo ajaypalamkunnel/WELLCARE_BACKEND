@@ -12,10 +12,10 @@ import { IUserType } from "../../../types/user";
 
 class UserController implements IUserController {
 
-    private userService: IUserService
+    private _userService: IUserService
 
-    constructor(userService: IUserService) {
-        this.userService = userService
+    constructor(_userService: IUserService) {
+        this._userService = _userService
     }
     
 //---------------------------Basic registration -----------------------------------------------
@@ -25,7 +25,7 @@ async registerBasicDetails(req: Request, res: Response): Promise<void> {
     
     try {
         
-        const { user } = await this.userService.registerBasicDetails(req.body)
+        const { user } = await this._userService.registerBasicDetails(req.body)
 
             res.status(201).json({ message: "OTP sent to email", email: user.email })
 
@@ -49,7 +49,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
         if (!email) {
             return res.status(400).json({ success: false, error: "Email is required" })
         }
-        await this.userService.resendOtp(email)
+        await this._userService.resendOtp(email)
         return res.status(200).json({ success: true, message: "New OTP sent to email" })
     } catch (error) {
         return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
@@ -66,7 +66,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return
             }
 
-            await this.userService.verifyOtp(email, otp)
+            await this._userService.verifyOtp(email, otp)
 
             res.status(200).json({ message: "OTP verified successfully. Your account is now activated." })
         } catch (error) {
@@ -84,7 +84,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return
             }
 
-            const { accessToken, refreshToken, user } = await this.userService.loginUser(email, password)
+            const { accessToken, refreshToken, user } = await this._userService.loginUser(email, password)
             // console.log("===>",accessToken);
             // console.log("===>",refreshToken);
             // **Set Refresh Token in HTTP-Only Cookie**
@@ -127,7 +127,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return;
             }
 
-            const { accessToken, refreshToken } = await this.userService.renewAuthTokens(oldRefreshToken)
+            const { accessToken, refreshToken } = await this._userService.renewAuthTokens(oldRefreshToken)
 
 
             res.cookie("refreshToken", refreshToken, {
@@ -152,7 +152,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 res.status(400).json({ success: false, error: "Email is required" })
                 return
             }
-            await this.userService.forgotPassword(email)
+            await this._userService.forgotPassword(email)
 
             res.status(200).json({ success: true, message: "New OTP sent to email" })
 
@@ -174,7 +174,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 res.status(400).json({ success: false, error: "Email is required" })
             }
 
-            await this.userService.updatePasswordUser(email, password)
+            await this._userService.updatePasswordUser(email, password)
             res.status(200).json({ success: true, error: "Password Updated Successfully" })
 
         } catch (error) {
@@ -199,7 +199,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return;
             }
 
-            const { accessToken, refreshToken } = await this.userService.generateTokens(user);
+            const { accessToken, refreshToken } = await this._userService.generateTokens(user);
             
             
             
@@ -248,7 +248,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return
             }
 
-            await this.userService.logoutUser(refreshToken)
+            await this._userService.logoutUser(refreshToken)
 
             res.clearCookie("refreshToken", {
                 httpOnly: true,
@@ -279,7 +279,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 return 
             }
 
-            const user = await this.userService.getUserProfile(req.user.userId)
+            const user = await this._userService.getUserProfile(req.user.userId)
             if(!user){
                 res.status(404).json({error:"User not found"})
             }

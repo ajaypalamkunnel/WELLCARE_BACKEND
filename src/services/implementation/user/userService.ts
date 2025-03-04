@@ -10,11 +10,11 @@ import { generteOTP } from "../../../utils/otpGenerator"
 
 class UserService implements IUserService {
 
-    private userRepository: IUserRepository
+    private _userRepository: IUserRepository
 
 
     constructor(userRespository: IUserRepository) {
-        this.userRepository = userRespository
+        this._userRepository = userRespository
     }
     
     
@@ -36,7 +36,7 @@ class UserService implements IUserService {
         }
 
 
-        const existingUser = await this.userRepository.findUserByEmail(userDetails.email!)
+        const existingUser = await this._userRepository.findUserByEmail(userDetails.email!)
 
         if (existingUser) {
             throw new Error("Email already Exist")
@@ -50,7 +50,7 @@ class UserService implements IUserService {
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 5); // 5 minutes expiry
 
-        const user = await this.userRepository.createUser({
+        const user = await this._userRepository.createUser({
             fullName,
             email,
             password: hashedPassword,
@@ -68,7 +68,7 @@ class UserService implements IUserService {
     }
 
     async resendOtp(email: string): Promise<void> {
-        const user = await this.userRepository.findUserByEmail(email)
+        const user = await this._userRepository.findUserByEmail(email)
 
         if (!user) {
             throw new Error("User not found")
@@ -78,7 +78,7 @@ class UserService implements IUserService {
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 10);
 
-        await this.userRepository.updateUser(user._id.toString(), { otp, otpExpires })
+        await this._userRepository.updateUser(user._id.toString(), { otp, otpExpires })
 
         await sendOTPEmail(email, otp)
 
@@ -87,7 +87,7 @@ class UserService implements IUserService {
 
 
     async verifyOtp(email: string, otp: string): Promise<void> {
-        const user = await this.userRepository.findUserByEmail(email)
+        const user = await this._userRepository.findUserByEmail(email)
 
         if (!user) {
             throw new Error("User not found");
@@ -101,7 +101,7 @@ class UserService implements IUserService {
             throw new Error("Invalid OTP. Please try again")
         }
 
-        await this.userRepository.updateUser(user._id.toString(), {
+        await this._userRepository.updateUser(user._id.toString(), {
             otp: null,
             otpExpires: null,
             status: 1
@@ -113,7 +113,7 @@ class UserService implements IUserService {
     async loginUser(email: string, password: string): Promise<{ user: IUser | null; accessToken: string; refreshToken: string }> {
 
 
-        const user = await this.userRepository.findUserByEmail(email)
+        const user = await this._userRepository.findUserByEmail(email)
 
         if (!user) {
             throw new Error("Invalid email or password.")
@@ -136,7 +136,7 @@ class UserService implements IUserService {
         const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        await this.userRepository.updateRefreshToken(user._id.toString(), refreshToken)
+        await this._userRepository.updateRefreshToken(user._id.toString(), refreshToken)
         return { accessToken, refreshToken, user }
     }
 
@@ -151,7 +151,7 @@ class UserService implements IUserService {
             throw new Error("Invalid refresh token");
         }
 
-        const user = await this.userRepository.findUserByEmail(decode.userId);
+        const user = await this._userRepository.findUserByEmail(decode.userId);
         if (!user || user.refreshToken !== oldRefreshToken) {
             throw new Error("Invalid refresh token")
         }
@@ -169,7 +169,7 @@ class UserService implements IUserService {
         console.log(email);
         
         try {
-            const user = await this.userRepository.findUserByEmail(email)
+            const user = await this._userRepository.findUserByEmail(email)
 
             if (!user) {
                 throw new Error("User with this email does not exist.")
@@ -193,7 +193,7 @@ class UserService implements IUserService {
             }
     
             //Save OTP only if email was sent successfully
-            await this.userRepository.updateUser(user._id.toString(), { otp, otpExpires });
+            await this._userRepository.updateUser(user._id.toString(), { otp, otpExpires });
     
             console.log(`Forgot password OTP sent to ${email}.`);
             
@@ -212,7 +212,7 @@ class UserService implements IUserService {
 
         try {
 
-            const user = await this.userRepository.findUserByEmail(email)
+            const user = await this._userRepository.findUserByEmail(email)
 
             if (!user) {
                 throw new Error("User with this email does not exist.")
@@ -226,7 +226,7 @@ class UserService implements IUserService {
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
 
-            await this.userRepository.updateUser(user._id.toString(),{password:hashedPassword})
+            await this._userRepository.updateUser(user._id.toString(),{password:hashedPassword})
 
             
         } catch (error) {
@@ -243,13 +243,13 @@ class UserService implements IUserService {
 
 
     async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IUser | null> {
-        let user = await this.userRepository.findUserByEmail(email)
+        let user = await this._userRepository.findUserByEmail(email)
 
         console.log("===>Findor create user",user);
         
         if(!user){
             console.log("hi Ima patient")
-            user = await this.userRepository.createUser({
+            user = await this._userRepository.createUser({
                 fullName:name,
                 email,
                 profileUrl:avatar,
@@ -272,17 +272,17 @@ class UserService implements IUserService {
 
     //for passport.js
     async getUserById(id: string): Promise<IUser | null> {
-        return await this.userRepository.findUserById(id);
+        return await this._userRepository.findUserById(id);
     }
 
 
     async logoutUser(refreshToken: string): Promise<void> {
-        await this.userRepository.removeRefreshToken(refreshToken)
+        await this._userRepository.removeRefreshToken(refreshToken)
     }
 
 
     async getUserProfile(userId: string): Promise<IUser | null> {
-        return await this.userRepository.findUserDataById(userId)
+        return await this._userRepository.findUserDataById(userId)
     }
 
 }
@@ -297,7 +297,7 @@ export default UserService
 //     return res.status(400).json({message:"All fields are required"})
 // }
 
-// const existingUser = await this.userRepository.findUserByEmail(email)
+// const existingUser = await this._userRepository.findUserByEmail(email)
 
 // if(existingUser){
 //     return res.status(400).json({message:"User already exists"})
@@ -313,7 +313,7 @@ export default UserService
 
 // //create user
 
-// const newUser = await this.userRepository.createUser({
+// const newUser = await this._userRepository.createUser({
 //     fullName,
 //     email,
 //     password:hashedPassword,

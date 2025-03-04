@@ -5,12 +5,12 @@ import { error } from 'console';
 
 class AdminController implements IAdminController {
 
-    private adminService: IAdminService
+    private _adminService: IAdminService
 
     constructor(adminService: IAdminService) {
-        this.adminService = adminService
+        this._adminService = adminService
     }
-
+    
 
 
     async login(req: Request, res: Response): Promise<void> {
@@ -25,7 +25,7 @@ class AdminController implements IAdminController {
                 return
             }
 
-            const { accessTokenAdmin, refreshTokenAdmin, admin } = await this.adminService.loginAdmin(email, password)
+            const { accessTokenAdmin, refreshTokenAdmin, admin } = await this._adminService.loginAdmin(email, password)
 
             res.cookie("refreshTokenAdmin", refreshTokenAdmin, {
                 httpOnly: true,
@@ -79,6 +79,24 @@ class AdminController implements IAdminController {
             res.status(500).json({error:"logout failed"})
         }
     }
+
+
+    async fetchAllDoctors(req: Request, res: Response): Promise<void> {
+        try {
+            const doctors = await this._adminService.fetchAllDoctors()
+
+            if (!doctors || doctors.length === 0) {
+                res.status(404).json({ success: false, message: "No doctors found" });
+                return;
+            }
+
+            res.status(200).json({ success: true, data: doctors });
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+    }
+
 
 }
 

@@ -10,10 +10,10 @@ import UserRepository from "../../../repositories/implementation/user/userReposi
 
 class DoctorService implements IDoctorService {
 
-    private doctorRepository: IDoctorRepository
+    private _doctorRepository: IDoctorRepository
 
     constructor(userRepository: IDoctorRepository) {
-        this.doctorRepository = userRepository
+        this._doctorRepository = userRepository
     }
     
     
@@ -26,7 +26,7 @@ class DoctorService implements IDoctorService {
             throw new Error("All fields are required")
         }
 
-        const existingUser = await this.doctorRepository.findDoctorByEmail(email!)
+        const existingUser = await this._doctorRepository.findDoctorByEmail(email!)
         console.log(existingUser);
 
         if (existingUser) {
@@ -39,7 +39,7 @@ class DoctorService implements IDoctorService {
 
         otpExpires.setMinutes(otpExpires.getMinutes() + 5)
 
-        const doctor = await this.doctorRepository.createDoctor({
+        const doctor = await this._doctorRepository.createDoctor({
             fullName,
             email,
             password: hashedPassword,
@@ -56,7 +56,7 @@ class DoctorService implements IDoctorService {
     }
 
     async resendOtp(email: string): Promise<void> {
-        const doctor = await this.doctorRepository.findDoctorByEmail(email)
+        const doctor = await this._doctorRepository.findDoctorByEmail(email)
 
         if (!doctor) {
             throw new Error("Doctor not found")
@@ -66,14 +66,14 @@ class DoctorService implements IDoctorService {
         const otpExpires = new Date()
         otpExpires.setMinutes(otpExpires.getMinutes() + 10)
 
-        await this.doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
+        await this._doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
 
         await sendOTPEmail(email, otp)
     }
 
 
     async verifyOtp(email: string, otp: string): Promise<void> {
-        const doctor = await this.doctorRepository.findDoctorByEmail(email)
+        const doctor = await this._doctorRepository.findDoctorByEmail(email)
         console.log(doctor);
 
 
@@ -89,7 +89,7 @@ class DoctorService implements IDoctorService {
             throw new Error("Invalid OTP. Please try again")
         }
 
-        await this.doctorRepository.updateDoctor(doctor._id.toString(), {
+        await this._doctorRepository.updateDoctor(doctor._id.toString(), {
             otp: null,
             otpExpires: null,
             status: 1
@@ -100,7 +100,7 @@ class DoctorService implements IDoctorService {
     async loginDoctor(email: string, password: string): Promise<{ doctor: IDoctor | null; doctorAccessToken: string; doctorRefreshToken: string; }> {
         console.log("hi I am from login doctor");
         
-        const doctor = await this.doctorRepository.findDoctorByEmail(email)
+        const doctor = await this._doctorRepository.findDoctorByEmail(email)
         console.log("hii ", doctor);
 
         if (!doctor) {
@@ -120,7 +120,7 @@ class DoctorService implements IDoctorService {
         const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email })
         const doctorRefreshToken = JwtUtils.generateRefreshToken({ userId: doctor._id })
 
-        await this.doctorRepository.updateDoctorRefreshToken(doctor._id.toString(), doctorRefreshToken)
+        await this._doctorRepository.updateDoctorRefreshToken(doctor._id.toString(), doctorRefreshToken)
         return { doctorAccessToken, doctorRefreshToken, doctor }
     }
 
@@ -134,7 +134,7 @@ class DoctorService implements IDoctorService {
 
         try {
 
-            const doctor = await this.doctorRepository.findDoctorByEmail(email)
+            const doctor = await this._doctorRepository.findDoctorByEmail(email)
 
             if (!doctor) {
                 throw new Error("User with this email does not exist.")
@@ -157,7 +157,7 @@ class DoctorService implements IDoctorService {
                 console.error("Failed to send OTP email:", emailError);
                 throw new Error("Failed to send OTP email. Please try again.");
             }
-            await this.doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
+            await this._doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
             console.log(`Forgot password OTP sent to ${email}.`);
         } catch (error) {
 
@@ -173,7 +173,7 @@ class DoctorService implements IDoctorService {
 
         try {
 
-            const doctor = await this.doctorRepository.findDoctorByEmail(email)
+            const doctor = await this._doctorRepository.findDoctorByEmail(email)
 
             if (!doctor) {
                 throw new Error("User with this email does not exist.")
@@ -187,7 +187,7 @@ class DoctorService implements IDoctorService {
             }
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
-            await this.doctorRepository.updateDoctor(doctor._id.toString(), { password: hashedPassword })
+            await this._doctorRepository.updateDoctor(doctor._id.toString(), { password: hashedPassword })
 
 
         } catch (error) {
@@ -206,13 +206,13 @@ class DoctorService implements IDoctorService {
 
 
     async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IDoctor | null> {
-        let doctor = await this.doctorRepository.findDoctorByEmail(email)
+        let doctor = await this._doctorRepository.findDoctorByEmail(email)
 
 
         if(!doctor){
             console.log("hi iMa doctor");
             
-            doctor = await this.doctorRepository.createDoctor({
+            doctor = await this._doctorRepository.createDoctor({
                 fullName:name,
                 email,
                 profileImage:avatar,
@@ -235,19 +235,19 @@ class DoctorService implements IDoctorService {
 
     // Find doctor by ID
     async getDoctorById(id: string): Promise<IDoctor | null> {
-        return await this.doctorRepository.findById(id);
+        return await this._doctorRepository.findById(id);
     }
 
 
     async logoutDoctor(refreshToken: string): Promise<void> {
-        await this.doctorRepository.removeRefreshToken(refreshToken)
+        await this._doctorRepository.removeRefreshToken(refreshToken)
     }
 
 
     async getDoctorProfile(userId: string): Promise<IDoctor | null> {
         console.log("I am from service",userId);
         
-        return await this.doctorRepository.findUserDataById(userId)
+        return await this._doctorRepository.findUserDataById(userId)
     }
     
 

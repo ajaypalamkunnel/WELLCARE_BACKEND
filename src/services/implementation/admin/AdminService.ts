@@ -4,14 +4,15 @@ import AdminRepository from "../../../repositories/implementation/admin/adminRep
 import JwtUtils from "../../../utils/jwtUtils";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IAdminService } from "../../interfaces/admin/IAdminServices";
+import { IDoctor } from "../../../model/doctor/doctorModel";
 
 
 export class AdminService implements IAdminService{
 
-    private adminRepository:AdminRepository
+    private _adminRepository:AdminRepository
 
-    constructor(adminRepository:AdminRepository){
-        this.adminRepository = adminRepository
+    constructor(_adminRepository:AdminRepository){
+        this._adminRepository = _adminRepository
     }
     
 
@@ -24,7 +25,7 @@ export class AdminService implements IAdminService{
                 throw new Error("Password is required to create an admin.");
             }
             const email = adminDetails.email
-            const existingAdmin = await this.adminRepository.findAdminByEmail(email);
+            const existingAdmin = await this._adminRepository.findAdminByEmail(email);
             if (existingAdmin) {
                 console.warn(` Admin with email ${adminDetails.email} already exists.`);
                 return { admin: null };
@@ -33,7 +34,7 @@ export class AdminService implements IAdminService{
             const password = adminDetails.password as string; // Ensure password is a string
             const hashedPassword = await PasswordUtils.hashPassword(password);
             
-            const newAdmin = await this.adminRepository.createAdmin({
+            const newAdmin = await this._adminRepository.createAdmin({
                 email: adminDetails.email,
                 password: hashedPassword,
             });
@@ -55,7 +56,7 @@ export class AdminService implements IAdminService{
     async loginAdmin(email: string, password: string): Promise<{ admin: IAdmin | null; accessTokenAdmin: string; refreshTokenAdmin: string }> {
        try {
 
-        const admin = await this.adminRepository.findAdminByEmail(email)
+        const admin = await this._adminRepository.findAdminByEmail(email)
 
 
         if(!admin){
@@ -83,6 +84,23 @@ export class AdminService implements IAdminService{
         
        }
     }
+
+    async fetchAllDoctors(): Promise<IDoctor[] | null> {
+        try {
+            const doctors = await this._adminRepository.findAllDoctors();
+            
+            if (!doctors || doctors.length === 0) {
+                return null; // Return null if no doctors are found
+            }
+    
+            return doctors;
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            throw new Error("Failed to fetch doctors");
+        }
+    }
+    
+    
 
     
 

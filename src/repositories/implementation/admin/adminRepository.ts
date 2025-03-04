@@ -1,9 +1,10 @@
 import Admin,{ IAdmin } from "../../../model/admin/AdminModel";
-import { IDoctor } from "../../../model/doctor/doctorModel";
+import Doctor, { IDoctor } from "../../../model/doctor/doctorModel";
 import IAdminRepository from "../../interfaces/admin/IAdminRepository";
 
 
 class AdminRepository implements IAdminRepository{
+    
    async createAdmin(admin: Partial<IAdmin>): Promise<IAdmin> {
         const newAdmin = new Admin(admin)
         return await newAdmin.save()
@@ -13,6 +14,10 @@ class AdminRepository implements IAdminRepository{
     }
     async findAdminById(id: string): Promise<IDoctor | null> {
         return await Admin.findById(id)
+    }
+    async findAllDoctors(): Promise<IDoctor[] | null> {
+        const doctors = await Doctor.find({});
+        return doctors.length > 0 ? doctors : null;
     }
 
 }

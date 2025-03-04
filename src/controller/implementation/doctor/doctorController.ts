@@ -6,10 +6,10 @@ import { error } from "console";
 
 class DoctorController implements IDoctorController {
 
-    private doctorService: IDoctorService
+    private _doctorService: IDoctorService
 
-    constructor(doctorService: IDoctorService) {
-        this.doctorService = doctorService
+    constructor(_doctorService: IDoctorService) {
+        this._doctorService = _doctorService
     }
     
     
@@ -18,7 +18,7 @@ class DoctorController implements IDoctorController {
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
         try {
 
-            const { doctor } = await this.doctorService.registerBasicDetails(req.body)
+            const { doctor } = await this._doctorService.registerBasicDetails(req.body)
 
             res.status(201).json({ message: "OTP sent to email", email: doctor.email })
 
@@ -40,7 +40,7 @@ class DoctorController implements IDoctorController {
             if (!email) {
                 return res.status(400).json({ success: true, error: "Email is required" })
             }
-            await this.doctorService.resendOtp(email)
+            await this._doctorService.resendOtp(email)
             return res.status(200).json({ success: true, message: "New OTP sent to email" })
         } catch (error) {
             return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
@@ -54,7 +54,7 @@ class DoctorController implements IDoctorController {
                 res.status(400).json({ error: "Email and OTP are required" })
                 return
             }
-            await this.doctorService.verifyOtp(email, otp)
+            await this._doctorService.verifyOtp(email, otp)
             res.status(200).json({ message: "OTP verified successfully, Your account is now activated." })
         } catch (error) {
             res.status(400).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
@@ -74,7 +74,7 @@ class DoctorController implements IDoctorController {
                 return
             }
 
-            const { doctorAccessToken, doctorRefreshToken, doctor } = await this.doctorService.loginDoctor(email, password)
+            const { doctorAccessToken, doctorRefreshToken, doctor } = await this._doctorService.loginDoctor(email, password)
             console.log(doctorAccessToken,"===",doctorRefreshToken);
             
             res.cookie("doctorRefreshToken", doctorRefreshToken, {
@@ -115,7 +115,7 @@ class DoctorController implements IDoctorController {
             return
         }
 
-        await this.doctorService.forgotPassword(email)
+        await this._doctorService.forgotPassword(email)
         res.status(200).json({success:true,message:"New OTP sent to email"})
         
        } catch (error) {
@@ -137,7 +137,7 @@ class DoctorController implements IDoctorController {
                 res.status(400).json({success:false,error:"Email is required"})
            }
 
-           await this.doctorService.updatePasswordDoctor(email,password)
+           await this._doctorService.updatePasswordDoctor(email,password)
            res.status(200).json({success:true,error:"Password Updated Successfully"})
         } catch (error) {
             res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
@@ -157,7 +157,7 @@ class DoctorController implements IDoctorController {
                 res.redirect(`${process.env.FRONTEND_URL}/login?error=AuthenticationFailed`);
                 return;
             }
-            const { accessToken, refreshToken } = await this.doctorService.generateTokens(doctor)
+            const { accessToken, refreshToken } = await this._doctorService.generateTokens(doctor)
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
@@ -195,7 +195,7 @@ class DoctorController implements IDoctorController {
                 return
             }
 
-            await this.doctorService.logoutDoctor(refreshToken)
+            await this._doctorService.logoutDoctor(refreshToken)
             
 
             res.clearCookie("doctorRefreshToken",{
@@ -228,7 +228,7 @@ class DoctorController implements IDoctorController {
             }
            
 
-            const user = await this.doctorService.getDoctorProfile(req.user.userId);
+            const user = await this._doctorService.getDoctorProfile(req.user.userId);
             if(!user){
                 res.status(404).json({error:"User not found"})
                 
