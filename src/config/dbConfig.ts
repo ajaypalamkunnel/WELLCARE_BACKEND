@@ -7,7 +7,7 @@ dotenv.config()
     const connection_string = process.env.DB_CONNECTION_STRING
 
     try {
-       const connection = await mongoose.connect(`${connection_string}`,{
+       await mongoose.connect(`${connection_string}`,{
             dbName:'wellcare'
        })
        console.log("db connected successfully");

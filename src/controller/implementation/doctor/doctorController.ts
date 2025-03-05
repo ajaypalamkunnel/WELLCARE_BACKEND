@@ -2,6 +2,7 @@ import e, { Request, Response } from "express";
 import IDoctorController from "../../interfaces/doctor/IDoctorController";
 import { IDoctorService } from "../../../services/interfaces/doctor/iDoctorServices";
 import { error } from "console";
+import { StatusCode } from "../../../constants/statusCode";
 
 
 class DoctorController implements IDoctorController {
@@ -20,7 +21,7 @@ class DoctorController implements IDoctorController {
 
             const { doctor } = await this._doctorService.registerBasicDetails(req.body)
 
-            res.status(201).json({ message: "OTP sent to email", email: doctor.email })
+            res.status(StatusCode.CREATED).json({ message: "OTP sent to email", email: doctor.email })
 
         } catch (error) {
             let errorMessage = "an unexpected error occured";
@@ -41,7 +42,7 @@ class DoctorController implements IDoctorController {
                 return res.status(400).json({ success: true, error: "Email is required" })
             }
             await this._doctorService.resendOtp(email)
-            return res.status(200).json({ success: true, message: "New OTP sent to email" })
+            return res.status(StatusCode.OK).json({ success: true, message: "New OTP sent to email" })
         } catch (error) {
             return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
@@ -55,7 +56,7 @@ class DoctorController implements IDoctorController {
                 return
             }
             await this._doctorService.verifyOtp(email, otp)
-            res.status(200).json({ message: "OTP verified successfully, Your account is now activated." })
+            res.status(StatusCode.OK).json({ message: "OTP verified successfully, Your account is now activated." })
         } catch (error) {
             res.status(400).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
         }
@@ -92,7 +93,7 @@ class DoctorController implements IDoctorController {
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
               });
 
-            res.status(200).json({
+            res.status(StatusCode.OK).json({
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
@@ -116,7 +117,7 @@ class DoctorController implements IDoctorController {
         }
 
         await this._doctorService.forgotPassword(email)
-        res.status(200).json({success:true,message:"New OTP sent to email"})
+        res.status(StatusCode.OK).json({success:true,message:"New OTP sent to email"})
         
        } catch (error) {
         console.error("Error in forgotPassword controller:", error);
@@ -138,7 +139,7 @@ class DoctorController implements IDoctorController {
            }
 
            await this._doctorService.updatePasswordDoctor(email,password)
-           res.status(200).json({success:true,error:"Password Updated Successfully"})
+           res.status(StatusCode.OK).json({success:true,error:"Password Updated Successfully"})
         } catch (error) {
             res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
@@ -166,7 +167,7 @@ class DoctorController implements IDoctorController {
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
             });
 
-            // res.status(200).json({
+            // res.status(StatusCode.OK).json({
             //     success: true,
             //     message: "Google authentication successful",
             //     accessToken,
@@ -187,7 +188,7 @@ class DoctorController implements IDoctorController {
 
             const refreshToken = req.cookies.doctorRefreshToken
 
-            // console.log("===>refersher",refreshToken);
+            
             
 
             if(!refreshToken){
@@ -209,9 +210,14 @@ class DoctorController implements IDoctorController {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 expires: new Date(0), // Expire the cookie immediately
-              });
+            });
 
-            res.status(200).json({success:true,message:"Logout successfull"})
+            
+
+
+
+
+            res.status(StatusCode.OK).json({success:true,message:"Logout successfull"})
         } catch (error) {
             res.status(500).json({error:"Logout failed"})
         }
@@ -235,7 +241,7 @@ class DoctorController implements IDoctorController {
             }
             
 
-            res.status(200).json({success:true,user})
+            res.status(StatusCode.OK).json({success:true,user})
         } catch (error) {
             res.status(500).json({ error: "Failed to fetch user profile" });
         }

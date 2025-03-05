@@ -8,6 +8,7 @@ import JwtUtils from "../../../utils/jwtUtils";
 import { generteOTP } from "../../../utils/otpGenerator"
 
 
+
 class UserService implements IUserService {
 
     private _userRepository: IUserRepository
@@ -245,7 +246,7 @@ class UserService implements IUserService {
     async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IUser | null> {
         let user = await this._userRepository.findUserByEmail(email)
 
-        console.log("===>Findor create user",user);
+      
         
         if(!user){
             console.log("hi Ima patient")
@@ -289,41 +290,3 @@ class UserService implements IUserService {
 
 export default UserService
 
-
-
-// const {fullName,email,password} = req.body;
-
-// if(!fullName||!email||!password){
-//     return res.status(400).json({message:"All fields are required"})
-// }
-
-// const existingUser = await this._userRepository.findUserByEmail(email)
-
-// if(existingUser){
-//     return res.status(400).json({message:"User already exists"})
-// }
-
-// const hashedPassword = await PasswordUtils.hashPassword(password)
-
-// const otp = Math.floor(100000 +Math.random()*900000).toString()
-
-// const otpExpires = new Date();
-// otpExpires.setMinutes(otpExpires.getMinutes() + 5);
-
-
-// //create user
-
-// const newUser = await this._userRepository.createUser({
-//     fullName,
-//     email,
-//     password:hashedPassword,
-//     otp,
-//     otpExpires,
-//     status:0
-// })
-
-
-// // Send OTP Email
-// await sendOTPEmail(email,otp)
-
-// return res.status(201).json({message:"OTP sent to email", email })

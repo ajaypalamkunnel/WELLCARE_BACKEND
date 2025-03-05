@@ -17,15 +17,15 @@ class UserController implements IUserController {
     constructor(_userService: IUserService) {
         this._userService = _userService
     }
-    
-//---------------------------Basic registration -----------------------------------------------
 
-async registerBasicDetails(req: Request, res: Response): Promise<void> {
-    console.log("hello guys");
-    
-    try {
-        
-        const { user } = await this._userService.registerBasicDetails(req.body)
+    //---------------------------Basic registration -----------------------------------------------
+
+    async registerBasicDetails(req: Request, res: Response): Promise<void> {
+        console.log("hello guys");
+
+        try {
+
+            const { user } = await this._userService.registerBasicDetails(req.body)
 
             res.status(201).json({ message: "OTP sent to email", email: user.email })
 
@@ -37,26 +37,26 @@ async registerBasicDetails(req: Request, res: Response): Promise<void> {
             res.status(400).json({ error: errorMessage })
         }
     }
-    
-//--------------------------- resend OTP -----------------------------------------------
+
+    //--------------------------- resend OTP -----------------------------------------------
 
 
-async resendOtp(req: Request, res: Response): Promise<Response> {
-    console.log("koiiiiii");
-    
-    try {
-        const { email } = req.body
-        if (!email) {
-            return res.status(400).json({ success: false, error: "Email is required" })
+    async resendOtp(req: Request, res: Response): Promise<Response> {
+        console.log("koiiiiii");
+
+        try {
+            const { email } = req.body
+            if (!email) {
+                return res.status(400).json({ success: false, error: "Email is required" })
+            }
+            await this._userService.resendOtp(email)
+            return res.status(200).json({ success: true, message: "New OTP sent to email" })
+        } catch (error) {
+            return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
-        await this._userService.resendOtp(email)
-        return res.status(200).json({ success: true, message: "New OTP sent to email" })
-    } catch (error) {
-        return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
     }
-}
 
-//--------------------------- Verify OTP -----------------------------------------------
+    //--------------------------- Verify OTP -----------------------------------------------
 
     async verifyOtp(req: Request, res: Response): Promise<void> {
         try {
@@ -85,9 +85,7 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
             }
 
             const { accessToken, refreshToken, user } = await this._userService.loginUser(email, password)
-            // console.log("===>",accessToken);
-            // console.log("===>",refreshToken);
-            // **Set Refresh Token in HTTP-Only Cookie**
+           
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
@@ -102,9 +100,9 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
-              });
+            });
 
-    
+
 
             res.status(200).json({
                 success: true,
@@ -186,23 +184,18 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
 
     async googleAuthCallback(req: Request, res: Response): Promise<void> {
         console.log("Iam googleAuthCallback");
-
-
         try {
-            console.log("====>", req.user);
 
             const user = req.user;
-            console.log("&&&&====>", user);
-           
+
+
             if (!user) {
                 res.redirect(`${process.env.FRONTEND_URL}/login?error=AuthenticationFailed`);
                 return;
             }
 
             const { accessToken, refreshToken } = await this._userService.generateTokens(user);
-            
-            
-            
+
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -210,24 +203,18 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             })
 
-
-
             res.cookie("auth_token", accessToken, {
                 httpOnly: true, // Prevents client-side access
                 secure: process.env.NODE_ENV === "production", // HTTPS only in production
                 sameSite: "strict", // Prevents CSRF attacks
                 maxAge: 2 * 60 * 60 * 1000, // 15 minutes (short-lived access token)
             });
-            
-            
 
             res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=patient&user=${encodeURIComponent(JSON.stringify(user))}&accesstoken=${accessToken}`);
 
         } catch (error) {
             res.redirect(`${process.env.FRONTEND_URL}/login?error=InternalServerError`);
         }
-
-
 
     }
 
@@ -261,7 +248,13 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 expires: new Date(0), // Expire the cookie immediately
-              });
+            });
+
+            res.clearCookie("connect.sid", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict"
+            })
 
 
             res.status(200).json({ success: true, message: "Logout successful" });
@@ -274,19 +267,19 @@ async resendOtp(req: Request, res: Response): Promise<Response> {
 
     async getProfile(req: Request, res: Response): Promise<void> {
         try {
-            if(!req.user){
-                res.status(401).json({error:"Unauthorized"});
-                return 
+            if (!req.user) {
+                res.status(401).json({ error: "Unauthorized" });
+                return
             }
 
             const user = await this._userService.getUserProfile(req.user.userId)
-            if(!user){
-                res.status(404).json({error:"User not found"})
+            if (!user) {
+                res.status(404).json({ error: "User not found" })
             }
 
-            res.status(200).json({success:true,user})
+            res.status(200).json({ success: true, user })
         } catch (error) {
-            res.status(500).json({error:"Failed to featch user Profile"})
+            res.status(500).json({ error: "Failed to featch user Profile" })
         }
     }
 

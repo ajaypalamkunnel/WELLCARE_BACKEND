@@ -1,4 +1,4 @@
-import passport, { use } from 'passport'
+import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import dotenv from 'dotenv'
 
@@ -30,7 +30,7 @@ passport.use(
                 const avatar = profile.photos?.[0].value as string;
                 const role = req.query.role  as "patient" | "doctor";
                 
-                console.log("Received Google Profile:", email, "Role:", role);
+                
                 
                 if (!email) {
                     return done(new Error("Email not found in Google profile"), false)
@@ -47,9 +47,9 @@ passport.use(
                 }
 
 
-                console.log("Authenticated User:", user);
+                
 
-                return done(null, user||undefined); // ✅ Fix: Corrected `done()` usage
+                return done(null, user||undefined); //  Fix: Corrected `done()` usage
             } catch (error) {
                 return done(error, false)
             }
@@ -58,7 +58,7 @@ passport.use(
 )
 
 passport.serializeUser((user: any, done) => {
-    console.log("Serializing User:", user);
+   
     done(null, { id: user._id, role: user.role });
 });
 
@@ -71,7 +71,7 @@ passport.deserializeUser(async (sessionUser: { id: string; role: string }, done)
         } else {
             user = await userService.getUserById(sessionUser.id)
         }
-        console.log("Deserializing User:", user);
+       
         
         return done(null, user)
     } catch (error) {

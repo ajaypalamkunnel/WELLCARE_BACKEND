@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import IAdminController from '../../interfaces/admin/IAdminController'
 import { IAdminService } from '../../../services/interfaces/admin/IAdminServices';
 import { error } from 'console';
+import { StatusCode } from '../../../constants/statusCode';
+import { STATUS_CODES } from 'http';
 
 class AdminController implements IAdminController {
 
@@ -21,7 +23,7 @@ class AdminController implements IAdminController {
             const { email, password } = req.body;
 
             if (!email || !password) {
-                res.status(400).json({ error: "Email and password are required" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "Email and password are required" })
                 return
             }
 
@@ -41,14 +43,14 @@ class AdminController implements IAdminController {
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
             });
 
-            res.status(200).json({
+            res.status(StatusCode.OK).json({
                 success: true,
                 message: "Login successfull",
                 accessTokenAdmin,
                 admin: { id: admin?._id, email: admin?.email }
             })
         } catch (error: unknown) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "Login failed" })
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
         }
 
     }
@@ -70,13 +72,13 @@ class AdminController implements IAdminController {
 
             })
 
-            res.status(200).json({
+            res.status(StatusCode.OK).json({
                 success:true,
                 message:"Logout successfull"
             })
             
         } catch (error:unknown) {
-            res.status(500).json({error:"logout failed"})
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({error:"logout failed"})
         }
     }
 
@@ -86,14 +88,14 @@ class AdminController implements IAdminController {
             const doctors = await this._adminService.fetchAllDoctors()
 
             if (!doctors || doctors.length === 0) {
-                res.status(404).json({ success: false, message: "No doctors found" });
+                res.status(StatusCode.NOT_FOUND).json({ success: false, message: "No doctors found" });
                 return;
             }
 
-            res.status(200).json({ success: true, data: doctors });
+            res.status(StatusCode.OK).json({ success: true, data: doctors });
         } catch (error) {
             console.error("Error fetching doctors:", error);
-            res.status(500).json({ success: false, message: "Internal Server Error" });
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
         }
     }
 

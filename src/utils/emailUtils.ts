@@ -14,8 +14,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-console.log("===>",process.env.SMTP_USER);
-console.log("===>",process.env.SMTP_PASS);
 
 export const sendOTPEmail = async (email: string, otp: string) => {
     try {

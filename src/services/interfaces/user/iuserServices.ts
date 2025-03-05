@@ -1,7 +1,7 @@
 
-import { promises } from "dns";
+
 import { IUser } from "../../../model/user/userModel";
-import IUserRepository from "../../../repositories/interfaces/user/IUser";
+
 
 
 export interface IUserService{
