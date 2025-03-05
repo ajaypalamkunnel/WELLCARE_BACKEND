@@ -23,7 +23,7 @@ class DoctorService implements IDoctorService {
         const { fullName, email, password } = doctorDetails;
 
         if (!fullName || !email || !password) {
-            throw new Error("All fields are required")
+            throw new Error("All fields are required")  
         }
 
         const existingUser = await this._doctorRepository.findDoctorByEmail(email!)
@@ -39,7 +39,7 @@ class DoctorService implements IDoctorService {
 
         otpExpires.setMinutes(otpExpires.getMinutes() + 5)
 
-        const doctor = await this._doctorRepository.createDoctor({
+        const doctor = await this._doctorRepository.create({
             fullName,
             email,
             password: hashedPassword,
@@ -66,7 +66,7 @@ class DoctorService implements IDoctorService {
         const otpExpires = new Date()
         otpExpires.setMinutes(otpExpires.getMinutes() + 10)
 
-        await this._doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
+        await this._doctorRepository.update(doctor._id.toString(), { otp, otpExpires })
 
         await sendOTPEmail(email, otp)
     }
@@ -89,7 +89,7 @@ class DoctorService implements IDoctorService {
             throw new Error("Invalid OTP. Please try again")
         }
 
-        await this._doctorRepository.updateDoctor(doctor._id.toString(), {
+        await this._doctorRepository.update(doctor._id.toString(), {
             otp: null,
             otpExpires: null,
             status: 1
@@ -157,7 +157,7 @@ class DoctorService implements IDoctorService {
                 console.error("Failed to send OTP email:", emailError);
                 throw new Error("Failed to send OTP email. Please try again.");
             }
-            await this._doctorRepository.updateDoctor(doctor._id.toString(), { otp, otpExpires })
+            await this._doctorRepository.update(doctor._id.toString(), { otp, otpExpires })
             console.log(`Forgot password OTP sent to ${email}.`);
         } catch (error) {
 
@@ -187,7 +187,7 @@ class DoctorService implements IDoctorService {
             }
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
-            await this._doctorRepository.updateDoctor(doctor._id.toString(), { password: hashedPassword })
+            await this._doctorRepository.update(doctor._id.toString(), { password: hashedPassword })
 
 
         } catch (error) {
@@ -212,7 +212,7 @@ class DoctorService implements IDoctorService {
         if(!doctor){
             console.log("hi iMa doctor");
             
-            doctor = await this._doctorRepository.createDoctor({
+            doctor = await this._doctorRepository.create({
                 fullName:name,
                 email,
                 profileImage:avatar,

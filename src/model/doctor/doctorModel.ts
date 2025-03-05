@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from "mongoose";
+import mongoose, { ObjectId, Schema,Document } from "mongoose";
 
 export interface IReview {
     patientId: string;

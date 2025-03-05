@@ -34,7 +34,7 @@ export class AdminService implements IAdminService{
             const password = adminDetails.password as string; // Ensure password is a string
             const hashedPassword = await PasswordUtils.hashPassword(password);
             
-            const newAdmin = await this._adminRepository.createAdmin({
+            const newAdmin = await this._adminRepository.create({
                 email: adminDetails.email,
                 password: hashedPassword,
             });

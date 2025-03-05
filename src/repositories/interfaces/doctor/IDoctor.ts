@@ -1,13 +1,10 @@
 import { IDoctor } from "../../../model/doctor/doctorModel";
+import { BaseRepository } from "../../base/BaseRepository";
+import { IBaseRepository } from "../../base/IBaseRepository";
 
-export default interface IDoctorRepository{
-    createDoctor(doctor:Partial<IDoctor>):Promise<IDoctor>
-    findDoctorByEmail(email:Partial<IDoctor>):Promise<IDoctor | null>
-    findById(id: string): Promise<IDoctor | null>;
-    findAll(): Promise<IDoctor[]>;
-    updateDoctor(id: string, update: Partial<IDoctor>): Promise<IDoctor | null>;
-    deleteDoctor(id: string): Promise<IDoctor | null>;
-    updateDoctorRefreshToken(id:string,refreshToken:string):Promise<IDoctor|null>
-    removeRefreshToken(refreshToken:string):Promise<void>
-    findUserDataById(userId:string):Promise<IDoctor|null>
+export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
+    findDoctorByEmail(email: string): Promise<IDoctor | null>
+    updateDoctorRefreshToken(id: string, refreshToken: string): Promise<IDoctor | null>
+    removeRefreshToken(refreshToken: string): Promise<void>
+    findUserDataById(userId: string): Promise<IDoctor | null>
 }

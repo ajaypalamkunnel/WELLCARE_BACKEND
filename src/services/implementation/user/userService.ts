@@ -51,7 +51,7 @@ class UserService implements IUserService {
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 5); // 5 minutes expiry
 
-        const user = await this._userRepository.createUser({
+        const user = await this._userRepository.create({
             fullName,
             email,
             password: hashedPassword,
@@ -79,7 +79,7 @@ class UserService implements IUserService {
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 10);
 
-        await this._userRepository.updateUser(user._id.toString(), { otp, otpExpires })
+        await this._userRepository.update(user._id.toString(), { otp, otpExpires })
 
         await sendOTPEmail(email, otp)
 
@@ -102,7 +102,7 @@ class UserService implements IUserService {
             throw new Error("Invalid OTP. Please try again")
         }
 
-        await this._userRepository.updateUser(user._id.toString(), {
+        await this._userRepository.update(user._id.toString(), {
             otp: null,
             otpExpires: null,
             status: 1
@@ -194,7 +194,7 @@ class UserService implements IUserService {
             }
     
             //Save OTP only if email was sent successfully
-            await this._userRepository.updateUser(user._id.toString(), { otp, otpExpires });
+            await this._userRepository.update(user._id.toString(), { otp, otpExpires });
     
             console.log(`Forgot password OTP sent to ${email}.`);
             
@@ -227,7 +227,7 @@ class UserService implements IUserService {
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
 
-            await this._userRepository.updateUser(user._id.toString(),{password:hashedPassword})
+            await this._userRepository.update(user._id.toString(),{password:hashedPassword})
 
             
         } catch (error) {
@@ -250,7 +250,7 @@ class UserService implements IUserService {
         
         if(!user){
             console.log("hi Ima patient")
-            user = await this._userRepository.createUser({
+            user = await this._userRepository.create({
                 fullName:name,
                 email,
                 profileUrl:avatar,
@@ -273,7 +273,7 @@ class UserService implements IUserService {
 
     //for passport.js
     async getUserById(id: string): Promise<IUser | null> {
-        return await this._userRepository.findUserById(id);
+        return await this._userRepository.findById(id);
     }
 
 
