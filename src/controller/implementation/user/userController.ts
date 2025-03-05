@@ -21,8 +21,7 @@ class UserController implements IUserController {
     //---------------------------Basic registration -----------------------------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
-        console.log("hello guys");
-
+        
         try {
 
             const { user } = await this._userService.registerBasicDetails(req.body)
