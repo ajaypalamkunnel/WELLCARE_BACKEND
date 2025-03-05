@@ -29,7 +29,7 @@ const authMiddleWare = (req:Request,res:Response,next:NextFunction):void=>{
     try {
         const decode = JwtUtils.verifyToken(token) as UserPayload;
         req.user = decode
-        // console.log("middle ware",req.user);
+        
         
         next()
     } catch (error) {

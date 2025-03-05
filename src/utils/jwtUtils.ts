@@ -10,7 +10,7 @@ const refreshSecret=process.env.REFRESH_TOKEN_SECRET as string
 
 class JwtUtils{
     static generateAccesToken(payload:object):string{
-        return jwt.sign(payload,accessSecret,{expiresIn:'15m'})
+        return jwt.sign(payload,accessSecret,{expiresIn:'35m'})
     }
 
     static generateRefreshToken(payload:object):string{
