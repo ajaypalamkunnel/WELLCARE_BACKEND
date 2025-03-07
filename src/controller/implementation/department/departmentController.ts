@@ -14,6 +14,10 @@ class DepartmentController implements IDepartmentController{
     }
     async createDepartment(req: Request, res: Response): Promise<void> {
         try {
+            console.log("create dept controller");
+            
+            console.log(req.body);
+            
            const {department} = await this._departmentService.createDeparment(req.body)
 
            res.status(StatusCode.CREATED).json(

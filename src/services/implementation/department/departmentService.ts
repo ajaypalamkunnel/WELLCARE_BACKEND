@@ -15,7 +15,13 @@ class DepartmentService implements IDepartmentService{
     async createDeparment(departmentDetails: IDepartment): Promise<{ department: IDepartment; }> {
         try{
 
-            const {name,icon} = departmentDetails
+            console.log("dept service");
+            console.log(departmentDetails);
+            
+            
+            const {name,icon} ={...departmentDetails}
+            console.log(name,"------",icon);
+            
     
             if(!name||!icon){
                 throw new Error("All fields are required")

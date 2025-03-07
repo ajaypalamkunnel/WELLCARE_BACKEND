@@ -25,5 +25,7 @@ export interface IDoctorService{
 
     getDoctorProfile(userId:string):Promise<IDoctor|null>
 
+    registerDoctor(doctorDetails:Partial<IDoctor>):Promise<{doctor:IDoctor}>
+
     
 }

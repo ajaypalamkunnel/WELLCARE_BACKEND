@@ -3,6 +3,7 @@ import IDoctorController from "../../interfaces/doctor/IDoctorController";
 import { IDoctorService } from "../../../services/interfaces/doctor/iDoctorServices";
 import { error } from "console";
 import { StatusCode } from "../../../constants/statusCode";
+import { handleErrorResponse } from "../../../utils/errorHandler";
 
 
 class DoctorController implements IDoctorController {
@@ -12,10 +13,11 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-    
-    
-    
-    
+
+
+
+
+
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
         try {
 
@@ -62,13 +64,13 @@ class DoctorController implements IDoctorController {
         }
     }
 
-    
+
     async postLogin(req: Request, res: Response): Promise<void> {
-        
+
         try {
             const { email, password } = req.body
-            console.log("Iam from controller of doctor",email);
-            console.log("Iam from controller of doctor",password);
+            console.log("Iam from controller of doctor", email);
+            console.log("Iam from controller of doctor", password);
 
             if (!email || !password) {
                 res.status(400).json({ error: "Email and password are required" })
@@ -76,8 +78,8 @@ class DoctorController implements IDoctorController {
             }
 
             const { doctorAccessToken, doctorRefreshToken, doctor } = await this._doctorService.loginDoctor(email, password)
-            console.log(doctorAccessToken,"===",doctorRefreshToken);
-            
+            console.log(doctorAccessToken, "===", doctorRefreshToken);
+
             res.cookie("doctorRefreshToken", doctorRefreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -91,7 +93,7 @@ class DoctorController implements IDoctorController {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
-              });
+            });
 
             res.status(StatusCode.OK).json({
                 success: true,
@@ -105,54 +107,54 @@ class DoctorController implements IDoctorController {
     }
 
 
-   async forgotPasswordDoctor(req: Request, res: Response): Promise<void> {
-       
-       try {
-           const {email} = req.body
-           console.log("Hi i am from forgotPasswordDoctor controller",email);
-           
-        if(!email){
-            res.status(400).json({success:false,error:"Email is required"})
-            return
-        }
+    async forgotPasswordDoctor(req: Request, res: Response): Promise<void> {
 
-        await this._doctorService.forgotPassword(email)
-        res.status(StatusCode.OK).json({success:true,message:"New OTP sent to email"})
-        
-       } catch (error) {
-        console.error("Error in forgotPassword controller:", error);
-        res.status(500).json({ 
-            success: false, 
-            error: error instanceof Error ? error.message : "An unexpected error occurred" 
-        });
-        
-        
-       }
+        try {
+            const { email } = req.body
+            console.log("Hi i am from forgotPasswordDoctor controller", email);
+
+            if (!email) {
+                res.status(400).json({ success: false, error: "Email is required" })
+                return
+            }
+
+            await this._doctorService.forgotPassword(email)
+            res.status(StatusCode.OK).json({ success: true, message: "New OTP sent to email" })
+
+        } catch (error) {
+            console.error("Error in forgotPassword controller:", error);
+            res.status(500).json({
+                success: false,
+                error: error instanceof Error ? error.message : "An unexpected error occurred"
+            });
+
+
+        }
     }
     async updatePasswordDoctor(req: Request, res: Response): Promise<void> {
         try {
 
-            const {email,password} = req.body
+            const { email, password } = req.body
 
-            if(!email){
-                res.status(400).json({success:false,error:"Email is required"})
-           }
+            if (!email) {
+                res.status(400).json({ success: false, error: "Email is required" })
+            }
 
-           await this._doctorService.updatePasswordDoctor(email,password)
-           res.status(StatusCode.OK).json({success:true,error:"Password Updated Successfully"})
+            await this._doctorService.updatePasswordDoctor(email, password)
+            res.status(StatusCode.OK).json({ success: true, error: "Password Updated Successfully" })
         } catch (error) {
             res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
     }
 
-    
+
     renewAuthTokens(req: Request, res: Response): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-   async googleAuthCallback(req: Request, res: Response): Promise<void> {
+    async googleAuthCallback(req: Request, res: Response): Promise<void> {
         try {
-            
+
             const doctor = req.user;
             if (!doctor) {
                 res.redirect(`${process.env.FRONTEND_URL}/login?error=AuthenticationFailed`);
@@ -188,21 +190,21 @@ class DoctorController implements IDoctorController {
 
             const refreshToken = req.cookies.doctorRefreshToken
 
-            
-            
 
-            if(!refreshToken){
-                res.status(400).json({error:"No refersh token provided"})
+
+
+            if (!refreshToken) {
+                res.status(400).json({ error: "No refersh token provided" })
                 return
             }
 
             await this._doctorService.logoutDoctor(refreshToken)
-            
 
-            res.clearCookie("doctorRefreshToken",{
-                httpOnly:true,
-                secure:process.env.NODE === "production",
-                sameSite:true
+
+            res.clearCookie("doctorRefreshToken", {
+                httpOnly: true,
+                secure: process.env.NODE === "production",
+                sameSite: true
             })
 
             res.cookie("doctorAccessToken", "", {
@@ -212,38 +214,68 @@ class DoctorController implements IDoctorController {
                 expires: new Date(0), // Expire the cookie immediately
             });
 
-            
 
 
 
 
-            res.status(StatusCode.OK).json({success:true,message:"Logout successfull"})
+
+            res.status(StatusCode.OK).json({ success: true, message: "Logout successfull" })
         } catch (error) {
-            res.status(500).json({error:"Logout failed"})
+            res.status(500).json({ error: "Logout failed" })
         }
-        
+
     }
 
     async getProfile(req: Request, res: Response): Promise<void> {
-        
-        
+
+
         try {
-            if(!req.user){
-                res.status(401).json({error:"Unauthorized"})
-                return 
+            if (!req.user) {
+                res.status(401).json({ error: "Unauthorized" })
+                return
             }
-           
+
 
             const user = await this._doctorService.getDoctorProfile(req.user.userId);
-            if(!user){
-                res.status(404).json({error:"User not found"})
-                
-            }
-            
+            if (!user) {
+                res.status(404).json({ error: "User not found" })
 
-            res.status(StatusCode.OK).json({success:true,user})
+            }
+
+
+            res.status(StatusCode.OK).json({ success: true, user })
         } catch (error) {
             res.status(500).json({ error: "Failed to fetch user profile" });
+        }
+    }
+
+
+
+    async registerDoctor(req: Request, res: Response): Promise<void> {
+        try {
+            const { fullName, email,
+                mobile, departmentId,
+                specialization, experience,
+                licenseNumber, availability,
+                clinicAddress, profileImage,
+                licenseDocument, IDProofDocument,
+                education, certifications } = req.body;
+
+            console.log(req.body);
+
+
+            if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !availability || !profileImage || !licenseDocument || !IDProofDocument || !education || !certifications) {
+                res.status(StatusCode.BAD_REQUEST).json({ error: "All required fields must be provided" });
+                return
+            }
+
+            const { doctor } = await this._doctorService.registerDoctor(req.body)
+
+            res.status(StatusCode.CREATED).json({ success: true, message: "Doctor registered successfully Your Application will verified by Administrative team", doctor })
+
+        } catch (error) {
+            handleErrorResponse(res, error)
+
         }
     }
 

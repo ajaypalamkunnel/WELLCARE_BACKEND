@@ -249,6 +249,55 @@ class DoctorService implements IDoctorService {
         
         return await this._doctorRepository.findUserDataById(userId)
     }
+
+    async registerDoctor(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor; }> {
+
+        try {
+            console.log("<=== registerDoctor service function ==>");
+            
+
+            const {fullName, email, mobile, departmentId, specialization, experience, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications} =doctorDetails;
+            
+            // if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !profileImage || !licenseDocument || !IDProofDocument) {
+            //     throw new Error("All required fields must be provided");
+            // }
+
+            const existingDoctor = await this._doctorRepository.findDoctorByEmail(email!);
+
+            if(!existingDoctor){
+                throw new Error("Doctor not found");
+            }
+            const doctor_id = existingDoctor._id.toString();
+            const updatedDoctor = await this._doctorRepository.update(doctor_id,{
+                mobile,
+                departmentId,
+                specialization,
+                experience,
+                licenseNumber,
+                availability,
+                clinicAddress,
+                profileImage,
+                licenseDocument,
+                IDProofDocument,
+                education,
+                certifications,
+                isVerified:false
+            })
+
+           
+            return { doctor: updatedDoctor! };
+        } catch (error) {
+            console.error("Error in registerDoctorService:", error);
+            throw new Error("Failed to register doctor. Please try again.");
+        }
+       
+
+
+
+    }
+    
+
+
     
 
 }

@@ -11,6 +11,7 @@ interface IDoctorController{
     googleAuthCallback(req: Request, res: Response): Promise<void> 
     logoutDoctor(req:Request,res:Response):Promise<void>
     getProfile(req:Request,res:Response):Promise<void>
+    registerDoctor(req:Request,res:Response):Promise<void>
 }
 
 

@@ -30,9 +30,13 @@ export interface ILocation {
     coordinates: number[];
 }
 
-export interface IClinic {
-    clinic_name: string;
-    place: string;
+export interface IClinicAddress {
+    clinicName: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
     location: ILocation;
 }
 
@@ -42,7 +46,7 @@ export interface IDoctor extends Document {
     fullName: string;
     email: string;
     password: string
-    phone: string;
+    mobile: string;
     specialization: string;
     departmentId: ObjectId;
     experience: number;
@@ -52,10 +56,11 @@ export interface IDoctor extends Document {
     education: IEducation[];
     certifications: ICertification[];
     currentSubscriptionId?: ObjectId;
-    clinic?: IClinic;
-    license_number: string;
-    license: string;
-    ID_proof: string;
+    availability: string[]
+    clinicAddress?: IClinicAddress;
+    licenseNumber: string;
+    licenseDocument: string;
+    IDProofDocument: string;
     isVerified: boolean;
     otp?: string | null;
     otpExpires?: Date | null
@@ -72,7 +77,7 @@ const DoctorSchema = new Schema<IDoctor>(
         fullName: { type: String, required: true },
         email: { type: String, required: true },
         password: { type: String, required: true },
-        phone: { type: String,},
+        mobile: { type: String,},
         specialization: { type: String },
         departmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Department", },
         experience: { type: Number, },
@@ -90,7 +95,6 @@ const DoctorSchema = new Schema<IDoctor>(
                 createdAt: { type: Date, default: Date.now }
             }
         ],
-        profileImage: { type: String },
         education: [
             {
                 degree: { type: String,  },
@@ -106,17 +110,20 @@ const DoctorSchema = new Schema<IDoctor>(
             }
         ],
         currentSubscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
-        clinic: {
-            clinic_name: { type: String,},
-            place: { type: String, },
-            location: {
-                type: { type: String, enum: ["Point"], },
-                coordinates: { type: [Number],  }
-            }
+        availability:{ type: [String]},
+        clinicAddress: {
+            clinicName: String,
+            street: String,
+            city: String,
+            state: String,
+            postalCode: String,
+            country: String,
+            location:[]
         },
-        license_number: { type: String,  },
-        license: { type: String,  },
-        ID_proof: { type: String, },
+        profileImage: { type: String },
+        licenseNumber: { type: String,  },
+        licenseDocument: { type: String,  },
+        IDProofDocument: { type: String, },
         isVerified: { type: Boolean, default: false },
         otp: { type: String,  },
         otpExpires: { type: Date, required: false, expires: 300 },
