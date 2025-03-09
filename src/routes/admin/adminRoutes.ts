@@ -23,4 +23,5 @@ router.post("/logout",(req,res)=>adminController.logout(req,res))
 router.get("/doctors",authMiddleWare,(req,res)=>adminController.fetchAllDoctors(req,res))
 router.post("/adddepartment",authMiddleWare,(req,res)=>departmentController.createDepartment(req,res))
 router.get("/getalldepartments",authMiddleWare,(req,res)=>departmentController.getAllDepatments(req,res))
+router.get("/users",(req,res)=>adminController.getAllUsers(req,res))
 export default router

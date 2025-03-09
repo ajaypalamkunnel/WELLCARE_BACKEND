@@ -5,6 +5,7 @@ import JwtUtils from "../../../utils/jwtUtils";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IAdminService } from "../../interfaces/admin/IAdminServices";
 import { IDoctor } from "../../../model/doctor/doctorModel";
+import { IUser } from "../../../model/user/userModel";
 
 
 export class AdminService implements IAdminService{
@@ -14,6 +15,7 @@ export class AdminService implements IAdminService{
     constructor(_adminRepository:AdminRepository){
         this._adminRepository = _adminRepository
     }
+    
     
 
     async createAdmin(adminDetails: Partial<IAdmin>): Promise<{ admin: IAdmin | null }> {
@@ -101,7 +103,23 @@ export class AdminService implements IAdminService{
     }
     
     
+    async getAllUsers(page: number, limit: number): Promise<{ users: IUser[]; totalUsers: number |null }> {
+        try {
 
+            console.log(" getAllUsers serveie");
+            
+            
+            const result = await this._adminRepository.getAllUsers(page, limit);
+            console.log(">>>>>>>>>",result)
+            return {
+                users: result.users,
+                totalUsers: result.totalUsers ?? null
+            };
+        } catch (error) {
+            console.error(`Error in getAllUsers: ${error instanceof Error ? error.message : error}`);
+            throw new Error("Failed to fetch users");
+        }
+    }
     
 
 

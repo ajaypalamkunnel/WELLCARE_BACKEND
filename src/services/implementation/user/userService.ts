@@ -286,6 +286,9 @@ class UserService implements IUserService {
         return await this._userRepository.findUserDataById(userId)
     }
 
+    
+    
+
 }
 
 export default UserService

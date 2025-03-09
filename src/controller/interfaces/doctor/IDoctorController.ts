@@ -12,6 +12,8 @@ interface IDoctorController{
     logoutDoctor(req:Request,res:Response):Promise<void>
     getProfile(req:Request,res:Response):Promise<void>
     registerDoctor(req:Request,res:Response):Promise<void>
+    updateDoctorStatus(req:Request,res:Response):Promise<void>
+    verifyDoctor(req:Request,res:Response):Promise<void>
 }
 
 

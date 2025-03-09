@@ -10,6 +10,8 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
         super(Doctor);
     }
     
+    
+    
     async findDoctorByEmail(email:string): Promise<IDoctor | null> {
         console.log(email);
         
@@ -26,7 +28,38 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
     
 
     async findUserDataById(userId: string): Promise<IDoctor | null> {
-       return await Doctor.findById(userId).select("-password -refreshToken")
+       return await Doctor.findById(userId).select("-password -refreshToken").populate({path:"departmentId",select:"name"})
     }
+
+
+    async udateDoctorStatus(doctorId: string, status: number): Promise<IDoctor | null> {
+        if(![1,-1].includes(status)){
+            throw new Error("Invalid status value. Use -1 for block, 1 for unblock.");
+        }
+
+        return await Doctor.findByIdAndUpdate(doctorId, {status},{new:true}).select("-password -refreshToken")
+    }
+
+    async updateDoctorVerification(doctorId: string, isVerified: boolean,status?:number): Promise<IDoctor | null> {
+
+        const updateFields: Partial<IDoctor> = { isVerified }; // Always update isVerified
+
+        if (status !== undefined) {
+            updateFields.status = status; // Only update status if provided
+        }
+
+        
+
+        return await Doctor.findByIdAndUpdate(
+            doctorId,
+            updateFields,
+            {new:true}
+        ).select("-password -refreshToken")
+    }
+
+   
+    
 }
+
+
 export default DoctorRepository

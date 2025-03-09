@@ -28,7 +28,8 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
 
 
 router.get("/profile", authMiddleWare, (req, res) => doctorController.getProfile(req, res))
-router.post("/doctorregistration", (req, res) => doctorController.registerDoctor(req, res))
-
+router.post("/doctorregistration",authMiddleWare, (req, res) => doctorController.registerDoctor(req, res))
+router.put("/updatestatus",authMiddleWare, (req,res)=> doctorController.updateDoctorStatus(req,res))
+router.put("/verify-doctor",authMiddleWare,(req,res)=>doctorController.verifyDoctor(req,res))
 
 export default router

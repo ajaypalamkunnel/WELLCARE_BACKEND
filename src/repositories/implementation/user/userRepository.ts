@@ -7,6 +7,7 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     constructor() {
         super(User)
     }
+    
 
     async findUserByEmail(email: string): Promise<IUser | null> {
         // console.log("Iam from findUserByEmail==>",email);
@@ -25,6 +26,11 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     async findUserDataById(userId: string): Promise<IUser | null> {
         return await User.findById(userId).select("-password -refreshToken")
     }
+
+    
+
+    
+
 }
 
 export default UserRepository

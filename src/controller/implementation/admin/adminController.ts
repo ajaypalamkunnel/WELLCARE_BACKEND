@@ -13,6 +13,7 @@ class AdminController implements IAdminController {
         this._adminService = adminService
     }
     
+    
 
 
     async login(req: Request, res: Response): Promise<void> {
@@ -96,6 +97,31 @@ class AdminController implements IAdminController {
         } catch (error) {
             console.error("Error fetching doctors:", error);
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+        }
+    }
+
+    async getAllUsers(req: Request, res: Response): Promise<void> {
+        try {
+            const page = Number(req.query.page) || 1
+            const limit = Number(req.query.limit) || 10
+            console.log("page===>",page);
+            console.log("limit===>",limit);
+            
+            const {users,totalUsers} = await this._adminService.getAllUsers(page,limit)
+            
+             res.status(StatusCode.OK).json({
+                success:true,
+                message:"Users retrived successfully",
+                data:{users,totalUsers,currentPage: page, totalPages: Math.ceil(totalUsers! / limit) }
+            })
+        } catch (error) {
+            console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
+
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message:error instanceof Error ? error.message : "An unexpected error occurred"
+            })
+            
         }
     }
 

@@ -50,6 +50,7 @@ export interface IDoctor extends Document {
     specialization: string;
     departmentId: ObjectId;
     experience: number;
+    gender:string;
     rating: IRating[];
     reviews: IReview[];
     profileImage: string;
@@ -81,6 +82,7 @@ const DoctorSchema = new Schema<IDoctor>(
         specialization: { type: String },
         departmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Department", },
         experience: { type: Number, },
+        gender:{type:String},
         rating: [
             {
                 averageRating: { type: Number, },
@@ -129,7 +131,7 @@ const DoctorSchema = new Schema<IDoctor>(
         otpExpires: { type: Date, required: false, expires: 300 },
         status: {
             type: Number,
-            enum: [-1, 0, 1],// -1 => blocked 0 => not verified 1 => verified
+            enum: [-2,-1, 0, 1,2],// -1 => blocked 0 => not verified 1 => verified -2 => rejected ====> 2 for application submitted
             default: 0
         },
         refreshToken: { type: String }

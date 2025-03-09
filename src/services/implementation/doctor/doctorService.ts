@@ -15,6 +15,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
+   
     
     
 
@@ -245,7 +246,7 @@ class DoctorService implements IDoctorService {
 
 
     async getDoctorProfile(userId: string): Promise<IDoctor | null> {
-        console.log("I am from service",userId);
+       
         
         return await this._doctorRepository.findUserDataById(userId)
     }
@@ -256,7 +257,7 @@ class DoctorService implements IDoctorService {
             console.log("<=== registerDoctor service function ==>");
             
 
-            const {fullName, email, mobile, departmentId, specialization, experience, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications} =doctorDetails;
+            const {fullName, email, mobile, departmentId, specialization, experience,gender, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications} =doctorDetails;
             
             // if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !profileImage || !licenseDocument || !IDProofDocument) {
             //     throw new Error("All required fields must be provided");
@@ -273,6 +274,7 @@ class DoctorService implements IDoctorService {
                 departmentId,
                 specialization,
                 experience,
+                gender,
                 licenseNumber,
                 availability,
                 clinicAddress,
@@ -281,7 +283,8 @@ class DoctorService implements IDoctorService {
                 IDProofDocument,
                 education,
                 certifications,
-                isVerified:false
+                isVerified:false,
+                status:2
             })
 
            
@@ -295,6 +298,68 @@ class DoctorService implements IDoctorService {
 
 
     }
+
+
+    async updateDoctorStatus(doctorId: string, status: number): Promise<IDoctor> {
+
+        try {
+            if(![1,-1].includes(status)){
+                throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
+            }
+
+            const existingDoctor = await this._doctorRepository.findById(doctorId)
+
+            if(!existingDoctor){
+                throw new Error("Doctor not found");
+            }
+
+            const updatedDoctor = await this._doctorRepository.udateDoctorStatus(doctorId,status)
+
+            if(!updatedDoctor){
+                throw new Error("Failed to update doctor status")
+            }
+            return updatedDoctor
+        } catch (error) {
+            console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
+            throw error
+            
+        }
+        
+    }
+
+
+
+    async verifyDoctor(doctorId: string, isVerified: boolean): Promise< IDoctor> {
+        try {
+
+            const existingDoctor = await this._doctorRepository.findById(doctorId)
+
+            if(!existingDoctor){
+                throw new Error("Doctor not found");
+            }
+            let updatedDoctor
+            if(isVerified){
+                 updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId,isVerified,1)
+            }else{
+                
+                updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId,isVerified,-2)
+            }
+
+            if(!updatedDoctor){
+                throw new Error("Failed to update doctor verification")
+            }
+            
+            return updatedDoctor
+
+        } catch (error) {
+
+            console.error(`Error in verifyDoctor: ${error instanceof Error ? error.message : error}`);
+            throw error
+            
+            
+        }
+    }
+    
     
 
 

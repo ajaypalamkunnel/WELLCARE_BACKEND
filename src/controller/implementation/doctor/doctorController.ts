@@ -13,7 +13,7 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-
+    
 
 
 
@@ -99,7 +99,7 @@ class DoctorController implements IDoctorController {
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
-                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName }
+                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName,isverified:doctor?.isVerified}
             })
         } catch (error) {
             res.status(400).json({ error: error instanceof Error ? error.message : "Login failed" })
@@ -254,7 +254,7 @@ class DoctorController implements IDoctorController {
     async registerDoctor(req: Request, res: Response): Promise<void> {
         try {
             const { fullName, email,
-                mobile, departmentId,
+                mobile, departmentId,gender,
                 specialization, experience,
                 licenseNumber, availability,
                 clinicAddress, profileImage,
@@ -278,6 +278,79 @@ class DoctorController implements IDoctorController {
 
         }
     }
+
+
+   async updateDoctorStatus(req: Request, res: Response): Promise<void> {
+
+    console.log("updated conrtoller");
+        try {
+            const {doctorId,status} = req.body
+
+            console.log("==>",doctorId,"==>,",status);
+            
+
+            if(!doctorId || (status !== 1 && status !== -1)){
+
+                 res.status(StatusCode.BAD_REQUEST).json({
+                    success:false,
+                    message: "Invalid request. Provide doctorId and valid status (-1 for block, 1 for unblock)."
+
+                })
+                return
+            }
+
+            const doctor = await this._doctorService.updateDoctorStatus(doctorId,status)
+
+             res.status(StatusCode.OK).json({
+                success:true,
+                message:`Doctor ${status === -1 ? "blocked" : "unblocked"} successfully.`,
+                data: doctor
+            })
+        } catch (error) {
+            console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
+
+             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message:error instanceof Error ? error.message : "An unexpected error occurred"
+            })
+            
+        }
+    }
+
+
+    async verifyDoctor(req: Request, res: Response): Promise<void> {
+        try {
+
+            const {doctorId,isVerified} = req.body
+
+            if(!doctorId || typeof isVerified !== 'boolean'){
+
+                 res.status(StatusCode.BAD_REQUEST).json({
+                    success:false,
+                    message: "Invalid request. Provide doctorId and isVerified as boolean.",
+                })
+                return
+            }
+
+            const doctor = await this._doctorService.verifyDoctor(doctorId,isVerified)
+
+             res.status(StatusCode.OK).json({
+                success:true,
+                message:`Doctor application has been ${isVerified ? "accepted" : "rejected"} successfully.`,
+                data:doctor
+            })
+            
+        } catch (error) {
+            console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
+
+             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: error instanceof Error ? error.message : "An unexpected error occurred",
+            })
+        }
+    }
+    
+
 
 }
 

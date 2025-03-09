@@ -27,5 +27,9 @@ export interface IDoctorService{
 
     registerDoctor(doctorDetails:Partial<IDoctor>):Promise<{doctor:IDoctor}>
 
+    updateDoctorStatus(doctorId:string,status:number):Promise<IDoctor>
+
+    verifyDoctor(doctor_id:string,isVerified:boolean):Promise<IDoctor>
+// 
     
 }
