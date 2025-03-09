@@ -12,6 +12,8 @@ class AdminController implements IAdminController {
     constructor(adminService: IAdminService) {
         this._adminService = adminService
     }
+   
+   
     
     
 
@@ -125,6 +127,8 @@ class AdminController implements IAdminController {
         }
     }
 
+
+   
 
 }
 

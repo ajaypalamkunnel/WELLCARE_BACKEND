@@ -7,6 +7,7 @@ interface IUserRepository extends IBaseRepository<IUser>{
     updateRefreshToken(userId:string,refreshToken:string):Promise<IUser|null>
     removeRefreshToken(refreshToken:string):Promise<void>
     findUserDataById(userId:string):Promise<IUser|null>
+    updateUserStatus(userId:string,status:number):Promise<IUser|null>
 
 }
 

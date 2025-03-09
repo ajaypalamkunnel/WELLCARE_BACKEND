@@ -9,6 +9,7 @@ import { error } from "console";
 import passport from "passport";
 import { IUser } from "../../../model/user/userModel";
 import { IUserType } from "../../../types/user";
+import { StatusCode } from "../../../constants/statusCode";
 
 class UserController implements IUserController {
 
@@ -281,6 +282,41 @@ class UserController implements IUserController {
             res.status(500).json({ error: "Failed to featch user Profile" })
         }
     }
+
+    async UpdateUserStatus(req: Request, res: Response): Promise<void> {
+        try {
+
+            const {userId,status} = req.body
+            console.log(">>>>",userId,">>>",status);
+
+
+            if(!userId ||(status !==1 && status !== -1)){
+                res.status(StatusCode.BAD_REQUEST).json({
+                    success:false,
+                    message: "Invalid request. Provide UserId and valid status (-1 for block, 1 for unblock)."
+
+                })
+                return
+            }
+
+            const user = await this._userService.updateUserStatus(userId,status)
+
+            res.status(StatusCode.OK).json({
+                success:true,
+                message:`User ${status === -1 ? "Blocked":"unblocked"} successfully`,
+                data:user
+            })
+            
+        } catch (error) {
+            console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message:error instanceof Error ? error.message : "An unexpected error occurred"
+            })
+
+        }
+    }
+
 
 
 

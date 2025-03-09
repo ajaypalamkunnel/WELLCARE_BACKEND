@@ -27,6 +27,16 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
         return await User.findById(userId).select("-password -refreshToken")
     }
 
+    async updateUserStatus(userId:string,status:number):Promise<IUser|null>{
+
+        if(![1,-1].includes(status)){
+            throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
+        }
+
+        return await User.findByIdAndUpdate(userId,{status},{new:true}).select("-password -refreshToken -otp -otpExpires")
+
+    }
+
     
 
     

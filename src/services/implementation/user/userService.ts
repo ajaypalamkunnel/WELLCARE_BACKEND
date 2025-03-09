@@ -286,6 +286,34 @@ class UserService implements IUserService {
         return await this._userRepository.findUserDataById(userId)
     }
 
+
+    async updateUserStatus(userId: string, status: number): Promise<IUser | null> {
+        try {
+ 
+         if(![1,-1].includes(status)){
+             throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
+ 
+         }
+ 
+         const existingUser = await this._userRepository.findById(userId)
+ 
+         if(!existingUser){
+             throw new Error("user not found")
+         }
+ 
+         const updatedUser = await this._userRepository.updateUserStatus(userId, status)
+ 
+         if(!updatedUser){
+             throw new Error("Failed to update user status")
+         }
+         return updatedUser
+        } catch (error) {
+         console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
+         throw error
+         
+        }
+     }
+
     
     
 

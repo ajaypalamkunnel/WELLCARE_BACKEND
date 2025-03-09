@@ -12,5 +12,6 @@ interface UserController{
     googleAuthCallback(req: Request, res: Response): Promise<void>;
     logout(req:Request,res:Response):Promise<void>
     getProfile(req:Request,res:Response):Promise<void>
+    UpdateUserStatus(req:Request,res:Response):Promise<void>
 }
 export default UserController

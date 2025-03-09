@@ -32,4 +32,5 @@ export interface IUserService{
     logoutUser(refreshToken:string):Promise<void>
 
     getUserProfile(userId:string):Promise<IUser | null>
+    updateUserStatus(userId:string,status:number):Promise<IUser|null>
 }
