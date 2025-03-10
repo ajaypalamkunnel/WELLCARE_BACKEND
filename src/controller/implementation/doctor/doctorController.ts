@@ -13,10 +13,10 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-    
 
 
 
+//------------------ Docotor basic registration at signup-----------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
         try {
@@ -31,7 +31,7 @@ class DoctorController implements IDoctorController {
             if (error instanceof Error) {
                 errorMessage = error.message
             }
-            res.status(400).json({ error: errorMessage })
+            res.status(StatusCode.BAD_REQUEST).json({ error: errorMessage })
         }
     }
 
@@ -41,12 +41,12 @@ class DoctorController implements IDoctorController {
             const { email } = req.body
 
             if (!email) {
-                return res.status(400).json({ success: true, error: "Email is required" })
+                return res.status(StatusCode.BAD_REQUEST).json({ success: true, error: "Email is required" })
             }
             await this._doctorService.resendOtp(email)
             return res.status(StatusCode.OK).json({ success: true, message: "New OTP sent to email" })
         } catch (error) {
-            return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
+            return res.status(StatusCode.BAD_REQUEST).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
     }
     async verifyOtp(req: Request, res: Response): Promise<void> {
@@ -54,13 +54,13 @@ class DoctorController implements IDoctorController {
             const { email, otp } = req.body
 
             if (!email || !otp) {
-                res.status(400).json({ error: "Email and OTP are required" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "Email and OTP are required" })
                 return
             }
             await this._doctorService.verifyOtp(email, otp)
             res.status(StatusCode.OK).json({ message: "OTP verified successfully, Your account is now activated." })
         } catch (error) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
         }
     }
 
@@ -73,7 +73,7 @@ class DoctorController implements IDoctorController {
             console.log("Iam from controller of doctor", password);
 
             if (!email || !password) {
-                res.status(400).json({ error: "Email and password are required" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "Email and password are required" })
                 return
             }
 
@@ -99,10 +99,10 @@ class DoctorController implements IDoctorController {
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
-                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName,isverified:doctor?.isVerified}
+                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isverified: doctor?.isVerified }
             })
         } catch (error) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "Login failed" })
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
         }
     }
 
@@ -114,7 +114,7 @@ class DoctorController implements IDoctorController {
             console.log("Hi i am from forgotPasswordDoctor controller", email);
 
             if (!email) {
-                res.status(400).json({ success: false, error: "Email is required" })
+                res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
                 return
             }
 
@@ -123,7 +123,7 @@ class DoctorController implements IDoctorController {
 
         } catch (error) {
             console.error("Error in forgotPassword controller:", error);
-            res.status(500).json({
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 error: error instanceof Error ? error.message : "An unexpected error occurred"
             });
@@ -137,13 +137,13 @@ class DoctorController implements IDoctorController {
             const { email, password } = req.body
 
             if (!email) {
-                res.status(400).json({ success: false, error: "Email is required" })
+                res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
             }
 
             await this._doctorService.updatePasswordDoctor(email, password)
             res.status(StatusCode.OK).json({ success: true, error: "Password Updated Successfully" })
         } catch (error) {
-            res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
+            res.status(StatusCode.BAD_REQUEST).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
     }
 
@@ -184,17 +184,15 @@ class DoctorController implements IDoctorController {
     }
 
 
+    
     async logoutDoctor(req: Request, res: Response): Promise<void> {
-
         try {
 
             const refreshToken = req.cookies.doctorRefreshToken
 
 
-
-
             if (!refreshToken) {
-                res.status(400).json({ error: "No refersh token provided" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "No refersh token provided" })
                 return
             }
 
@@ -215,13 +213,9 @@ class DoctorController implements IDoctorController {
             });
 
 
-
-
-
-
             res.status(StatusCode.OK).json({ success: true, message: "Logout successfull" })
         } catch (error) {
-            res.status(500).json({ error: "Logout failed" })
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Logout failed" })
         }
 
     }
@@ -231,7 +225,7 @@ class DoctorController implements IDoctorController {
 
         try {
             if (!req.user) {
-                res.status(401).json({ error: "Unauthorized" })
+                res.status(StatusCode.UNAUTHORIZED).json({ error: "Unauthorized" })
                 return
             }
 
@@ -245,7 +239,7 @@ class DoctorController implements IDoctorController {
 
             res.status(StatusCode.OK).json({ success: true, user })
         } catch (error) {
-            res.status(500).json({ error: "Failed to fetch user profile" });
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Failed to fetch user profile" });
         }
     }
 
@@ -254,7 +248,7 @@ class DoctorController implements IDoctorController {
     async registerDoctor(req: Request, res: Response): Promise<void> {
         try {
             const { fullName, email,
-                mobile, departmentId,gender,
+                mobile, departmentId, gender,
                 specialization, experience,
                 licenseNumber, availability,
                 clinicAddress, profileImage,
@@ -280,40 +274,40 @@ class DoctorController implements IDoctorController {
     }
 
 
-   async updateDoctorStatus(req: Request, res: Response): Promise<void> {
+    async updateDoctorStatus(req: Request, res: Response): Promise<void> {
 
-    console.log("updated conrtoller");
+        console.log("updated conrtoller");
         try {
-            const {doctorId,status} = req.body
+            const { doctorId, status } = req.body
 
-            console.log("==>",doctorId,"==>,",status);
-            
+            console.log("==>", doctorId, "==>,", status);
 
-            if(!doctorId || (status !== 1 && status !== -1)){
 
-                 res.status(StatusCode.BAD_REQUEST).json({
-                    success:false,
+            if (!doctorId || (status !== 1 && status !== -1)) {
+
+                res.status(StatusCode.BAD_REQUEST).json({
+                    success: false,
                     message: "Invalid request. Provide doctorId and valid status (-1 for block, 1 for unblock)."
 
                 })
                 return
             }
 
-            const doctor = await this._doctorService.updateDoctorStatus(doctorId,status)
+            const doctor = await this._doctorService.updateDoctorStatus(doctorId, status)
 
-             res.status(StatusCode.OK).json({
-                success:true,
-                message:`Doctor ${status === -1 ? "blocked" : "unblocked"} successfully.`,
+            res.status(StatusCode.OK).json({
+                success: true,
+                message: `Doctor ${status === -1 ? "blocked" : "unblocked"} successfully.`,
                 data: doctor
             })
         } catch (error) {
             console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
 
-             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message:error instanceof Error ? error.message : "An unexpected error occurred"
+                message: error instanceof Error ? error.message : "An unexpected error occurred"
             })
-            
+
         }
     }
 
@@ -321,35 +315,35 @@ class DoctorController implements IDoctorController {
     async verifyDoctor(req: Request, res: Response): Promise<void> {
         try {
 
-            const {doctorId,isVerified} = req.body
+            const { doctorId, isVerified } = req.body
 
-            if(!doctorId || typeof isVerified !== 'boolean'){
+            if (!doctorId || typeof isVerified !== 'boolean') {
 
-                 res.status(StatusCode.BAD_REQUEST).json({
-                    success:false,
+                res.status(StatusCode.BAD_REQUEST).json({
+                    success: false,
                     message: "Invalid request. Provide doctorId and isVerified as boolean.",
                 })
                 return
             }
 
-            const doctor = await this._doctorService.verifyDoctor(doctorId,isVerified)
+            const doctor = await this._doctorService.verifyDoctor(doctorId, isVerified)
 
-             res.status(StatusCode.OK).json({
-                success:true,
-                message:`Doctor application has been ${isVerified ? "accepted" : "rejected"} successfully.`,
-                data:doctor
+            res.status(StatusCode.OK).json({
+                success: true,
+                message: `Doctor application has been ${isVerified ? "accepted" : "rejected"} successfully.`,
+                data: doctor
             })
-            
+
         } catch (error) {
             console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
 
-             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: error instanceof Error ? error.message : "An unexpected error occurred",
             })
         }
     }
-    
+
 
 
 }

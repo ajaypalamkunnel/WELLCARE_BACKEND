@@ -22,7 +22,7 @@ class UserController implements IUserController {
     //---------------------------Basic registration -----------------------------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
-        
+
         try {
 
             const { user } = await this._userService.registerBasicDetails(req.body)
@@ -34,7 +34,7 @@ class UserController implements IUserController {
             if (error instanceof Error) {
                 errorMessage = error.message
             }
-            res.status(400).json({ error: errorMessage })
+            res.status(StatusCode.BAD_REQUEST).json({ error: errorMessage })
         }
     }
 
@@ -47,54 +47,55 @@ class UserController implements IUserController {
         try {
             const { email } = req.body
             if (!email) {
-                return res.status(400).json({ success: false, error: "Email is required" })
+                return res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
             }
             await this._userService.resendOtp(email)
-            return res.status(200).json({ success: true, message: "New OTP sent to email" })
+            return res.status(StatusCode.OK).json({ success: true, message: "New OTP sent to email" })
         } catch (error) {
-            return res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
+            return res.status(StatusCode.BAD_REQUEST).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
     }
 
     //--------------------------- Verify OTP -----------------------------------------------
-
+    
     async verifyOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body
             if (!email || !otp) {
-                res.status(400).json({ error: "Email and OTP are required" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "Email and OTP are required" })
                 return
             }
-
+            
             await this._userService.verifyOtp(email, otp)
-
-            res.status(200).json({ message: "OTP verified successfully. Your account is now activated." })
+            
+            res.status(StatusCode.OK).json({ message: "OTP verified successfully. Your account is now activated." })
         } catch (error) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
         }
     }
-
-
+    
+    //--------------------------- Login post request -----------------------------------------------
+    
     async postLogin(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body
 
             if (!email || !password) {
-                res.status(400).json({ error: "Email and password are required" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "Email and password are required" })
                 return
             }
 
             const { accessToken, refreshToken, user } = await this._userService.loginUser(email, password)
-           
+
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
-
+                
             })
-
+            
             res.cookie("auth_token", accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -104,24 +105,27 @@ class UserController implements IUserController {
 
 
 
-            res.status(200).json({
+            res.status(StatusCode.OK).json({
                 success: true,
                 message: "Login succesful",
                 accessToken,
                 user: { id: user?._id, email: user?.email, fullName: user?.fullName }
             })
         } catch (error) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "Login failed" })
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
         }
     }
 
+
+    //--------------------------- renew token -----------------------------------------------
+    
     async renewAuthTokens(req: Request, res: Response): Promise<void> {
         try {
             const oldRefreshToken = req.cookies.refreshToken;
-
-
+            
+            
             if (!oldRefreshToken) {
-                res.status(401).json({ error: "Refresh token not found" })
+                res.status(StatusCode.UNAUTHORIZED).json({ error: "Refresh token not found" })
                 return;
             }
 
@@ -136,47 +140,50 @@ class UserController implements IUserController {
             })
 
 
-            res.status(200).json({ accessToken })
+            res.status(StatusCode.OK).json({ accessToken })
         } catch (error) {
-            res.status(400).json({ error: error instanceof Error ? error.message : "Failed to refresh token" });
+            res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Failed to refresh token" });
         }
     }
 
-    async forgotPassword(req: Request, res: Response): Promise<void> {
-        try {
-            const { email } = req.body
+//---------------------------forgot Password -----------------------------------------------
 
+async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+        const { email } = req.body
+        
             if (!email) {
-                res.status(400).json({ success: false, error: "Email is required" })
+                res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
                 return
             }
             await this._userService.forgotPassword(email)
 
-            res.status(200).json({ success: true, message: "New OTP sent to email" })
+            res.status(StatusCode.OK).json({ success: true, message: "New OTP sent to email" })
 
         } catch (error) {
             console.error("Error in forgotPassword controller:", error);
-            res.status(500).json({
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 error: error instanceof Error ? error.message : "An unexpected error occurred"
             });
         }
     }
-
+    
+//---------------------------update Password -----------------------------------------------
 
     async updatePassword(req: Request, res: Response): Promise<void> {
         try {
 
             const { email, password } = req.body
             if (!email) {
-                res.status(400).json({ success: false, error: "Email is required" })
+                res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
             }
 
             await this._userService.updatePasswordUser(email, password)
-            res.status(200).json({ success: true, error: "Password Updated Successfully" })
+            res.status(StatusCode.OK).json({ success: true, error: "Password Updated Successfully" })
 
         } catch (error) {
-            res.status(400).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
+            res.status(StatusCode.BAD_REQUEST).json({ success: false, error: error instanceof Error ? error.message : "An unexpected error occurred" })
         }
 
     }
@@ -224,6 +231,7 @@ class UserController implements IUserController {
         prompt: 'select_account'
     });
 
+    //------------------------------- User logout  -----------------------------------
 
     async logout(req: Request, res: Response): Promise<void> {
 
@@ -231,7 +239,7 @@ class UserController implements IUserController {
             const refreshToken = req.cookies.refreshToken
 
             if (!refreshToken) {
-                res.status(400).json({ error: "No refresh token provided" })
+                res.status(StatusCode.BAD_REQUEST).json({ error: "No refresh token provided" })
                 return
             }
 
@@ -257,18 +265,20 @@ class UserController implements IUserController {
             })
 
 
-            res.status(200).json({ success: true, message: "Logout successful" });
+            res.status(StatusCode.OK).json({ success: true, message: "Logout successful" });
         } catch (error) {
-            res.status(500).json({ error: "Logout failed" });
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Logout failed" });
         }
 
-
+        
     }
+    
+    //------------------------------- Get user profile -----------------------------------
 
     async getProfile(req: Request, res: Response): Promise<void> {
         try {
             if (!req.user) {
-                res.status(401).json({ error: "Unauthorized" });
+                res.status(StatusCode.UNAUTHORIZED).json({ error: "Unauthorized" });
                 return
             }
 
@@ -277,41 +287,43 @@ class UserController implements IUserController {
                 res.status(404).json({ error: "User not found" })
             }
 
-            res.status(200).json({ success: true, user })
+            res.status(StatusCode.OK).json({ success: true, user })
         } catch (error) {
-            res.status(500).json({ error: "Failed to featch user Profile" })
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Failed to featch user Profile" })
         }
     }
+
+//------------------------------- user blocking and unblocking-----------------------------------
 
     async UpdateUserStatus(req: Request, res: Response): Promise<void> {
         try {
 
-            const {userId,status} = req.body
-            console.log(">>>>",userId,">>>",status);
+            const { userId, status } = req.body
+            console.log(">>>>", userId, ">>>", status);
 
 
-            if(!userId ||(status !==1 && status !== -1)){
+            if (!userId || (status !== 1 && status !== -1)) {
                 res.status(StatusCode.BAD_REQUEST).json({
-                    success:false,
+                    success: false,
                     message: "Invalid request. Provide UserId and valid status (-1 for block, 1 for unblock)."
 
                 })
                 return
             }
 
-            const user = await this._userService.updateUserStatus(userId,status)
+            const user = await this._userService.updateUserStatus(userId, status)
 
             res.status(StatusCode.OK).json({
-                success:true,
-                message:`User ${status === -1 ? "Blocked":"unblocked"} successfully`,
-                data:user
+                success: true,
+                message: `User ${status === -1 ? "Blocked" : "unblocked"} successfully`,
+                data: user
             })
-            
+
         } catch (error) {
             console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message:error instanceof Error ? error.message : "An unexpected error occurred"
+                message: error instanceof Error ? error.message : "An unexpected error occurred"
             })
 
         }
@@ -325,40 +337,3 @@ class UserController implements IUserController {
 export default UserController
 
 
-
-// const {fullName,email,password} = req.body;
-
-// if(!fullName||!email||!password){
-//     return res.status(400).json({message:"All fields are required"})
-// }
-
-// const existingUser = await this.userRepository.findUserByEmail(email)
-
-// if(existingUser){
-//     return res.status(400).json({message:"User already exists"})
-// }
-
-// const hashedPassword = await PasswordUtils.hashPassword(password)
-
-// const otp = Math.floor(100000 +Math.random()*900000).toString()
-
-// const otpExpires = new Date();
-// otpExpires.setMinutes(otpExpires.getMinutes() + 5);
-
-
-// //create user
-
-// const newUser = await this.userRepository.createUser({
-//     fullName,
-//     email,
-//     password:hashedPassword,
-//     otp,
-//     otpExpires,
-//     status:0
-// })
-
-
-// // Send OTP Email
-// await sendOTPEmail(email,otp)
-
-// return res.status(201).json({message:"OTP sent to email", email })

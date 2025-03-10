@@ -4,6 +4,7 @@ import UserService from "../../services/implementation/user/userService"
 import UserRepository from "../../repositories/implementation/user/userRepository"
 import passport from "passport";
 import authMiddleWare from "../../middleware/authMiddleware";
+import checkUserBlocked from "../../middleware/checkUserBlocked";
 const router = Router();
 
 
@@ -30,7 +31,7 @@ router.get(
     (req, res) => userController.googleAuthCallback(req, res)
 );
 
-router.get("/profile",authMiddleWare,(req,res)=>userController.getProfile(req,res))
+router.get("/profile",authMiddleWare,checkUserBlocked,(req,res)=>userController.getProfile(req,res))
 
 
 export default router

@@ -4,6 +4,7 @@ import DoctorService from "../../services/implementation/doctor/doctorService";
 import DoctorController from "../../controller/implementation/doctor/doctorController";
 import passport from "passport";
 import authMiddleWare from "../../middleware/authMiddleware";
+import checkDoctorBlocked from "../../middleware/checkDoctorBlocked";
 
 
 const router = Router();
@@ -27,9 +28,9 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
     (req, res) => doctorController.googleAuthCallback(req, res))
 
 
-router.get("/profile", authMiddleWare, (req, res) => doctorController.getProfile(req, res))
-router.post("/doctorregistration",authMiddleWare, (req, res) => doctorController.registerDoctor(req, res))
-router.put("/updatestatus",authMiddleWare, (req,res)=> doctorController.updateDoctorStatus(req,res))
+router.get("/profile", authMiddleWare,checkDoctorBlocked, (req, res) => doctorController.getProfile(req, res))
+router.post("/doctorregistration",authMiddleWare,checkDoctorBlocked, (req, res) => doctorController.registerDoctor(req, res))
+router.put("/updatestatus",authMiddleWare,checkDoctorBlocked, (req,res)=> doctorController.updateDoctorStatus(req,res))
 router.put("/verify-doctor",authMiddleWare,(req,res)=>doctorController.verifyDoctor(req,res))
 
 export default router
