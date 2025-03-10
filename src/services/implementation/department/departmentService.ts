@@ -1,5 +1,6 @@
 import { IDepartment } from "../../../model/department/departmentModel";
 import IDepartmentRepository from "../../../repositories/interfaces/department/IDepartment";
+import { DepartmentTpe } from "../../../types/departmentTypes";
 import { IDepartmentService } from "../../interfaces/department/iDepartmentService";
 
 
@@ -10,7 +11,7 @@ class DepartmentService implements IDepartmentService{
     constructor(departmentRepository:IDepartmentRepository){
         this._departmentRepository = departmentRepository
     }
-
+    
 
     async createDeparment(departmentDetails: IDepartment): Promise<{ department: IDepartment; }> {
         try{
@@ -63,6 +64,36 @@ class DepartmentService implements IDepartmentService{
             throw new Error("Failed to fetch departments")
         }
      }
+
+
+    async updateDeptStatus(deptId: string, status: boolean): Promise<DepartmentTpe> {
+        try {
+
+            if(typeof status !== 'boolean'){
+
+                throw new Error("Invalid status only accept boolean value")
+            }
+
+            const existDepartment = await this._departmentRepository.findById(deptId)
+
+        if(!existDepartment){
+            throw new Error("Department not found")
+        }
+
+        const updatedDepartment = await this._departmentRepository.update(deptId,{status})
+
+        if(!updatedDepartment){
+            throw new Error("Failed to update department status")
+        }
+
+        return updatedDepartment
+            
+        } catch (error) {
+            console.error(`Error in update depatment status :${error instanceof Error ? error.message : error}`);
+            throw error
+        }
+    }
+
     
 }
 

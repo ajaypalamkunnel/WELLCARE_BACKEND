@@ -32,4 +32,5 @@ router.post("/adddepartment",authMiddleWare,(req,res)=>departmentController.crea
 router.get("/getalldepartments",authMiddleWare,(req,res)=>departmentController.getAllDepatments(req,res))
 router.get("/users",(req,res)=>adminController.getAllUsers(req,res))
 router.put("/updateStatus",(req,res)=>userController.UpdateUserStatus(req,res))
+router.put("/update-department-status",(req,res)=>departmentController.updateDepartmentStatus(req,res))
 export default router
