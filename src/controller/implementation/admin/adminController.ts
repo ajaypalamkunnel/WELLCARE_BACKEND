@@ -12,7 +12,7 @@ class AdminController implements IAdminController {
     constructor(adminService: IAdminService) {
         this._adminService = adminService
     }
-   
+    
    
     
     
@@ -126,6 +126,43 @@ class AdminController implements IAdminController {
             
         }
     }
+
+    async updateDoctorStatus(req: Request, res: Response): Promise<void> {
+        console.log("updated conrtoller");
+        try {
+            const { doctorId, status } = req.body
+
+            console.log("==>", doctorId, "==>,", status);
+
+
+            if (!doctorId || (status !== 1 && status !== -1)) {
+
+                res.status(StatusCode.BAD_REQUEST).json({
+                    success: false,
+                    message: "Invalid request. Provide doctorId and valid status (-1 for block, 1 for unblock)."
+
+                })
+                return
+            }
+
+            const doctor = await this._adminService.updateDoctorStatus(doctorId, status)
+
+            res.status(StatusCode.OK).json({
+                success: true,
+                message: `Doctor ${status === -1 ? "blocked" : "unblocked"} successfully.`,
+                data: doctor
+            })
+        } catch (error) {
+            console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
+
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: error instanceof Error ? error.message : "An unexpected error occurred"
+            })
+
+        }
+    }
+   
 
 
    

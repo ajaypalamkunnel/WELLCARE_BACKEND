@@ -6,15 +6,22 @@ import PasswordUtils from "../../../utils/passwordUtils";
 import { IAdminService } from "../../interfaces/admin/IAdminServices";
 import { IDoctor } from "../../../model/doctor/doctorModel";
 import { IUser } from "../../../model/user/userModel";
+import DoctorRepository from "../../../repositories/implementation/doctor/doctorRepository";
+import UserRepository from "../../../repositories/implementation/user/userRepository";
 
 
 export class AdminService implements IAdminService{
 
     private _adminRepository:AdminRepository
+    private _doctorRepository:DoctorRepository
+    private _userRepository:UserRepository
 
-    constructor(_adminRepository:AdminRepository){
+    constructor(_adminRepository:AdminRepository,_doctorRepository:DoctorRepository, _userRepository:UserRepository){
         this._adminRepository = _adminRepository
+       this._doctorRepository = _doctorRepository
+       this._userRepository = _userRepository
     }
+    
     
     
     
@@ -119,6 +126,32 @@ export class AdminService implements IAdminService{
         } catch (error) {
             console.error(`Error in getAllUsers: ${error instanceof Error ? error.message : error}`);
             throw new Error("Failed to fetch users");
+        }
+    }
+
+    async updateDoctorStatus(doctorId: string, status: number): Promise<IDoctor> {
+        try {
+            if(![1,-1].includes(status)){
+                throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
+            }
+            console.log("====>",doctorId);
+            
+            const existingDoctor = await this._doctorRepository.findById(doctorId)
+
+            if(!existingDoctor){
+                throw new Error("Doctor not found");
+            }
+
+            const updatedDoctor = await this._adminRepository.udateDoctorStatus(doctorId,status)
+
+            if(!updatedDoctor){
+                throw new Error("Failed to update doctor status")
+            }
+            return updatedDoctor
+        } catch (error) {
+            console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
+            throw error
+            
         }
     }
 

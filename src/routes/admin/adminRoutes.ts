@@ -1,4 +1,4 @@
-import { Router} from "express";
+import { Router } from "express";
 import AdminRepository from "../../repositories/implementation/admin/adminRepository";
 import { AdminService } from "../../services/implementation/admin/AdminService";
 import AdminController from "../../controller/implementation/admin/adminController";
@@ -9,28 +9,33 @@ import DepartmentController from "../../controller/implementation/department/dep
 import UserRepository from "../../repositories/implementation/user/userRepository";
 import UserService from "../../services/implementation/user/userService";
 import UserController from "../../controller/implementation/user/userController";
+import DoctorRepository from "../../repositories/implementation/doctor/doctorRepository";
 
 
 const router = Router();
 
 
-const adminRepository = new AdminRepository()
-const adminService = new AdminService(adminRepository)
-const adminController = new AdminController(adminService)
+const doctorRepository = new DoctorRepository()
+
 const departmentRepository = new DepartmentRepository()
 const departmentService = new DepartmentService(departmentRepository)
 const departmentController = new DepartmentController(departmentService)
+
 const userRepository = new UserRepository()
 const userService = new UserService(userRepository)
 const userController = new UserController(userService)
 
+const adminRepository = new AdminRepository()
+const adminService = new AdminService(adminRepository, doctorRepository, userRepository)
+const adminController = new AdminController(adminService)
 
-router.post("/login",(req,res)=>adminController.login(req,res))
-router.post("/logout",(req,res)=>adminController.logout(req,res))
-router.get("/doctors",authMiddleWare,(req,res)=>adminController.fetchAllDoctors(req,res))
-router.post("/adddepartment",authMiddleWare,(req,res)=>departmentController.createDepartment(req,res))
-router.get("/getalldepartments",authMiddleWare,(req,res)=>departmentController.getAllDepatments(req,res))
-router.get("/users",authMiddleWare,(req,res)=>adminController.getAllUsers(req,res))
-router.put("/updateStatus",authMiddleWare,(req,res)=>userController.UpdateUserStatus(req,res))
-router.put("/update-department-status",authMiddleWare,(req,res)=>departmentController.updateDepartmentStatus(req,res))
+router.post("/login", (req, res) => adminController.login(req, res))
+router.post("/logout", (req, res) => adminController.logout(req, res))
+router.get("/doctors", authMiddleWare, (req, res) => adminController.fetchAllDoctors(req, res))
+router.post("/adddepartment", authMiddleWare, (req, res) => departmentController.createDepartment(req, res))
+router.get("/getalldepartments", authMiddleWare, (req, res) => departmentController.getAllDepatments(req, res))
+router.get("/users", authMiddleWare, (req, res) => adminController.getAllUsers(req, res))
+router.put("/updateStatus", authMiddleWare, (req, res) => userController.UpdateUserStatus(req, res))
+router.put("/update-department-status", authMiddleWare, (req, res) => departmentController.updateDepartmentStatus(req, res))
+router.put("/update-doctor-status", authMiddleWare, (req, res) => adminController.updateDoctorStatus(req, res))
 export default router

@@ -7,7 +7,7 @@ export interface IAdminService{
    loginAdmin(email:string,password:string):Promise<{admin:IAdmin|null;accessTokenAdmin:string;refreshTokenAdmin:string}>
    fetchAllDoctors():Promise<IDoctor[]|null>
    getAllUsers(page: number, limit: number):Promise<{users:IUser[],totalUsers:number|null}>
-  
+   updateDoctorStatus(doctorId:string,status:number):Promise<IDoctor>
 
 }
 

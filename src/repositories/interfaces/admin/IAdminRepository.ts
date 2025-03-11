@@ -10,6 +10,6 @@ export default interface IAdminRepository extends IBaseRepository<IAdmin>{
     findAllDoctors():Promise<IDoctor[]|null>
     getAllUsers(page:number,limit:number):Promise<{users:IUser[],totalUsers?:number | null}>
     
-
+    udateDoctorStatus(doctorId:string,status:number):Promise<IDoctor|null>
     
 }

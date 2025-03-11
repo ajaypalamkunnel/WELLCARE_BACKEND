@@ -13,6 +13,7 @@ class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository
     
     
     
+    
     async findAdminByEmail(email: string): Promise<IAdmin | null> {
         return await Admin.findOne({email})
     }
@@ -42,6 +43,14 @@ class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository
                 }
     }
 
+
+    async udateDoctorStatus(doctorId: string, status: number): Promise<IDoctor | null> {
+        if(![1,-1].includes(status)){
+            throw new Error("Invalid status value. Use -1 for block, 1 for unblock.");
+        }
+
+        return await Doctor.findByIdAndUpdate(doctorId, {status},{new:true}).select("-password -refreshToken")
+    }
    
     
 
