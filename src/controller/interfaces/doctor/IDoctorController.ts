@@ -14,6 +14,7 @@ interface IDoctorController{
     registerDoctor(req:Request,res:Response):Promise<void>
     updateDoctorStatus(req:Request,res:Response):Promise<void>
     verifyDoctor(req:Request,res:Response):Promise<void>
+    updateProfile(req: Request, res: Response): Promise<void>;
 }
 
 

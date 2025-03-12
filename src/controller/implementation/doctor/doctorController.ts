@@ -16,7 +16,8 @@ class DoctorController implements IDoctorController {
 
 
 
-//------------------ Docotor basic registration at signup-----------------------------
+
+    //------------------ Docotor basic registration at signup-----------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
         try {
@@ -184,7 +185,7 @@ class DoctorController implements IDoctorController {
     }
 
 
-    
+
     async logoutDoctor(req: Request, res: Response): Promise<void> {
         try {
 
@@ -341,6 +342,39 @@ class DoctorController implements IDoctorController {
                 success: false,
                 message: error instanceof Error ? error.message : "An unexpected error occurred",
             })
+        }
+    }
+
+
+
+    async updateProfile(req: Request, res: Response): Promise<void> {
+        try {
+
+            const { doctorId, updateData } = req.body
+
+
+
+            if (!doctorId) {
+                res.status(StatusCode.UNAUTHORIZED).json({ error: "Unauthorized access." });
+                return
+            }
+
+            const updatedDoctor = await this._doctorService.updateDoctorProfile(doctorId, updateData)
+
+            res.status(StatusCode.OK).json({
+                success: true,
+                message: "Profile updated successfully.",
+                data: updatedDoctor,
+            })
+
+        } catch (error) {
+
+            console.error("Error updating doctor profile:", error);
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+                error: "Failed to update profile.",
+                details: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+
         }
     }
 

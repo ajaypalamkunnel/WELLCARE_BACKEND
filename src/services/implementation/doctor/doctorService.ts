@@ -15,6 +15,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
+    
    
     
     
@@ -357,6 +358,35 @@ class DoctorService implements IDoctorService {
             throw error
             
             
+        }
+    }
+
+
+    async updateDoctorProfile(doctorId: string, updateData: Partial<IDoctor>): Promise<IDoctor | null> {
+        try {
+
+            const allowedUpdates = ["fullName", "mobile", "experience", "specialization", "profileImage"];
+
+            const filteredUpdates: Partial<IDoctor> = {}
+
+            for(const key of Object.keys(updateData)){
+                if(allowedUpdates.includes(key)){
+                    filteredUpdates[key as keyof IDoctor] = updateData[key as keyof IDoctor]
+                }
+            }
+
+            if (Object.keys(filteredUpdates).length === 0) {
+                throw new Error("No valid fields provided for update.");
+              }
+
+              const updatedDoctor = await this._doctorRepository.update(
+                doctorId,
+                filteredUpdates)
+
+            return updatedDoctor    
+        } catch (error) {
+            console.error("Error in updateDoctorProfile:", error);
+            throw new Error("Failed to update doctor profile.");
         }
     }
     

@@ -9,6 +9,6 @@ export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     findUserDataById(userId: string): Promise<IDoctor | null>
 
     udateDoctorStatus(doctorId:string,status:number):Promise<IDoctor|null>
-
     updateDoctorVerification(doctorId:string,isVerified:boolean,status?:number):Promise<IDoctor|null>
+    
 }

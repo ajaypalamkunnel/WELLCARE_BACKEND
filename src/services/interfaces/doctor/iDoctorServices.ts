@@ -30,6 +30,8 @@ export interface IDoctorService{
     updateDoctorStatus(doctorId:string,status:number):Promise<IDoctor>
 
     verifyDoctor(doctor_id:string,isVerified:boolean):Promise<IDoctor>
+
+    updateDoctorProfile(doctorId:string,updateData:Partial<IDoctor>):Promise<IDoctor|null>
 // 
     
 }
