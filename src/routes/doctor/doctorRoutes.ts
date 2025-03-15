@@ -33,5 +33,7 @@ router.post("/doctorregistration",authMiddleWare,checkDoctorBlocked, (req, res) 
 router.put("/updatestatus",authMiddleWare,(req,res)=> doctorController.updateDoctorStatus(req,res))
 router.put("/verify-doctor",authMiddleWare,(req,res)=>doctorController.verifyDoctor(req,res))
 router.put("/doctor-profile-update",authMiddleWare,checkDoctorBlocked,(req,res)=>doctorController.updateProfile(req,res))
-
+router.put("/change-password", authMiddleWare, async (req, res) => {
+    await doctorController.changePassword(req, res);
+});
 export default router

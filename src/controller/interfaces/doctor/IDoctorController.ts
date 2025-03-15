@@ -15,6 +15,7 @@ interface IDoctorController{
     updateDoctorStatus(req:Request,res:Response):Promise<void>
     verifyDoctor(req:Request,res:Response):Promise<void>
     updateProfile(req: Request, res: Response): Promise<void>;
+    changePassword(req:Request,res:Response):Promise<Response>
 }
 
 

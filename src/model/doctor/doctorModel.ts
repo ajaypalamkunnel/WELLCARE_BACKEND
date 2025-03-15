@@ -22,7 +22,7 @@ export interface IEducation {
 export interface ICertification {
     name: string;
     issuedBy: string;
-    year: number;
+    yearOfIssue: number;
 }
 
 export interface ILocation {
@@ -108,7 +108,7 @@ const DoctorSchema = new Schema<IDoctor>(
             {
                 name: { type: String, },
                 issuedBy: { type: String, },
-                year: { type: Number,}
+                yearOfIssue: { type: Number,}
             }
         ],
         currentSubscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },

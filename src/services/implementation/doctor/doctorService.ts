@@ -3,9 +3,10 @@ import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IDoctorService } from "../../interfaces/doctor/iDoctorServices";
 import { generteOTP } from "../../../utils/otpGenerator"
-import { sendOTPEmail } from "../../../utils/emailUtils";
+import { sendApplicationApprovalEmail, sendApplicationRejectionEmail, sendOTPEmail } from "../../../utils/emailUtils";
 import JwtUtils from "../../../utils/jwtUtils";
 import UserRepository from "../../../repositories/implementation/user/userRepository";
+import { CustomError } from "../../../utils/CustomError";
 
 
 class DoctorService implements IDoctorService {
@@ -15,17 +16,19 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
-    
-   
-    
-    
+
+
+
+
+
+
 
     async registerBasicDetails(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor; }> {
 
         const { fullName, email, password } = doctorDetails;
 
         if (!fullName || !email || !password) {
-            throw new Error("All fields are required")  
+            throw new Error("All fields are required")
         }
 
         const existingUser = await this._doctorRepository.findDoctorByEmail(email!)
@@ -101,7 +104,7 @@ class DoctorService implements IDoctorService {
 
     async loginDoctor(email: string, password: string): Promise<{ doctor: IDoctor | null; doctorAccessToken: string; doctorRefreshToken: string; }> {
         console.log("hi I am from login doctor");
-        
+
         const doctor = await this._doctorRepository.findDoctorByEmail(email)
         console.log("hii ", doctor);
 
@@ -211,17 +214,17 @@ class DoctorService implements IDoctorService {
         let doctor = await this._doctorRepository.findDoctorByEmail(email)
 
 
-        if(!doctor){
+        if (!doctor) {
             console.log("hi iMa doctor");
-            
+
             doctor = await this._doctorRepository.create({
-                fullName:name,
+                fullName: name,
                 email,
-                profileImage:avatar,
-                password:email,
-                isVerified:false,
-                status:1,
-                refreshToken:""
+                profileImage: avatar,
+                password: email,
+                isVerified: false,
+                status: 1,
+                refreshToken: ""
             });
             return doctor
         }
@@ -231,7 +234,7 @@ class DoctorService implements IDoctorService {
         const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        return {accessToken,refreshToken}
+        return { accessToken, refreshToken }
     }
 
 
@@ -247,8 +250,8 @@ class DoctorService implements IDoctorService {
 
 
     async getDoctorProfile(userId: string): Promise<IDoctor | null> {
-       
-        
+
+
         return await this._doctorRepository.findUserDataById(userId)
     }
 
@@ -256,21 +259,21 @@ class DoctorService implements IDoctorService {
 
         try {
             console.log("<=== registerDoctor service function ==>");
-            
 
-            const {fullName, email, mobile, departmentId, specialization, experience,gender, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications} =doctorDetails;
-            
+
+            const { fullName, email, mobile, departmentId, specialization, experience, gender, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications } = doctorDetails;
+
             // if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !profileImage || !licenseDocument || !IDProofDocument) {
             //     throw new Error("All required fields must be provided");
             // }
 
             const existingDoctor = await this._doctorRepository.findDoctorByEmail(email!);
 
-            if(!existingDoctor){
+            if (!existingDoctor) {
                 throw new Error("Doctor not found");
             }
             const doctor_id = existingDoctor._id.toString();
-            const updatedDoctor = await this._doctorRepository.update(doctor_id,{
+            const updatedDoctor = await this._doctorRepository.update(doctor_id, {
                 mobile,
                 departmentId,
                 specialization,
@@ -284,17 +287,17 @@ class DoctorService implements IDoctorService {
                 IDProofDocument,
                 education,
                 certifications,
-                isVerified:false,
-                status:2
+                isVerified: false,
+                status: 2
             })
 
-           
+
             return { doctor: updatedDoctor! };
         } catch (error) {
             console.error("Error in registerDoctorService:", error);
             throw new Error("Failed to register doctor. Please try again.");
         }
-       
+
 
 
 
@@ -304,60 +307,63 @@ class DoctorService implements IDoctorService {
     async updateDoctorStatus(doctorId: string, status: number): Promise<IDoctor> {
 
         try {
-            if(![1,-1].includes(status)){
+            if (![1, -1].includes(status)) {
                 throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
             }
 
             const existingDoctor = await this._doctorRepository.findById(doctorId)
 
-            if(!existingDoctor){
+            if (!existingDoctor) {
                 throw new Error("Doctor not found");
             }
 
-            const updatedDoctor = await this._doctorRepository.udateDoctorStatus(doctorId,status)
+            const updatedDoctor = await this._doctorRepository.udateDoctorStatus(doctorId, status)
 
-            if(!updatedDoctor){
+            if (!updatedDoctor) {
                 throw new Error("Failed to update doctor status")
             }
             return updatedDoctor
         } catch (error) {
             console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
             throw error
-            
+
         }
-        
+
     }
 
 
 
-    async verifyDoctor(doctorId: string, isVerified: boolean): Promise< IDoctor> {
+    async verifyDoctor(doctorId: string, isVerified: boolean, reason: string): Promise<IDoctor> {
         try {
 
             const existingDoctor = await this._doctorRepository.findById(doctorId)
 
-            if(!existingDoctor){
+            if (!existingDoctor) {
                 throw new Error("Doctor not found");
             }
             let updatedDoctor
-            if(isVerified){
-                 updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId,isVerified,1)
-            }else{
-                
-                updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId,isVerified,-2)
+            if (isVerified) {
+                updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId, isVerified, 1)
+                sendApplicationApprovalEmail(updatedDoctor?.email!)
+
+            } else {
+
+                updatedDoctor = await this._doctorRepository.updateDoctorVerification(doctorId, isVerified, -2)
+                sendApplicationRejectionEmail(updatedDoctor?.email!, reason)
             }
 
-            if(!updatedDoctor){
+            if (!updatedDoctor) {
                 throw new Error("Failed to update doctor verification")
             }
-            
+
             return updatedDoctor
 
         } catch (error) {
 
             console.error(`Error in verifyDoctor: ${error instanceof Error ? error.message : error}`);
             throw error
-            
-            
+
+
         }
     }
 
@@ -369,31 +375,82 @@ class DoctorService implements IDoctorService {
 
             const filteredUpdates: Partial<IDoctor> = {}
 
-            for(const key of Object.keys(updateData)){
-                if(allowedUpdates.includes(key)){
+            for (const key of Object.keys(updateData)) {
+                if (allowedUpdates.includes(key)) {
                     filteredUpdates[key as keyof IDoctor] = updateData[key as keyof IDoctor]
                 }
             }
 
             if (Object.keys(filteredUpdates).length === 0) {
                 throw new Error("No valid fields provided for update.");
-              }
+            }
 
-              const updatedDoctor = await this._doctorRepository.update(
+            const updatedDoctor = await this._doctorRepository.update(
                 doctorId,
                 filteredUpdates)
 
-            return updatedDoctor    
+            return updatedDoctor
         } catch (error) {
             console.error("Error in updateDoctorProfile:", error);
             throw new Error("Failed to update doctor profile.");
         }
     }
-    
-    
 
 
-    
+
+    // async changePassword(doctorId: string, currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    //         }
+
+    async changePassword(doctorId: string, currentPassword: string, newPassword: string): Promise<{ success: true; message: string; }> {
+        try {
+
+            const user = await this._doctorRepository.findById(doctorId)
+
+            if (!user) {
+                throw new CustomError("User not found", 404);
+            }
+
+            const isMatch = await PasswordUtils.comparePassword(currentPassword, user.password)
+            console.log(">>>",isMatch);
+            
+            if (!isMatch) {
+                throw new CustomError("Incorrect current password", 400);
+            }
+
+            const isSamePassword = await PasswordUtils.comparePassword(newPassword, user.password);
+            if (isSamePassword) {
+                throw new CustomError("New password must be different from the old password", 400);
+            }
+
+
+            const hashedPassword = await PasswordUtils.hashPassword(newPassword);
+
+            const updated = await this._doctorRepository.updatePassword(doctorId, hashedPassword)
+
+            if (!updated) {
+                throw new CustomError("Failed to update password", 500);
+
+            }
+
+            return { success: true, message: "Password updated successfully" };
+
+
+        } catch (error) {
+
+            if (error instanceof CustomError) {
+
+                throw error
+            }
+
+            throw new CustomError("Internal Server Error", 500);
+        }
+
+    }
+
+
+
+
+
 
 }
 

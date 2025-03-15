@@ -4,6 +4,8 @@ import { IDoctorService } from "../../../services/interfaces/doctor/iDoctorServi
 import { error } from "console";
 import { StatusCode } from "../../../constants/statusCode";
 import { handleErrorResponse } from "../../../utils/errorHandler";
+import { CustomError } from "../../../utils/CustomError";
+import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 
 
 class DoctorController implements IDoctorController {
@@ -13,6 +15,7 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
+    
 
 
 
@@ -316,7 +319,7 @@ class DoctorController implements IDoctorController {
     async verifyDoctor(req: Request, res: Response): Promise<void> {
         try {
 
-            const { doctorId, isVerified } = req.body
+            const { doctorId, isVerified,reason } = req.body
 
             if (!doctorId || typeof isVerified !== 'boolean') {
 
@@ -327,7 +330,7 @@ class DoctorController implements IDoctorController {
                 return
             }
 
-            const doctor = await this._doctorService.verifyDoctor(doctorId, isVerified)
+            const doctor = await this._doctorService.verifyDoctor(doctorId, isVerified,reason)
 
             res.status(StatusCode.OK).json({
                 success: true,
@@ -375,6 +378,30 @@ class DoctorController implements IDoctorController {
                 details: error instanceof Error ? error.message : "Unknown error occurred",
             });
 
+        }
+    }
+
+
+    async changePassword(req: Request, res: Response): Promise<Response> {
+        try {
+            const { doctorId, oldPassword, newPassword } = req.body;
+            console.log("------->",doctorId, oldPassword, newPassword);
+            
+
+            if(!doctorId||!oldPassword||!newPassword){
+                throw new CustomError("All fields are required", 400)
+            }
+
+            const result = await this._doctorService.changePassword(doctorId,oldPassword,newPassword)
+
+            return res.status(200).json(generateSuccessResponse(result.message))
+        } catch (error:unknown) {
+            const errMessage = (error as Error).message || "Something went wrong";
+    
+            console.error(`Password change error: ${errMessage}`);
+            
+            return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(errMessage));
+        
         }
     }
 

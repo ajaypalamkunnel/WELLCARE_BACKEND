@@ -57,6 +57,13 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
         ).select("-password -refreshToken")
     }
 
+
+    async updatePassword(userId: string, hashedPassword: string): Promise<boolean> {
+        const user = await Doctor.findByIdAndUpdate(userId,{password:hashedPassword},{new:true})
+        return !!user
+    }
+    
+
    
     
 }

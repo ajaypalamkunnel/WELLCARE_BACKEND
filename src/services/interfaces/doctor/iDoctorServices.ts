@@ -29,9 +29,11 @@ export interface IDoctorService{
 
     updateDoctorStatus(doctorId:string,status:number):Promise<IDoctor>
 
-    verifyDoctor(doctor_id:string,isVerified:boolean):Promise<IDoctor>
+    verifyDoctor(doctor_id:string,isVerified:boolean,reason?:string):Promise<IDoctor>
 
     updateDoctorProfile(doctorId:string,updateData:Partial<IDoctor>):Promise<IDoctor|null>
+
+    changePassword(doctorId:string,currentPassword:string,newPassword:string):Promise<{success:true;message:string}>
 // 
     
 }
