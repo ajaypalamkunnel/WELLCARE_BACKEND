@@ -8,6 +8,8 @@ export interface IAdminService{
    fetchAllDoctors():Promise<IDoctor[]|null>
    getAllUsers(page: number, limit: number):Promise<{users:IUser[],totalUsers:number|null}>
    updateDoctorStatus(doctorId:string,status:number):Promise<IDoctor>
+   
+   
 
 }
 

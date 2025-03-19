@@ -259,7 +259,7 @@ class DoctorController implements IDoctorController {
                 licenseDocument, IDProofDocument,
                 education, certifications } = req.body;
 
-            console.log(req.body);
+            console.log("====>",req.body);
 
 
             if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !availability || !profileImage || !licenseDocument || !IDProofDocument || !education || !certifications) {
