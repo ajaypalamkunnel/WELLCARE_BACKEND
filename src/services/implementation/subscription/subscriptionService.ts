@@ -1,6 +1,8 @@
+import Razorpay from "razorpay";
 import { StatusCode } from "../../../constants/statusCode";
-import { ISubscription } from "../../../model/subscription/subscriptionModel";
+import Subscription, { ISubscription } from "../../../model/subscription/subscriptionModel";
 import ISubscriptionRepository from "../../../repositories/interfaces/subscription/ISubscription";
+import { RazorpayOrderResponse } from "../../../types/razorpayTypes";
 import { CustomError } from "../../../utils/CustomError";
 import { ISubscriptionService } from "../../interfaces/Subscription/ISubscription";
 
@@ -12,6 +14,7 @@ class SubscriptionService implements ISubscriptionService {
     constructor(subscriptionRepository: ISubscriptionRepository) {
         this._subscriptionRepository = subscriptionRepository
     }
+   
 
 
 
@@ -171,6 +174,29 @@ class SubscriptionService implements ISubscriptionService {
 
 
     }
+
+
+    async getAllSubscriptionPlans(): Promise<ISubscription[]> {
+        try {
+
+            const plans = await this._subscriptionRepository.getAllActivePlans()
+
+            if (!plans || plans.length === 0) {
+                throw new CustomError("No active subscription plans available", 404);
+            }
+
+            return plans;
+        } catch (error) {
+
+            console.error("Error fetching all subscription plans:", error);
+            throw new CustomError("Failed to fetch subscription plans", 500);
+
+
+        }
+    }
+
+
+    
 
 
 

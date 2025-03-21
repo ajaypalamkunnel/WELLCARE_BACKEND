@@ -57,6 +57,8 @@ export interface IDoctor extends Document {
     education: IEducation[];
     certifications: ICertification[];
     currentSubscriptionId?: ObjectId;
+    isSubscribed: boolean;
+    subscriptionExpiryDate?: Date;
     availability: string[]
     clinicAddress?: IClinicAddress;
     licenseNumber: string;
@@ -111,7 +113,9 @@ const DoctorSchema = new Schema<IDoctor>(
                 yearOfIssue: { type: Number,}
             }
         ],
-        currentSubscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
+        currentSubscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "DoctorSubscription" },
+        isSubscribed: { type: Boolean, default: false },
+        subscriptionExpiryDate: { type: Date },
         availability:{ type: [String]},
         clinicAddress: {
             clinicName: String,

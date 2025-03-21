@@ -5,6 +5,12 @@ import DoctorController from "../../controller/implementation/doctor/doctorContr
 import passport from "passport";
 import authMiddleWare from "../../middleware/authMiddleware";
 import checkDoctorBlocked from "../../middleware/checkDoctorBlocked";
+import SubscriptionController from "../../controller/implementation/subscription/subscriptionContrloller";
+import SubscriptionRepositroy from "../../repositories/implementation/subscription/subscriptionRepository";
+import SubscriptionService from "../../services/implementation/subscription/subscriptionService";
+import DoctorSubscriptionRepository from "../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
+import DoctorSubscriptionService from "../../services/implementation/doctorSubscriptionService/DoctorSubscriptionService";
+import DoctorSubscriptionController from "../../controller/implementation/doctorSubscription/DoctorSubscription";
 
 
 const router = Router();
@@ -12,6 +18,17 @@ const router = Router();
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
 const doctorController = new DoctorController(doctorService)
+
+
+const subscriptionRepository = new SubscriptionRepositroy()
+const subscriptionService = new SubscriptionService(subscriptionRepository)
+const subscriptionController = new SubscriptionController(subscriptionService)
+
+
+const doctorSubscriptionRepository = new DoctorSubscriptionRepository()
+const doctorSubscriptionService = new DoctorSubscriptionService(doctorSubscriptionRepository, subscriptionRepository,doctorRepository)
+const doctorSubscriptionController = new DoctorSubscriptionController(doctorSubscriptionService)
+
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
 router.post("/signup/resend_otp", async (req, res) => { await doctorController.resendOtp(req, res) })
@@ -28,12 +45,25 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
     (req, res) => doctorController.googleAuthCallback(req, res))
 
 
-router.get("/profile", authMiddleWare,checkDoctorBlocked, (req, res) => doctorController.getProfile(req, res))
-router.post("/doctorregistration",authMiddleWare,checkDoctorBlocked, (req, res) => doctorController.registerDoctor(req, res))
-router.put("/updatestatus",authMiddleWare,(req,res)=> doctorController.updateDoctorStatus(req,res))
-router.put("/verify-doctor",authMiddleWare,(req,res)=>doctorController.verifyDoctor(req,res))
-router.put("/doctor-profile-update",authMiddleWare,checkDoctorBlocked,(req,res)=>doctorController.updateProfile(req,res))
-router.put("/change-password", authMiddleWare, async (req, res) => {
+router.get("/profile", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.getProfile(req, res))
+router.post("/doctorregistration", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.registerDoctor(req, res))
+router.put("/updatestatus", authMiddleWare, (req, res) => doctorController.updateDoctorStatus(req, res))
+router.put("/verify-doctor", authMiddleWare, (req, res) => doctorController.verifyDoctor(req, res))
+router.put("/doctor-profile-update", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.updateProfile(req, res))
+router.put("/change-password", authMiddleWare, checkDoctorBlocked, async (req, res) => {
     await doctorController.changePassword(req, res);
 });
+
+router.get("/subscription-plans", async (req, res) => {
+    await subscriptionController.getAllSubscriptionPlans(req, res);
+});
+
+
+router.post("/create-order", authMiddleWare, checkDoctorBlocked, async (req, res) => {
+    await doctorSubscriptionController.createSubscriptionOrder(req, res)
+})
+
+router.post("/verify-payment", authMiddleWare, checkDoctorBlocked, async (req, res) => {
+    await doctorSubscriptionController.verifyPayment(req, res)
+})
 export default router

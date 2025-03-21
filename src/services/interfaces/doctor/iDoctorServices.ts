@@ -34,6 +34,8 @@ export interface IDoctorService{
     updateDoctorProfile(doctorId:string,updateData:Partial<IDoctor>):Promise<IDoctor|null>
 
     changePassword(doctorId:string,currentPassword:string,newPassword:string):Promise<{success:true;message:string}>
+
+    
 // 
     
 }
