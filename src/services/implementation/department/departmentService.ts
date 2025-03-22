@@ -12,6 +12,7 @@ class DepartmentService implements IDepartmentService{
         this._departmentRepository = departmentRepository
     }
     
+    
 
     async createDeparment(departmentDetails: IDepartment): Promise<{ department: IDepartment; }> {
         try{
@@ -91,6 +92,21 @@ class DepartmentService implements IDepartmentService{
         } catch (error) {
             console.error(`Error in update depatment status :${error instanceof Error ? error.message : error}`);
             throw error
+        }
+    }
+
+    async getAllActiveDepartments(): Promise<IDepartment[]> {
+        try {
+
+            const departments = await this._departmentRepository.getAllActiveDepartments()
+
+            if(!departments || departments.length === 0){
+                return []
+            }
+            return departments
+        } catch (error) {
+            console.error("Error in All active department department fetch");
+            throw new Error("Failed to fetch departments")
         }
     }
 

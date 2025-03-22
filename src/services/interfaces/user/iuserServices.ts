@@ -1,5 +1,6 @@
 
 
+import { IDepartment } from "../../../model/department/departmentModel";
 import { IUser } from "../../../model/user/userModel";
 
 

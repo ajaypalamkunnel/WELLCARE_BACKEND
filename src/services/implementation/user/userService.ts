@@ -6,6 +6,7 @@ import { sendOTPEmail } from "../../../utils/emailUtils";
 import { userInfo } from "os";
 import JwtUtils from "../../../utils/jwtUtils";
 import { generteOTP } from "../../../utils/otpGenerator"
+import { IDepartment } from "../../../model/department/departmentModel";
 
 
 
@@ -17,6 +18,7 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository
     }
+    
     
     
 
@@ -313,6 +315,9 @@ class UserService implements IUserService {
          
         }
      }
+
+
+     
 
     
     

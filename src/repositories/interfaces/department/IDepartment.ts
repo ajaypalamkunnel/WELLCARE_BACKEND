@@ -5,6 +5,6 @@ import { IBaseRepository } from "../../base/IBaseRepository";
 export default interface IDepartmentRepository extends IBaseRepository<IDepartment>{
 
     findDepartmentByName(name:string):Promise<IDepartment|null>
-    // getAllDepartments():Promise<IDepartment[]|null>
+    getAllActiveDepartments():Promise<IDepartment[]|null>
 
 }

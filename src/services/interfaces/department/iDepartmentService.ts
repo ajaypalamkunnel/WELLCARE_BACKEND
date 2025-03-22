@@ -7,4 +7,5 @@ export interface IDepartmentService{
     createDeparment(departmentDetails:IDepartment):Promise<{department:IDepartment}>
     getAllDepartments():Promise<IDepartment[]>
     updateDeptStatus(deptId:string,status:boolean):Promise<DepartmentTpe>
+    getAllActiveDepartments():Promise<IDepartment[]>
 }

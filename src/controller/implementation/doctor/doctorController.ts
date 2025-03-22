@@ -15,10 +15,6 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-    
-
-
-
 
     //------------------ Docotor basic registration at signup-----------------------------
 
@@ -259,7 +255,7 @@ class DoctorController implements IDoctorController {
                 licenseDocument, IDProofDocument,
                 education, certifications } = req.body;
 
-            console.log("====>",req.body);
+            console.log("====>", req.body);
 
 
             if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !availability || !profileImage || !licenseDocument || !IDProofDocument || !education || !certifications) {
@@ -319,7 +315,7 @@ class DoctorController implements IDoctorController {
     async verifyDoctor(req: Request, res: Response): Promise<void> {
         try {
 
-            const { doctorId, isVerified,reason } = req.body
+            const { doctorId, isVerified, reason } = req.body
 
             if (!doctorId || typeof isVerified !== 'boolean') {
 
@@ -330,7 +326,7 @@ class DoctorController implements IDoctorController {
                 return
             }
 
-            const doctor = await this._doctorService.verifyDoctor(doctorId, isVerified,reason)
+            const doctor = await this._doctorService.verifyDoctor(doctorId, isVerified, reason)
 
             res.status(StatusCode.OK).json({
                 success: true,
@@ -385,25 +381,53 @@ class DoctorController implements IDoctorController {
     async changePassword(req: Request, res: Response): Promise<Response> {
         try {
             const { doctorId, oldPassword, newPassword } = req.body;
-            console.log("------->",doctorId, oldPassword, newPassword);
-            
+            console.log("------->", doctorId, oldPassword, newPassword);
 
-            if(!doctorId||!oldPassword||!newPassword){
+
+            if (!doctorId || !oldPassword || !newPassword) {
                 throw new CustomError("All fields are required", 400)
             }
 
-            const result = await this._doctorService.changePassword(doctorId,oldPassword,newPassword)
+            const result = await this._doctorService.changePassword(doctorId, oldPassword, newPassword)
 
             return res.status(200).json(generateSuccessResponse(result.message))
-        } catch (error:unknown) {
+        } catch (error: unknown) {
             const errMessage = (error as Error).message || "Something went wrong";
-    
+
             console.error(`Password change error: ${errMessage}`);
-            
+
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(errMessage));
-        
+
         }
     }
+
+
+    async getDoctors(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const { search, departmentId, minExperience, maxExperience, gender, availability, sortBy, page, limit } =
+                req.query;
+
+            const doctors = await this._doctorService.getFilteredDoctors(
+                search as string,
+                departmentId as string,
+                { min: minExperience ? Number(minExperience) : undefined, max: maxExperience ? Number(maxExperience) : undefined },
+                gender as string,
+                availability as string,
+                sortBy as string,
+                page ? Number(page) : 1,
+                limit ? Number(limit) : 10
+            );
+
+
+            return res.status(StatusCode.OK).json(doctors)
+
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
+        }
+    }
+
 
 
 

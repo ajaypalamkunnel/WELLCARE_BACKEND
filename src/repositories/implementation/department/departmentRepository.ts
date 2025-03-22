@@ -11,6 +11,11 @@ class DepartmentRepository extends BaseRepository<IDepartment> implements IDepar
     async findDepartmentByName(name: string): Promise<IDepartment | null> {
         return await Department.findOne({name})
     }
+    
+    async getAllActiveDepartments(): Promise<IDepartment[] | null> {
+        return await Department.find({status:true})
+    }
+    
    
 
 }

@@ -7,6 +7,7 @@ import { sendApplicationApprovalEmail, sendApplicationRejectionEmail, sendOTPEma
 import JwtUtils from "../../../utils/jwtUtils";
 import UserRepository from "../../../repositories/implementation/user/userRepository";
 import { CustomError } from "../../../utils/CustomError";
+import mongoose from "mongoose";
 
 
 class DoctorService implements IDoctorService {
@@ -16,10 +17,6 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
-
-
-
-
 
 
 
@@ -268,8 +265,8 @@ class DoctorService implements IDoctorService {
             // }
 
             const existingDoctor = await this._doctorRepository.findDoctorByEmail(email!);
-            console.log(">>>>>>>>",existingDoctor);
-            
+            console.log(">>>>>>>>", existingDoctor);
+
 
             if (!existingDoctor) {
                 throw new Error("Doctor not found");
@@ -413,8 +410,8 @@ class DoctorService implements IDoctorService {
             }
 
             const isMatch = await PasswordUtils.comparePassword(currentPassword, user.password)
-            console.log(">>>",isMatch);
-            
+            console.log(">>>", isMatch);
+
             if (!isMatch) {
                 throw new CustomError("Incorrect current password", 400);
             }
@@ -447,6 +444,70 @@ class DoctorService implements IDoctorService {
             throw new CustomError("Internal Server Error", 500);
         }
 
+    }
+
+
+    async getFilteredDoctors(search?: string, departmentId?: string, experience?: { min?: number; max?: number; }, gender?: string, availability?: string, sortBy?: string, page: number = 1, limit: number = 10): Promise<{ doctors: IDoctor[]; total: number; totalPages: number; }> {
+        try {
+
+            let filters: any = { isSubscribed: true }
+
+            if (search) {
+                filters.fullName = { $regex: search, $options: "i" }
+            }
+            
+            
+
+            if (departmentId) {
+                filters.departmentId = new mongoose.Types.ObjectId(departmentId);
+            }
+
+            
+            if (experience && (experience.min !== undefined || experience.max !== undefined)) {
+                filters.experience = {};
+                if (experience.min !== undefined) filters.experience.$gte = experience.min;
+                if (experience.max !== undefined) filters.experience.$lte = experience.max;
+            }
+            
+            
+            if (gender) {
+                filters.gender = { $regex: `^${gender}$`, $options: "i" }; // Case-insensitive regex match
+            }
+            if (availability) {
+                filters.availability = availability;
+            }
+
+            let sortOption: any = {};
+            if (sortBy === "experience") {
+                sortOption.experience = -1;
+            } else if (sortBy === "rating") {
+                sortOption["rating.averageRating"] = -1;
+            } else {
+                sortOption.createdAt = -1;
+            }
+
+
+            const {doctors,total} = await this._doctorRepository.findDoctorsWithFilters(
+                filters,
+                sortOption,
+                page,
+                limit
+            )
+
+
+            return{
+                doctors,
+                total,
+                totalPages:Math.ceil(total/limit)
+            }
+
+
+
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            throw new Error("Failed to fetch doctors");
+
+        }
     }
 
 

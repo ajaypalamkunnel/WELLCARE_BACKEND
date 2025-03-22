@@ -3,6 +3,8 @@ import { IDepartmentController } from "../../interfaces/department/IDepartmentCo
 import { IDepartmentService } from "../../../services/interfaces/department/iDepartmentService";
 import { StatusCode } from "../../../constants/statusCode";
 import { handleErrorResponse } from "../../../utils/errorHandler";
+import { generateSuccessResponse } from "../../../utils/response";
+import { handleControllerError } from "../../../utils/controllerErrorHandler";
 
 
 class DepartmentController implements IDepartmentController {
@@ -12,6 +14,7 @@ class DepartmentController implements IDepartmentController {
     constructor(departmentService: IDepartmentService) {
         this._departmentService = departmentService
     }
+   
 
     async createDepartment(req: Request, res: Response): Promise<void> {
         try {
@@ -83,6 +86,22 @@ class DepartmentController implements IDepartmentController {
             })
 
         }
+    }
+
+
+    async getAllActiveDepartments(req: Request, res: Response): Promise<Response> {
+       try {
+
+        const allActiveDepartments = await this._departmentService.getAllActiveDepartments()
+
+        return res.status(StatusCode.OK).json(generateSuccessResponse("All active departments featched successfully",allActiveDepartments))
+
+        
+       } catch (error:unknown) {
+
+            return handleControllerError(res,error)
+        
+       }
     }
 
 }
