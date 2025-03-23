@@ -10,6 +10,9 @@ import passport from "passport";
 import { IUser } from "../../../model/user/userModel";
 import { IUserType } from "../../../types/user";
 import { StatusCode } from "../../../constants/statusCode";
+import { threadId } from "worker_threads";
+import { CustomError } from "../../../utils/CustomError";
+import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 
 class UserController implements IUserController {
 
@@ -18,7 +21,7 @@ class UserController implements IUserController {
     constructor(_userService: IUserService) {
         this._userService = _userService
     }
-
+    
     //---------------------------Basic registration -----------------------------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
@@ -295,8 +298,8 @@ async forgotPassword(req: Request, res: Response): Promise<void> {
 
 //------------------------------- user blocking and unblocking-----------------------------------
 
-    async UpdateUserStatus(req: Request, res: Response): Promise<void> {
-        try {
+async UpdateUserStatus(req: Request, res: Response): Promise<void> {
+    try {
 
             const { userId, status } = req.body
             console.log(">>>>", userId, ">>>", status);
@@ -325,9 +328,40 @@ async forgotPassword(req: Request, res: Response): Promise<void> {
                 success: false,
                 message: error instanceof Error ? error.message : "An unexpected error occurred"
             })
-
+            
         }
     }
+    
+    //------------------------------- change user password user -----------------------------------
+    
+    async changePassword(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const {userId,oldPassword,newPassword} = req.body
+
+            console.log("---",userId,oldPassword,newPassword);
+            
+
+            if(!userId||!oldPassword||!newPassword){
+                throw new CustomError("All fields are required",StatusCode.BAD_REQUEST)
+            }
+
+            const result = await this._userService.changePassword(userId,oldPassword,newPassword)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse(result.message))
+            
+        } catch (error) {
+
+            const errMessage = (error as Error).message || "something went wrong"
+
+            console.error(`Password change error ${errMessage}`);
+
+            return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(errMessage))
+            
+            
+        }
+    }
+
 
 
 

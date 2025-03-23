@@ -15,7 +15,7 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-
+    
     //------------------ Docotor basic registration at signup-----------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
@@ -427,6 +427,41 @@ class DoctorController implements IDoctorController {
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
         }
     }
+
+    async getDoctorProfile(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const {doctorId} = req.params
+
+            console.log("====>",doctorId);
+            
+
+            if(!doctorId){
+                return res.status(StatusCode.BAD_REQUEST).json({ message: "Doctor ID is required"})
+            }
+
+            const doctor = await this._doctorService.detailedDoctorProfile(doctorId)
+
+            return res.status(StatusCode.OK).json(doctor)
+
+
+            
+        } catch (error:unknown) {
+
+            console.error("Error fetching doctor profile:", error);
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({ message: error.message });
+              }
+
+              if (error instanceof Error) {
+                return res.status(500).json({ message: error.message });
+              }
+            
+              return res.status(500).json({ message: "Internal Server Error" });
+            
+        }
+    }
+
 
 
 

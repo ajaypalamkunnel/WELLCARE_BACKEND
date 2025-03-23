@@ -8,6 +8,7 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
         super(User)
     }
     
+    
 
     async findUserByEmail(email: string): Promise<IUser | null> {
         // console.log("Iam from findUserByEmail==>",email);
@@ -36,6 +37,15 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
         return await User.findByIdAndUpdate(userId,{status},{new:true}).select("-password -refreshToken -otp -otpExpires")
 
     }
+
+
+    async updatePassword(userId: string, hashedPassword: string): Promise<boolean> {
+       const user = await User.findByIdAndUpdate(userId,{password:hashedPassword},{new:true})
+       return !!user
+    }
+
+
+    
 
     
 

@@ -34,4 +34,6 @@ export interface IUserService{
 
     getUserProfile(userId:string):Promise<IUser | null>
     updateUserStatus(userId:string,status:number):Promise<IUser|null>
+
+    changePassword(userId:string,currentPassword:string,newPassword:string):Promise<{ success: true; message: string }>
 }

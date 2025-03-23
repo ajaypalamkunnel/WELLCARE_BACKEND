@@ -46,6 +46,8 @@ export interface IDoctorService {
         limit?: number
     ): Promise<{ doctors: IDoctor[]; total: number; totalPages: number }>;
 
+   detailedDoctorProfile(doctorId:string):Promise<Partial<IDoctor | null>> 
+   
     // 
 
 }

@@ -8,6 +8,7 @@ import JwtUtils from "../../../utils/jwtUtils";
 import UserRepository from "../../../repositories/implementation/user/userRepository";
 import { CustomError } from "../../../utils/CustomError";
 import mongoose from "mongoose";
+import { StatusCode } from "../../../constants/statusCode";
 
 
 class DoctorService implements IDoctorService {
@@ -508,6 +509,37 @@ class DoctorService implements IDoctorService {
             throw new Error("Failed to fetch doctors");
 
         }
+    }
+
+   async detailedDoctorProfile(doctorId:string):Promise<Partial<IDoctor | null>> {
+
+        try {
+
+            const doctor = await this._doctorRepository.getDoctorProfile(doctorId)
+
+            console.log("id ---",doctorId);
+            
+
+            console.log("service---",doctor);
+            
+
+            if(!doctor){
+                throw new CustomError("doctor not found",StatusCode.NOT_FOUND)
+            }
+
+            return doctor
+
+            
+        } catch (error) {
+
+            if(error instanceof CustomError){
+                throw error
+            }
+           
+            throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            
+        }
+
     }
 
 

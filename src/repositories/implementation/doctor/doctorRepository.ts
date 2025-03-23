@@ -9,7 +9,7 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
     constructor() {
         super(Doctor);
     }
-
+    
 
 
 
@@ -90,6 +90,20 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
 
         }
     }
+
+
+    async getDoctorProfile(doctorId: string): Promise<IDoctor|null> {
+        try {
+            const doctor = await Doctor.findOne({_id:doctorId})
+                            .populate("departmentId","name")
+                            .select("-password -refreshToken -subscriptionExpiryDate -licenseDocument -IDProofDocument")
+            return doctor
+        } catch (error) {
+            console.error("Error featching doctors profile",error);
+            throw new Error("Database error while fetching doctor profile") 
+        }
+    }
+
 
 
 

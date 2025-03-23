@@ -27,16 +27,16 @@ const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
 const doctorController = new DoctorController(doctorService)
 
-router.post("/signup/basic_details",(req,res)=>userController.registerBasicDetails(req,res))
-router.post("/signup/resend_otp", async (req,res)=>{ await userController.resendOtp(req,res)})
-router.post("/signup/verify_otp",async (req,res)=>{await userController.verifyOtp(req,res)})
+router.post("/signup/basic_details", (req, res) => userController.registerBasicDetails(req, res))
+router.post("/signup/resend_otp", async (req, res) => { await userController.resendOtp(req, res) })
+router.post("/signup/verify_otp", async (req, res) => { await userController.verifyOtp(req, res) })
 
-router.post("/login",(req,res)=>userController.postLogin(req,res))
-router.post("/forgot-password",(req,res)=>userController.forgotPassword(req,res))
-router.post("/update-password",(req,res)=>userController.updatePassword(req,res))
-router.post("/refresh-token",(req,res)=>userController.renewAuthTokens(req,res))
-router.post("/logout",async(req,res)=>{
-    await userController.logout(req,res)
+router.post("/login", (req, res) => userController.postLogin(req, res))
+router.post("/forgot-password", (req, res) => userController.forgotPassword(req, res))
+router.post("/update-password", (req, res) => userController.updatePassword(req, res))
+router.post("/refresh-token", (req, res) => userController.renewAuthTokens(req, res))
+router.post("/logout", async (req, res) => {
+    await userController.logout(req, res)
 })
 
 router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
@@ -46,13 +46,18 @@ router.get(
     (req, res) => userController.googleAuthCallback(req, res)
 );
 
-router.get("/profile",authMiddleWare,checkUserBlocked,(req,res)=>userController.getProfile(req,res))
+router.get("/profile", authMiddleWare, checkUserBlocked, (req, res) => userController.getProfile(req, res))
 
-router.get("/get-all-active-departments", async (req,res)=> {await departmentController.getAllActiveDepartments(req,res)})
+router.get("/get-all-active-departments", async (req, res) => { await departmentController.getAllActiveDepartments(req, res) })
 
 router.get("/doctors", async (req, res) => {
     await doctorController.getDoctors(req, res);
-  });
-  
+});
+router.get("/doctor-profile/:doctorId", async (req, res) => {
+    await doctorController.getDoctorProfile(req, res)
+})
 
+router.put("/change-password", authMiddleWare, checkUserBlocked, async (req, res) => {
+    await userController.changePassword(req, res)
+})
 export default router

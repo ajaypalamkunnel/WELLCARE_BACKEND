@@ -7,6 +7,8 @@ import { userInfo } from "os";
 import JwtUtils from "../../../utils/jwtUtils";
 import { generteOTP } from "../../../utils/otpGenerator"
 import { IDepartment } from "../../../model/department/departmentModel";
+import { CustomError } from "../../../utils/CustomError";
+import { StatusCode } from "../../../constants/statusCode";
 
 
 
@@ -18,6 +20,7 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository
     }
+    
     
     
     
@@ -315,6 +318,51 @@ class UserService implements IUserService {
          
         }
      }
+
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<{ success: true; message: string; }> {
+       try{
+
+            const user = await this._userRepository.findById(userId)
+
+            if(!user){
+                throw new CustomError("User not found",StatusCode.NOT_FOUND)
+            }
+
+            const isMatch = await PasswordUtils.comparePassword(currentPassword,user.password)
+
+            if(!isMatch){
+                throw new CustomError("Incorrect current password",StatusCode.BAD_REQUEST)
+            }
+
+            const isSamePassword = await PasswordUtils.comparePassword(newPassword,user.password)
+
+            if(isSamePassword){
+                throw new CustomError("New password must be different from the old password",StatusCode.BAD_REQUEST)
+            }
+
+
+            const hashedPassword = await PasswordUtils.hashPassword(newPassword)
+
+            const updated = await this._userRepository.updatePassword(userId,hashedPassword)
+
+            if(!updated){
+                throw new CustomError("Failed to update passsword",StatusCode.INTERNAL_SERVER_ERROR)
+
+            }
+
+            return {success:true,message:"Password updated succesfully"}
+
+       }catch(error){
+
+        if(error instanceof CustomError){
+            throw error
+        }
+
+        throw new CustomError("Internal Server error",StatusCode.INTERNAL_SERVER_ERROR)
+
+       }
+    }
 
 
      
