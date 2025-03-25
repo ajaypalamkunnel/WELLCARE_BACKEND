@@ -10,6 +10,7 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
         super(Doctor);
     }
     
+    
 
 
 
@@ -100,6 +101,19 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
             return doctor
         } catch (error) {
             console.error("Error featching doctors profile",error);
+            throw new Error("Database error while fetching doctor profile") 
+        }
+    }
+
+
+   async findDoctorByIdAndGetSubscriptionDetails(doctorId: string): Promise<IDoctor | null> {
+        try {
+
+            const doctorSubscriptionDetails = await Doctor.findById(doctorId).populate("currentSubscriptionId")
+                .select("-password -refreshToken -licenseDocument -IDProofDocument")
+            return doctorSubscriptionDetails
+        } catch (error) {
+            console.error("Error featching doctors subscription",error);
             throw new Error("Database error while fetching doctor profile") 
         }
     }

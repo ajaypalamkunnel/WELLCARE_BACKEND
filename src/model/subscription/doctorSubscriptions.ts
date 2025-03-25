@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { ISubscription } from "./subscriptionModel";
 
 export interface IDoctorSubscription extends Document {
     _id: ObjectId
     doctorId: mongoose.Types.ObjectId;
-    planId: mongoose.Types.ObjectId;
+    planId: mongoose.Types.ObjectId | ISubscription;
     orderId: string; // Razorpay Order ID
     startDate?: Date | null; // Nullable, set after payment
     endDate?: Date | null;
@@ -22,7 +23,7 @@ export interface IDoctorSubscription extends Document {
 const DoctorSubscriptionSchema = new Schema<IDoctorSubscription>(
     {
         doctorId: { type: Schema.Types.ObjectId, required: true, ref: "Doctor" },
-        planId: { type: Schema.Types.ObjectId, required: true, ref: "Plan" },
+        planId: { type: Schema.Types.ObjectId, required: true, ref: "Subscription" },
         orderId: { type: String, required: true, unique: true }, // Razorpay Order ID
         startDate: { type: Date, required: false, default: null }, // Nullable until payment
         endDate: { type: Date, required: false, default: null }, // Nullable until payment

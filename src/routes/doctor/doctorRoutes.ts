@@ -11,6 +11,10 @@ import SubscriptionService from "../../services/implementation/subscription/subs
 import DoctorSubscriptionRepository from "../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
 import DoctorSubscriptionService from "../../services/implementation/doctorSubscriptionService/DoctorSubscriptionService";
 import DoctorSubscriptionController from "../../controller/implementation/doctorSubscription/DoctorSubscription";
+import DoctorServiceRepository from "../../repositories/implementation/doctorService/doctorServiceRepository";
+import DoctorServiceService from "../../services/implementation/doctorServiceService/DoctorServiceService";
+import DoctorServiceController from "../../controller/implementation/doctorServiceController/doctorServiceController";
+import checkSubscription from "../../middleware/checkSubscription";
 
 
 const router = Router();
@@ -28,6 +32,10 @@ const subscriptionController = new SubscriptionController(subscriptionService)
 const doctorSubscriptionRepository = new DoctorSubscriptionRepository()
 const doctorSubscriptionService = new DoctorSubscriptionService(doctorSubscriptionRepository, subscriptionRepository,doctorRepository)
 const doctorSubscriptionController = new DoctorSubscriptionController(doctorSubscriptionService)
+
+const doctorServiceRepository = new DoctorServiceRepository()
+const doctorServiceService = new DoctorServiceService(doctorServiceRepository,doctorRepository,doctorSubscriptionRepository)
+const doctorServiceController = new DoctorServiceController(doctorServiceService)
 
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
@@ -65,5 +73,17 @@ router.post("/create-order", authMiddleWare, checkDoctorBlocked, async (req, res
 
 router.post("/verify-payment", authMiddleWare, checkDoctorBlocked, async (req, res) => {
     await doctorSubscriptionController.verifyPayment(req, res)
+})
+
+router.post("/create-service",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+    await doctorServiceController.createDoctorService(req,res)
+})
+
+router.get("/get-services",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+    await doctorServiceController.getDoctorServices(req,res)
+})
+
+router.put("/update-service",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+    await doctorServiceController.doctorServiceUpdate(req,res)
 })
 export default router

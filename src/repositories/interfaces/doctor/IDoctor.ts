@@ -13,5 +13,6 @@ export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     updatePassword(userId:string,hashedPassword:string):Promise<boolean>
     findDoctorsWithFilters(filters:any,sortOption:any,page:number,limit:number):Promise<{doctors:IDoctor[];total:number}>
     getDoctorProfile(doctorId:string):Promise<IDoctor|null>
+    findDoctorByIdAndGetSubscriptionDetails(doctorId:string):Promise<IDoctor|null>
 
 }

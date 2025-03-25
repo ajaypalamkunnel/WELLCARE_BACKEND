@@ -6,6 +6,6 @@ export default interface IDoctorSubscriptionsRepository extends IBaseRepository<
     findByOrderId(orderId: string): Promise<IDoctorSubscription | null>;
     updateByOrderId(orderId: string, updateData: Partial<IDoctorSubscription>): Promise<IDoctorSubscription | null>;
     findActiveSubscription(doctorId: string): Promise<IDoctorSubscription | null>
-
+    
 
 }

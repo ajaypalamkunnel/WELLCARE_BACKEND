@@ -1,4 +1,5 @@
 import DoctorSubscription, { IDoctorSubscription } from "../../../model/subscription/doctorSubscriptions";
+import { ISubscription } from "../../../model/subscription/subscriptionModel";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorSubscriptionsRepository from "../../interfaces/doctorSubscriptions/IDoctorSubscriptions";
 import mongoose, { ObjectId } from "mongoose";
@@ -19,7 +20,7 @@ class DoctorSubscriptionRepository extends BaseRepository<IDoctorSubscription> i
             doctorId: new mongoose.Types.ObjectId(doctorId),
             status: "active",
             endDate: { $gte: new Date() }
-        })
+        }).populate<{ planId: ISubscription }>("planId", "serviceLimit planName duration price")
     }
 }
 
