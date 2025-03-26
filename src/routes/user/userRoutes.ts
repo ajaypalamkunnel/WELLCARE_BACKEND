@@ -11,6 +11,8 @@ import DepartmentController from "../../controller/implementation/department/dep
 import DoctorController from "../../controller/implementation/doctor/doctorController";
 import DoctorRepository from "../../repositories/implementation/doctor/doctorRepository";
 import DoctorService from "../../services/implementation/doctor/doctorService";
+import { checkRole } from "../../middleware/checkRole";
+import { Roles } from "../../types/roles";
 const router = Router();
 
 
@@ -46,7 +48,7 @@ router.get(
     (req, res) => userController.googleAuthCallback(req, res)
 );
 
-router.get("/profile", authMiddleWare, checkUserBlocked, (req, res) => userController.getProfile(req, res))
+router.get("/profile", authMiddleWare, checkUserBlocked,checkRole(Roles.USER), (req, res) => userController.getProfile(req, res))
 
 router.get("/get-all-active-departments", async (req, res) => { await departmentController.getAllActiveDepartments(req, res) })
 
@@ -57,7 +59,11 @@ router.get("/doctor-profile/:doctorId", async (req, res) => {
     await doctorController.getDoctorProfile(req, res)
 })
 
-router.put("/change-password", authMiddleWare, checkUserBlocked, async (req, res) => {
+router.put("/change-password", authMiddleWare, checkUserBlocked,checkRole(Roles.USER), async (req, res) => {
     await userController.changePassword(req, res)
+})
+
+router.put("/complete-registration", authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async (req,res)=>{
+    await userController.completeUserRegistration(req,res)
 })
 export default router

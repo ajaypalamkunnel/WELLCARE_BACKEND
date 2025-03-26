@@ -120,7 +120,7 @@ class DoctorService implements IDoctorService {
             throw new Error("Invalid email or Password")
         }
 
-        const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email })
+        const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email,role:"doctor" })
         const doctorRefreshToken = JwtUtils.generateRefreshToken({ userId: doctor._id })
 
         await this._doctorRepository.updateDoctorRefreshToken(doctor._id.toString(), doctorRefreshToken)

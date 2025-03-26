@@ -15,6 +15,8 @@ import DoctorServiceRepository from "../../repositories/implementation/doctorSer
 import DoctorServiceService from "../../services/implementation/doctorServiceService/DoctorServiceService";
 import DoctorServiceController from "../../controller/implementation/doctorServiceController/doctorServiceController";
 import checkSubscription from "../../middleware/checkSubscription";
+import { checkRole } from "../../middleware/checkRole";
+import { Roles } from "../../types/roles";
 
 
 const router = Router();
@@ -53,12 +55,12 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
     (req, res) => doctorController.googleAuthCallback(req, res))
 
 
-router.get("/profile", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.getProfile(req, res))
-router.post("/doctorregistration", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.registerDoctor(req, res))
-router.put("/updatestatus", authMiddleWare, (req, res) => doctorController.updateDoctorStatus(req, res))
-router.put("/verify-doctor", authMiddleWare, (req, res) => doctorController.verifyDoctor(req, res))
-router.put("/doctor-profile-update", authMiddleWare, checkDoctorBlocked, (req, res) => doctorController.updateProfile(req, res))
-router.put("/change-password", authMiddleWare, checkDoctorBlocked, async (req, res) => {
+router.get("/profile", authMiddleWare, checkDoctorBlocked,checkRole(Roles.DOCTOR), (req, res) => doctorController.getProfile(req, res))
+router.post("/doctorregistration", authMiddleWare, checkDoctorBlocked,checkRole(Roles.DOCTOR), (req, res) => doctorController.registerDoctor(req, res))
+router.put("/updatestatus", authMiddleWare,checkRole(Roles.DOCTOR), (req, res) => doctorController.updateDoctorStatus(req, res))
+router.put("/verify-doctor", authMiddleWare,(req, res) => doctorController.verifyDoctor(req, res))
+router.put("/doctor-profile-update", authMiddleWare, checkDoctorBlocked, checkRole(Roles.DOCTOR),(req, res) => doctorController.updateProfile(req, res))
+router.put("/change-password", authMiddleWare, checkDoctorBlocked,checkRole(Roles.DOCTOR), async (req, res) => {
     await doctorController.changePassword(req, res);
 });
 
@@ -67,23 +69,23 @@ router.get("/subscription-plans", async (req, res) => {
 });
 
 
-router.post("/create-order", authMiddleWare, checkDoctorBlocked, async (req, res) => {
+router.post("/create-order", authMiddleWare, checkDoctorBlocked,checkRole(Roles.DOCTOR), async (req, res) => {
     await doctorSubscriptionController.createSubscriptionOrder(req, res)
 })
 
-router.post("/verify-payment", authMiddleWare, checkDoctorBlocked, async (req, res) => {
+router.post("/verify-payment", authMiddleWare, checkDoctorBlocked,checkRole(Roles.DOCTOR), async (req, res) => {
     await doctorSubscriptionController.verifyPayment(req, res)
 })
 
-router.post("/create-service",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+router.post("/create-service",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR), async (req,res)=>{
     await doctorServiceController.createDoctorService(req,res)
 })
 
-router.get("/get-services",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+router.get("/get-services",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR), async (req,res)=>{
     await doctorServiceController.getDoctorServices(req,res)
 })
 
-router.put("/update-service",authMiddleWare,checkDoctorBlocked,checkSubscription, async (req,res)=>{
+router.put("/update-service",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR), async (req,res)=>{
     await doctorServiceController.doctorServiceUpdate(req,res)
 })
 export default router

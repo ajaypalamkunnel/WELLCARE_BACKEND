@@ -45,6 +45,25 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     }
 
 
+   async updateUserDetails(email: string, updateData: Partial<IUser>): Promise<IUser | null> {
+        try {
+
+            return await User.findOneAndUpdate(
+                {email},
+                {...updateData,isVerified:true,updatedAt:new Date()},
+                {new:true}
+
+            )
+            
+        } catch (error) {
+            console.error("Error updating user details");
+            throw new Error("Database error while fetching user details")
+            
+        }
+    }
+    
+
+
     
 
     

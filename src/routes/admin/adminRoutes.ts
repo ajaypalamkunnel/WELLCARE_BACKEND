@@ -13,6 +13,8 @@ import DoctorRepository from "../../repositories/implementation/doctor/doctorRep
 import SubscriptionRepositroy from "../../repositories/implementation/subscription/subscriptionRepository";
 import SubscriptionService from "../../services/implementation/subscription/subscriptionService";
 import SubscriptionController from "../../controller/implementation/subscription/subscriptionContrloller";
+import { checkRole } from "../../middleware/checkRole";
+import { Roles } from "../../types/roles";
 
 
 const router = Router();
@@ -39,25 +41,25 @@ const subscriptionController = new SubscriptionController(subscriptionService)
 
 router.post("/login", (req, res) => adminController.login(req, res))
 router.post("/logout", (req, res) => adminController.logout(req, res))
-router.get("/doctors", authMiddleWare, (req, res) => adminController.fetchAllDoctors(req, res))
-router.post("/adddepartment", authMiddleWare, (req, res) => departmentController.createDepartment(req, res))
+router.get("/doctors", authMiddleWare,checkRole(Roles.Admin), (req, res) => adminController.fetchAllDoctors(req, res))
+router.post("/adddepartment", authMiddleWare,checkRole(Roles.Admin),  (req, res) => departmentController.createDepartment(req, res))
 router.get("/getalldepartments", authMiddleWare, (req, res) => departmentController.getAllDepatments(req, res))
-router.get("/users", authMiddleWare, (req, res) => adminController.getAllUsers(req, res))
-router.put("/updateStatus", authMiddleWare, (req, res) => userController.UpdateUserStatus(req, res))
-router.put("/update-department-status", authMiddleWare, (req, res) => departmentController.updateDepartmentStatus(req, res))
-router.put("/update-doctor-status", authMiddleWare, (req, res) => adminController.updateDoctorStatus(req, res))
-router.post("/create-subscription-plan", authMiddleWare, async (req, res) => {
+router.get("/users", authMiddleWare,checkRole(Roles.Admin),  (req, res) => adminController.getAllUsers(req, res))
+router.put("/updateStatus", authMiddleWare,checkRole(Roles.Admin),  (req, res) => userController.UpdateUserStatus(req, res))
+router.put("/update-department-status", authMiddleWare,checkRole(Roles.Admin),  (req, res) => departmentController.updateDepartmentStatus(req, res))
+router.put("/update-doctor-status", authMiddleWare,checkRole(Roles.Admin),  (req, res) => adminController.updateDoctorStatus(req, res))
+router.post("/create-subscription-plan", authMiddleWare,checkRole(Roles.Admin),  async (req, res) => {
     await subscriptionController.createsubscriptionPlan(req, res)
 })
-router.get("/get-subscription-plans", authMiddleWare, async (req, res) => {
+router.get("/get-subscription-plans", authMiddleWare,checkRole(Roles.Admin),  async (req, res) => {
     await subscriptionController.getSubscriptionPlans(req, res)
 })
 
-router.put("/toggle-subscription-status", authMiddleWare, async (req, res) => {
+router.put("/toggle-subscription-status", authMiddleWare,checkRole(Roles.Admin),  async (req, res) => {
     await subscriptionController.toggleSubscriptionStatus(req, res)
 })
 
-router.put("/update-plan", authMiddleWare, async (req, res) => {
+router.put("/update-plan", authMiddleWare,checkRole(Roles.Admin),  async (req, res) => {
     await subscriptionController.updateSubscriptionPlan(req, res)
 })
 export default router

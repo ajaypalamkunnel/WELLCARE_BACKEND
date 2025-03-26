@@ -14,5 +14,6 @@ interface UserController{
     getProfile(req:Request,res:Response):Promise<void>
     UpdateUserStatus(req:Request,res:Response):Promise<void>
     changePassword(req:Request,res:Response):Promise<Response>
+    completeUserRegistration(req:Request,res:Response):Promise<Response>
 }
 export default UserController

@@ -79,7 +79,7 @@ export class AdminService implements IAdminService{
             throw new Error("Invalid email or password.")
         }
 
-        const accessTokenAdmin = JwtUtils.generateAccesToken({userId:admin._id,email:admin.email})
+        const accessTokenAdmin = JwtUtils.generateAccesToken({userId:admin._id,email:admin.email,role:"admin"})
         const refreshTokenAdmin = JwtUtils.generateRefreshToken({userId:admin._id})
         return { admin, accessTokenAdmin, refreshTokenAdmin }
        } catch (error:unknown) {

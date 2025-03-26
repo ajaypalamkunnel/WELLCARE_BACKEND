@@ -3,9 +3,20 @@ import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
 interface IPersonalInfo {
     age: number;
-    gender: string;
+    gender: "male" | "female";
     blood_group: string;
+    allergies:string;
+    chronic_disease:string;
 }
+export interface IAddress {
+    houseName: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+}
+
 
 
 interface IUser extends Document {
@@ -18,18 +29,31 @@ interface IUser extends Document {
     isVerified: boolean;
     otp?: string | null;
     otpExpires?: Date | null;
-    profileUrl?:string|null
+    profileUrl?:string|null;
     updatedAt?: Date;
     createdAt?: Date;
     personalInfo: IPersonalInfo;
+    address:IAddress;
     refreshToken: string 
 
 }
 
+const Address = new Schema<IAddress>({
+    houseName:{type:String},
+    street:{type:String},
+    city:{type:String},
+    state:{type:String},
+    postalCode:{type:String},
+    country:{type:String}
+})
+
+
 const PersonalInfoSchema = new Schema<IPersonalInfo>({
-    age: { type: Number, required: true },
-    gender: { type: String, required: true },
-    blood_group: { type: String, required: true },
+    age: { type: Number },
+    gender: { type: String,enum:["male","female"]},
+    blood_group: { type: String},
+    allergies:{type:String,},
+    chronic_disease:{type:String}
 }, { _id: false })
 
 
@@ -74,8 +98,10 @@ const UserSchema = new Schema<IUser>({
         default: Date.now
     },
     personalInfo: {
-        type: PersonalInfoSchema,
-        //required: true
+        type: PersonalInfoSchema
+    },
+    address:{
+        type:Address
     },
     refreshToken: { type: String }
 }, { timestamps: true })

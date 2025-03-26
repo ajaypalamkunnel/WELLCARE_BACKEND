@@ -13,6 +13,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import { threadId } from "worker_threads";
 import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
+import { add } from "winston";
 
 class UserController implements IUserController {
 
@@ -21,6 +22,7 @@ class UserController implements IUserController {
     constructor(_userService: IUserService) {
         this._userService = _userService
     }
+    
     
     //---------------------------Basic registration -----------------------------------------------
 
@@ -112,7 +114,7 @@ class UserController implements IUserController {
                 success: true,
                 message: "Login succesful",
                 accessToken,
-                user: { id: user?._id, email: user?.email, fullName: user?.fullName }
+                user: { id: user?._id, email: user?.email, isVerified:user?.isVerified, fullName: user?.fullName }
             })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
@@ -358,6 +360,33 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
 
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(errMessage))
             
+            
+        }
+    }
+
+
+    async completeUserRegistration(req: Request, res: Response): Promise<Response> {
+        try {
+            const data = req.body
+            console.log("contorller>>>>",data);
+            
+
+            const {email,fullName,mobile,personalInfo,address} = req.body
+
+
+            if (!email ||!mobile|| !personalInfo || !address){
+                throw new CustomError("All fields are required",StatusCode.BAD_REQUEST)
+            }
+
+            const updatedUser = await this._userService.completeUserRegistration(email,mobile,personalInfo,address,fullName)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("User registration completed successfully",updatedUser))
+            
+            
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+            .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
             
         }
     }

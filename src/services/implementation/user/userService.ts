@@ -1,4 +1,4 @@
-import { IUser } from "../../../model/user/userModel";
+import { IAddress, IUser } from "../../../model/user/userModel";
 import IUserRepository from "../../../repositories/interfaces/user/IUser";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IUserService } from "../../interfaces/user/iuserServices";
@@ -20,6 +20,7 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository
     }
+    
     
     
     
@@ -139,7 +140,7 @@ class UserService implements IUserService {
             throw new Error("Invalid email or password.")
         }
 
-        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
+        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email, role:"user" })
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
         await this._userRepository.updateRefreshToken(user._id.toString(), refreshToken)
@@ -365,7 +366,45 @@ class UserService implements IUserService {
     }
 
 
-     
+    async completeUserRegistration(email: string,mobile:string, personalInfo: Partial<IUser["personalInfo"]>, address: IAddress,fullName?:string,): Promise<IUser> {
+        try {
+            const user = await this._userRepository.findUserByEmail(email)
+
+            if(!user){
+                throw new CustomError("User Not found",StatusCode.NOT_FOUND)
+            }
+
+
+            const completePersonalInfo: IUser["personalInfo"] = {
+                age: personalInfo.age ?? user.personalInfo.age ?? 0, // Default to 0 if missing
+                gender: personalInfo.gender ?? user.personalInfo.gender ?? "male", // Default to "male"
+                blood_group: personalInfo.blood_group ?? user.personalInfo.blood_group ?? "",
+                allergies: personalInfo.allergies ?? user.personalInfo.allergies ?? "",
+                chronic_disease: personalInfo.chronic_disease ?? user.personalInfo.chronic_disease ?? ""
+            };
+            const updatedUser = await this._userRepository.updateUserDetails(email,{
+                fullName:fullName || user.fullName,
+                personalInfo: completePersonalInfo,
+                mobile,
+                address,
+                isVerified:true
+            })
+
+            if(!updatedUser){
+                throw new CustomError("Failed to update user details",StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+            return updatedUser
+            
+        } catch (error) {
+            
+            if(error instanceof CustomError){
+                throw error;
+            }
+
+            throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+        }
+    }
 
     
     

@@ -9,6 +9,7 @@ interface IUserRepository extends IBaseRepository<IUser>{
     findUserDataById(userId:string):Promise<IUser|null>
     updateUserStatus(userId:string,status:number):Promise<IUser|null>
     updatePassword(userId:string,hashedPassword:string):Promise<boolean>
+    updateUserDetails(email:string,updateData:Partial<IUser>):Promise<IUser|null>
     
 
 }

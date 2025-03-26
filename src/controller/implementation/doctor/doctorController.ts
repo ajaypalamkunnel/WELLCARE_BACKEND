@@ -94,12 +94,13 @@ class DoctorController implements IDoctorController {
                 sameSite: "strict",
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
             });
-
+            console.log("----->",doctor);
+            
             res.status(StatusCode.OK).json({
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
-                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isverified: doctor?.isVerified }
+                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isverified: doctor?.isVerified,isSubscribed:doctor?.isSubscribed,subscriptionExpiryDate:doctor?.subscriptionExpiryDate }
             })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })

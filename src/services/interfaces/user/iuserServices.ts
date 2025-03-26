@@ -1,7 +1,7 @@
 
 
 import { IDepartment } from "../../../model/department/departmentModel";
-import { IUser } from "../../../model/user/userModel";
+import { IAddress, IUser } from "../../../model/user/userModel";
 
 
 
@@ -36,4 +36,6 @@ export interface IUserService{
     updateUserStatus(userId:string,status:number):Promise<IUser|null>
 
     changePassword(userId:string,currentPassword:string,newPassword:string):Promise<{ success: true; message: string }>
+
+    completeUserRegistration(email:string,mobile:string,personalInfo:Partial<IUser["personalInfo"]>,address:IAddress,fullName?:string,):Promise<IUser>
 }
