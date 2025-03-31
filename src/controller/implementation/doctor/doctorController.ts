@@ -100,7 +100,7 @@ class DoctorController implements IDoctorController {
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
-                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isverified: doctor?.isVerified,isSubscribed:doctor?.isSubscribed,subscriptionExpiryDate:doctor?.subscriptionExpiryDate }
+                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isVerified: doctor?.isVerified,isSubscribed:doctor?.isSubscribed,subscriptionExpiryDate:doctor?.subscriptionExpiryDate }
             })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })

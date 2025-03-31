@@ -10,6 +10,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import crypto from "crypto";
 import { IDoctorSubscription } from "../../../model/subscription/doctorSubscriptions";
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
+import DoctorSubscriptionRepository from "../../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
 
 
 
@@ -30,6 +31,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
             key_secret: process.env.RAZORPAY_KEY_SECRET!,
         });
     }
+   
 
 
     async createSubscriptionOrder(doctorId: string, planId: string): Promise<RazorpayOrderResponse> {
@@ -215,6 +217,31 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
     }
 
     //razropay order creation
+
+
+    async getDoctorSubscription(subscriptionId: string): Promise<IDoctorSubscription | null> {
+        try {
+
+            if(!subscriptionId){
+                throw new CustomError("Subscription ID is required",StatusCode.BAD_REQUEST)
+            }
+
+            const mySubscription = await this._doctorSubscriptionRepo.findSubscriptionById(subscriptionId)
+
+            if(!mySubscription){
+                throw new CustomError("Subscrition not found",StatusCode.NOT_FOUND)
+            }
+
+            return mySubscription
+            
+        } catch (error) {
+
+            console.error("service : Error fethcing doctor subscription ",error);
+
+            throw error
+            
+        }
+    }
 
 
 

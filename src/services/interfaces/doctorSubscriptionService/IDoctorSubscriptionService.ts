@@ -17,4 +17,7 @@ export interface IDoctorSubscriptionService{
         data?: IDoctorSubscription;
       }>;
 
+
+      getDoctorSubscription(subscriptionId:string):Promise<IDoctorSubscription|null>
+
 }

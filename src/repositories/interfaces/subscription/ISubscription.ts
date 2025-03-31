@@ -6,4 +6,5 @@ export default interface ISubscriptionRepository extends IBaseRepository<ISubscr
     findSubscriptionPlanByName(planName:string):Promise<ISubscription | null>
     getAllActivePlans(): Promise<ISubscription[]>;
     
+    
 }

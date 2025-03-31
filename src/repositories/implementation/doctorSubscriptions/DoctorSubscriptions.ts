@@ -8,6 +8,7 @@ class DoctorSubscriptionRepository extends BaseRepository<IDoctorSubscription> i
     constructor() {
         super(DoctorSubscription)
     }
+    
     async findByOrderId(orderId: string): Promise<IDoctorSubscription | null> {
         return await DoctorSubscription.findOne({ orderId })
     }
@@ -21,6 +22,10 @@ class DoctorSubscriptionRepository extends BaseRepository<IDoctorSubscription> i
             status: "active",
             endDate: { $gte: new Date() }
         }).populate<{ planId: ISubscription }>("planId", "serviceLimit planName duration price")
+    }
+
+    async findSubscriptionById(susbscriptionID: string): Promise<IDoctorSubscription | null> {
+        return await DoctorSubscription.findById(susbscriptionID).populate("planId")
     }
 }
 

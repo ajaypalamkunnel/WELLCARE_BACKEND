@@ -88,4 +88,8 @@ router.get("/get-services",authMiddleWare,checkDoctorBlocked,checkSubscription,c
 router.put("/update-service",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR), async (req,res)=>{
     await doctorServiceController.doctorServiceUpdate(req,res)
 })
+
+
+router.get("/get-my-subscription/:subscriptionId",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorSubscriptionController.getDoctorSubscriptionn(req,res)})
 export default router
