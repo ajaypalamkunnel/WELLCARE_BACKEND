@@ -118,7 +118,7 @@ export class AdminService implements IAdminService{
             
             
             const result = await this._adminRepository.getAllUsers(page, limit);
-            console.log(">>>>>>>>>",result)
+            // console.log(">>>>>>>>>",result)
             return {
                 users: result.users,
                 totalUsers: result.totalUsers ?? null

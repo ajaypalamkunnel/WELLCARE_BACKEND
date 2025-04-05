@@ -17,6 +17,9 @@ import DoctorServiceController from "../../controller/implementation/doctorServi
 import checkSubscription from "../../middleware/checkSubscription";
 import { checkRole } from "../../middleware/checkRole";
 import { Roles } from "../../types/roles";
+import DoctorScheduleRepository from "../../repositories/implementation/doctorService/doctorScheduleRepository";
+import DoctorScheduleService from "../../services/implementation/doctorServiceService/DoctorScheduleService";
+import DoctorScheduleController from "../../controller/implementation/doctorServiceController/doctorScheduleController";
 
 
 const router = Router();
@@ -38,6 +41,12 @@ const doctorSubscriptionController = new DoctorSubscriptionController(doctorSubs
 const doctorServiceRepository = new DoctorServiceRepository()
 const doctorServiceService = new DoctorServiceService(doctorServiceRepository,doctorRepository,doctorSubscriptionRepository)
 const doctorServiceController = new DoctorServiceController(doctorServiceService)
+
+const doctorScheduleRepository = new DoctorScheduleRepository()
+const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
+const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
+
+
 
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
@@ -90,6 +99,28 @@ router.put("/update-service",authMiddleWare,checkDoctorBlocked,checkSubscription
 })
 
 
-router.get("/get-my-subscription/:subscriptionId",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR),async(req,res)=>{
+router.get("/get-my-subscription/:subscriptionId",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
     await doctorSubscriptionController.getDoctorSubscriptionn(req,res)})
+
+
+router.post("/validate-schedule",authMiddleWare,checkDoctorBlocked,checkSubscription,checkRole(Roles.DOCTOR),async (req,res)=>{
+    await doctorScheduleController.validateSchedule(req,res)
+})
+
+
+router.post("/generate-slots",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorScheduleController.generateSlot(req,res)
+})
+
+router.post("/create-schedule",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorScheduleController.createSchedule(req,res)
+})
+
+
+router.get("/fetch-schedules",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
+    console.log("hi gutsssss");
+    
+    await doctorScheduleController.listSchedules(req,res)
+})
+
 export default router

@@ -56,7 +56,7 @@ class DoctorServiceController implements IDoctorServiceController {
             }
 
             const services = await this._doctorServiceService.getServicesByDoctor(doctorId as string);
-            console.log(">>>>>>>>",services);
+            // console.log(">>>>>>>>",services);
             
             return res.status(StatusCode.OK).json(generateSuccessResponse("Doctor services fetched successfully",services))
             

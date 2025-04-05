@@ -266,7 +266,7 @@ class DoctorService implements IDoctorService {
             // }
 
             const existingDoctor = await this._doctorRepository.findDoctorByEmail(email!);
-            console.log(">>>>>>>>", existingDoctor);
+            // console.log(">>>>>>>>", existingDoctor);
 
 
             if (!existingDoctor) {
