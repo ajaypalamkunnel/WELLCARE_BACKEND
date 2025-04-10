@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { IBaseRepository } from "../../base/IBaseRepository";
+import { IScheduleResponse } from "../../../types/bookingTypes";
+import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 
 
 export interface Pagination {
@@ -32,6 +34,15 @@ export default interface IDoctorScheduleRepository extends IBaseRepository<IDoct
         page?: number,
         limit?: number
     ): Promise<{schedules:IDoctorAvailability[];pagination:Pagination}>
+
+
+    getScheduleBySlot(scheduleId:string,slotId:string):Promise<IDoctorAvailability|null>
+    
+
+    getScheduleById(scheduleId: string):Promise<IDoctorAvailability|null>
+
+
+    findAvailableSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
 
 
 }

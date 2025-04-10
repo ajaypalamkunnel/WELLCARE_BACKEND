@@ -9,16 +9,22 @@ import { generteOTP } from "../../../utils/otpGenerator"
 import { IDepartment } from "../../../model/department/departmentModel";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
+import { isValidObjectId } from "mongoose";
+import { IScheduleResponse } from "../../../types/bookingTypes";
+import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
+import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 
 
 
 class UserService implements IUserService {
 
     private _userRepository: IUserRepository
+    // private _doctorScheduleRepository:IUserRepository
 
 
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository
+        
     }
     
     
@@ -405,6 +411,46 @@ class UserService implements IUserService {
             throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
         }
     }
+
+
+
+    async fetchScheduleByDoctorAndDate(doctorId: string, date: string): Promise<IScheduleResponse[]> {
+        try {
+
+
+            if(!doctorId || !isValidObjectId(doctorId)){
+                throw new CustomError("Invalid or missing doctorId.",StatusCode.BAD_REQUEST)
+            }
+
+
+            if (!date || isNaN(Date.parse(date))) {
+                throw new CustomError("Invalid or missing date.",StatusCode.BAD_REQUEST);
+              }
+
+
+              const dateObj = new Date(date)
+
+            
+            const schedules = await this._userRepository.fetchDoctorDaySchedule(doctorId,dateObj)
+
+           
+
+
+            return schedules
+        } catch (error) {
+
+            console.error("Error in fetchScheduleByDoctorAndDate schedule : ",error);
+
+            if (error instanceof CustomError) {
+                throw error;
+              }
+
+            throw new CustomError("Error in fetching doctor schedule",StatusCode.INTERNAL_SERVER_ERROR)
+            
+            
+        }
+    }
+
 
     
     

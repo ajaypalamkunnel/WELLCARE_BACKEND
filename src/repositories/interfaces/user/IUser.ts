@@ -1,4 +1,5 @@
 import {IUser} from '../../../model/user/userModel';
+import { IScheduleResponse } from '../../../types/bookingTypes';
 import { IBaseRepository } from '../../base/IBaseRepository';
 
 interface IUserRepository extends IBaseRepository<IUser>{
@@ -10,6 +11,8 @@ interface IUserRepository extends IBaseRepository<IUser>{
     updateUserStatus(userId:string,status:number):Promise<IUser|null>
     updatePassword(userId:string,hashedPassword:string):Promise<boolean>
     updateUserDetails(email:string,updateData:Partial<IUser>):Promise<IUser|null>
+
+    fetchDoctorDaySchedule(doctorId:string,date:Date):Promise<IScheduleResponse[]>
     
 
 }

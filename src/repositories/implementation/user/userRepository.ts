@@ -1,6 +1,11 @@
+import mongoose from "mongoose";
+import DoctorSchedules from "../../../model/doctorService/doctorSchedule";
 import { User, IUser } from "../../../model/user/userModel";
+import { IScheduleResponse } from "../../../types/bookingTypes";
 import { BaseRepository } from "../../base/BaseRepository";
 import IUserRepository from "../../interfaces/user/IUser";
+import { CustomError } from "../../../utils/CustomError";
+import { StatusCode } from "../../../constants/statusCode";
 
 class UserRepository extends BaseRepository<IUser> implements IUserRepository {
 
@@ -57,10 +62,108 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
             
         } catch (error) {
             console.error("Error updating user details");
+
+            if (error instanceof CustomError) {
+                throw error;
+              }
+
+
             throw new Error("Database error while fetching user details")
             
         }
     }
+
+
+
+    async fetchDoctorDaySchedule(doctorId: string, date: Date): Promise<IScheduleResponse[]> {
+
+        try {
+
+            const today = new Date();
+            today.setUTCHours(0,0,0,0);
+
+            const inputDate = new Date(date);
+            inputDate.setUTCHours(0, 0, 0, 0);
+
+
+            if (inputDate < today) {
+                throw new CustomError(
+                  "Fetching past date schedules is not allowed.",
+                  StatusCode.BAD_REQUEST
+                );
+              }
+
+
+            const startOfDay = new Date(date)
+            startOfDay.setUTCHours(0, 0, 0, 0);
+
+            const endOfDay = new Date(date);
+            endOfDay.setUTCHours(23, 59, 59, 999)
+
+
+
+            const schedules = await DoctorSchedules.aggregate<IScheduleResponse>([
+                {
+                    $match: {
+                        doctorId: new mongoose.Types.ObjectId(doctorId),
+                        date: {
+                            $gte: startOfDay,
+                            $lte: endOfDay
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "serviceId",
+                        foreignField: "_id",
+                        as: "service"
+                    }
+
+                },
+                {
+                    $unwind: "$service"
+
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        doctorId: 1,
+                        date: 1,
+                        start_time: 1,
+                        end_time: 1,
+                        duration: 1,
+                        availability: 1,
+                        serviceId: {
+                            _id: "$service._id",
+                            name: "$service.name",
+                            fee: "$service.fee",
+                            mode: "$service.mode",
+                        }
+                    }
+                }, {
+                    $sort: {
+                        start_time: 1
+                    }
+                }
+
+            ])
+
+            return schedules
+
+        } catch (error) {
+            console.error("fetchDoctorDaySchedule Repository Error:", error);
+
+            if (error instanceof CustomError) {
+                throw error;
+              }
+            throw new CustomError("Failed to fetch doctor schedules.", StatusCode.INTERNAL_SERVER_ERROR)
+        }
+
+    }
+
+
+    
     
 
 
@@ -73,3 +176,65 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
 }
 
 export default UserRepository
+
+
+// export async function fetchDoctorDaySchedule(
+//     doctorId: string,
+//     date: Date
+//   ): Promise<IScheduleResponse[]> {
+//     try {
+//       const startOfDay = new Date(date);
+//       startOfDay.setUTCHours(0, 0, 0, 0);
+  
+//       const endOfDay = new Date(date);
+//       endOfDay.setUTCHours(23, 59, 59, 999);
+  
+//       const schedules = await DoctorSchedules.aggregate<IScheduleResponse>([
+//         {
+//           $match: {
+//             doctorId: new mongoose.Types.ObjectId(doctorId),
+//             date: { $gte: startOfDay, $lte: endOfDay },
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: "services", // Must match your MongoDB collection name exactly
+//             localField: "serviceId",
+//             foreignField: "_id",
+//             as: "service",
+//           },
+//         },
+//         {
+//           $unwind: "$service", // Flatten the service array
+//         },
+//         {
+//           $project: {
+//             _id: 1,
+//             doctorId: 1,
+//             date: 1,
+//             start_time: 1,
+//             end_time: 1,
+//             duration: 1,
+//             availability: 1,
+//             serviceId: {
+//               _id: "$service._id",
+//               name: "$service.name",
+//               fee: "$service.fee",
+//               mode: "$service.mode",
+//             },
+//           },
+//         },
+//         {
+//           $sort: { start_time: 1 },
+//         },
+//       ]);
+  
+//       return schedules;
+//     } catch (error) {
+//       console.error("fetchDoctorDaySchedule Repository Error:", error);
+//       throw new CustomError(
+//         "Failed to fetch doctor schedules.",
+//         StatusCode.INTERNAL_SERVER_ERROR
+//       );
+//     }
+//   }

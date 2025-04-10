@@ -13,8 +13,19 @@ import DoctorRepository from "../../repositories/implementation/doctor/doctorRep
 import DoctorService from "../../services/implementation/doctor/doctorService";
 import { checkRole } from "../../middleware/checkRole";
 import { Roles } from "../../types/roles";
+import DoctorScheduleRepository from "../../repositories/implementation/doctorService/doctorScheduleRepository";
+import DoctorScheduleService from "../../services/implementation/doctorServiceService/DoctorScheduleService";
+import DoctorScheduleController from "../../controller/implementation/doctorServiceController/doctorScheduleController";
+import ConsultationBookingRepository from "../../repositories/implementation/consultationBooking/consultationBookingRepository";
+import ConsultationBookingService from "../../services/implementation/consultationBooking/consultationBookingService";
+import DoctorServiceRepository from "../../repositories/implementation/doctorService/doctorServiceRepository";
+import ConsultationBookingController from "../../controller/implementation/consultationBooking/consultationBookingController";
 const router = Router();
 
+
+const doctorScheduleRepository = new DoctorScheduleRepository()
+const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
+const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const userRepository = new UserRepository()
 const userService = new UserService(userRepository)
@@ -25,9 +36,21 @@ const departmentRepository = new DepartmentRepository()
 const departmentService = new DepartmentService(departmentRepository)
 const departmentController = new DepartmentController(departmentService)
 
+const doctorServiceRepository = new DoctorServiceRepository()
+
+
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
 const doctorController = new DoctorController(doctorService)
+
+
+const consultationBookingRepository = new ConsultationBookingRepository()
+const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository)
+const consultationBookingController = new ConsultationBookingController(consultationBookingService)
+
+
+
+
 
 router.post("/signup/basic_details", (req, res) => userController.registerBasicDetails(req, res))
 router.post("/signup/resend_otp", async (req, res) => { await userController.resendOtp(req, res) })
@@ -66,4 +89,27 @@ router.put("/change-password", authMiddleWare, checkUserBlocked,checkRole(Roles.
 router.put("/complete-registration", authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async (req,res)=>{
     await userController.completeUserRegistration(req,res)
 })
+
+
+router.get("/schedules",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async (req,res)=>{
+    await userController.getDoctorSchedules(req,res)
+})
+
+
+router.post("/consultation-booking/initiate",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.initiateAppointment(req,res)
+})
+
+router.post("/consultation-booking/verify",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.verifyAppointment(req,res)
+})
+
+router.get("/consultation-booking/details",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.fetchBookingDetails(req,res)
+})
+router.get("/my-appoinments",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.getUserAppointments(req,res)
+})
+
+
 export default router

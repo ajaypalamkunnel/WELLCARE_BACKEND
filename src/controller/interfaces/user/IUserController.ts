@@ -15,5 +15,6 @@ interface UserController{
     UpdateUserStatus(req:Request,res:Response):Promise<void>
     changePassword(req:Request,res:Response):Promise<Response>
     completeUserRegistration(req:Request,res:Response):Promise<Response>
+    getDoctorSchedules(req:Request,res:Response):Promise<Response>
 }
 export default UserController

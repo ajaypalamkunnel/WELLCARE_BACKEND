@@ -2,6 +2,7 @@
 
 import { IDepartment } from "../../../model/department/departmentModel";
 import { IAddress, IUser } from "../../../model/user/userModel";
+import { IScheduleResponse } from "../../../types/bookingTypes";
 
 
 
@@ -38,4 +39,10 @@ export interface IUserService{
     changePassword(userId:string,currentPassword:string,newPassword:string):Promise<{ success: true; message: string }>
 
     completeUserRegistration(email:string,mobile:string,personalInfo:Partial<IUser["personalInfo"]>,address:IAddress,fullName?:string,):Promise<IUser>
+
+
+    fetchScheduleByDoctorAndDate(doctorId:string,date:string):Promise<IScheduleResponse[]>
+
+
+
 }

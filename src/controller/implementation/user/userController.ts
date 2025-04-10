@@ -391,6 +391,31 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
         }
     }
 
+    async getDoctorSchedules(req: Request, res: Response): Promise<Response> {
+        try {
+
+            console.log("Ivade vannu");
+            
+
+            const {doctorId,date} = req.query;
+
+            const schedules = await this._userService.fetchScheduleByDoctorAndDate(
+                doctorId as string,
+                date as string
+            )
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Doctor schedules fetched successfully",schedules))
+            
+        } catch (error) {
+
+            console.error("Controller Error:", error);
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "internal server erroor"))
+            
+        }
+    }
+
 
 
 

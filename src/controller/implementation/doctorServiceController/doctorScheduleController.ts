@@ -15,6 +15,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
     constructor(doctorScheduleService: IDoctorScheduleService) {
         this._doctorScheduleService = doctorScheduleService
     }
+    
    
 
 
@@ -231,6 +232,9 @@ class DoctorScheduleController implements IDoctorScheduleController {
             
         }
     }
+
+
+   
 
 
 

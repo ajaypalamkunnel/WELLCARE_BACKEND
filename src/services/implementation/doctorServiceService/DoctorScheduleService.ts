@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import IDoctorScheduleRepository, { Pagination } from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import { IScheduleValidationResponse, TempSlot } from "../../../types/schedules";
 import { CustomError } from "../../../utils/CustomError";
 import IDoctorScheduleService from "../../interfaces/doctorServiceService/IDoctorScheduleService";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
+import { IScheduleResponse } from "../../../types/bookingTypes";
 
 
 class DoctorScheduleService implements IDoctorScheduleService {
@@ -14,6 +15,7 @@ class DoctorScheduleService implements IDoctorScheduleService {
     constructor(doctorScheduleRepository: IDoctorScheduleRepository) {
         this._doctorScheduleRepository = doctorScheduleRepository
     }
+    
     
 
 
@@ -199,6 +201,12 @@ class DoctorScheduleService implements IDoctorScheduleService {
             throw new CustomError("Error in fetching schedules:",StatusCode.INTERNAL_SERVER_ERROR)
         }
     }
+
+
+
+    
+
+
 
 
 

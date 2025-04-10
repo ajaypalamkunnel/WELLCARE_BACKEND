@@ -1,4 +1,5 @@
     import mongoose,{Schema,Document} from "mongoose";
+import { IDoctorService } from "./doctorServicesModal";
 
 
     export type SlotStatus =
