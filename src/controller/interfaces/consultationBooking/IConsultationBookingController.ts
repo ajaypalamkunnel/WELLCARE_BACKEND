@@ -6,7 +6,8 @@ export interface IConsultationBookingController{
     verifyAppointment(req: Request, res: Response):Promise<Response>
     fetchBookingDetails(req:Request,res:Response):Promise<Response>
     getUserAppointments(req: Request, res: Response): Promise<Response>;
-
+    getAppointmentDetail(req: Request, res: Response): Promise<Response>;
+    cancelAppointment(req: Request, res: Response):Promise<Response>
 }
 
 

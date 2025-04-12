@@ -1,5 +1,6 @@
+import { Types } from "mongoose";
 import { ISlot, SlotStatus } from "../../../model/doctorService/doctorSchedule";
-import { InitiateBookingResponse, VerifyAndBookResponse } from "../../../types/bookingTypes";
+import { AppointmentDetailDTO, InitiateBookingResponse, VerifyAndBookResponse } from "../../../types/bookingTypes";
 
 
 interface IConsultationBookingService{
@@ -32,6 +33,20 @@ interface IConsultationBookingService{
         patientId: string,
         statusKey: SlotStatus
       ): Promise<any[]>
+
+
+      getAppoinmentDetailsById(
+        appoinmentId:Types.ObjectId,
+        patientId:Types.ObjectId
+      ):Promise<AppointmentDetailDTO>
+
+
+
+      cancelAppointment(
+        patientId: Types.ObjectId,
+        appointmentId: Types.ObjectId,
+        reason?: string
+      ): Promise<{ refund: { status: string; amount: number } }>;
 
 }
 

@@ -1,7 +1,8 @@
-import { UpdateWriteOpResult } from "mongoose";
+import { Types, UpdateWriteOpResult } from "mongoose";
 import { IPayment } from "../../../model/bookingPayment/bookingPayment";
 import { IConsultationAppointment } from "../../../model/consultationBooking/consultationBooking";
 import { SlotStatus } from "../../../model/doctorService/doctorSchedule";
+import { AppointmentDetailDTO } from "../../../types/bookingTypes";
 
 
 interface IConsultationBookingRepository {
@@ -26,7 +27,17 @@ interface IConsultationBookingRepository {
         statusList: SlotStatus[]
       ): Promise<any[]>;
 
+    findAppoinmentDetailById(appointmentId:Types.ObjectId,patientId:Types.ObjectId):Promise<AppointmentDetailDTO|null>
 
+    findByIdAndPatient(
+        appointmentId: Types.ObjectId,
+        patientId: Types.ObjectId
+      ): Promise<IConsultationAppointment | null>;
+    
+      updateAppointmentCancellation(
+        appointmentId: Types.ObjectId,
+        updateData: Partial<IConsultationAppointment>
+      ): Promise<IConsultationAppointment | null>; 
 }
 
 export default IConsultationBookingRepository

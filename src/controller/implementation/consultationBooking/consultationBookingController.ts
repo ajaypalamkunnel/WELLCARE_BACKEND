@@ -5,6 +5,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 import { CustomError } from "../../../utils/CustomError";
 import { SlotStatus } from "../../../model/doctorService/doctorSchedule";
+import { Types } from "mongoose";
 
 
 
@@ -16,8 +17,9 @@ class ConsultationBookingController implements IConsultationBookingController {
     constructor(consultationBookingController: IConsultationBookingService) {
         this._consultationBookingController = consultationBookingController
     }
-    
-    
+
+
+
     async fetchBookingDetails(req: Request, res: Response): Promise<Response> {
 
         try {
@@ -74,50 +76,129 @@ class ConsultationBookingController implements IConsultationBookingController {
     }
     async verifyAppointment(req: Request, res: Response): Promise<Response> {
         try {
-            
+
             const result = await this._consultationBookingController.verifyAndBook(req.body);
 
             return res.status(StatusCode.CREATED).json(generateSuccessResponse("Appointment booked", result))
 
         } catch (error) {
-            
+
             console.error("Error verifing payment controller: ", error);
 
 
             return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
-            .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
 
-            
+
         }
     }
-    
+
     async getUserAppointments(req: Request, res: Response): Promise<Response> {
         try {
 
             const patientId = req.user?.userId
 
-            if(!patientId){
+            if (!patientId) {
                 throw new CustomError("Unauthorized access", StatusCode.UNAUTHORIZED);
             }
 
             const statusKey = (req.query.status as SlotStatus)?.toLowerCase() || "upcoming";
             const validStatus = ["upcoming", "completed", "cancelled"];
             if (!validStatus.includes(statusKey)) {
-              throw new CustomError("Invalid status filter", StatusCode.BAD_REQUEST);
+                throw new CustomError("Invalid status filter", StatusCode.BAD_REQUEST);
             }
 
 
-            const appoinments = await this._consultationBookingController.getUserAppointments(patientId,statusKey as SlotStatus)
+            const appoinments = await this._consultationBookingController.getUserAppointments(patientId, statusKey as SlotStatus)
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("Appointments fetched successfully",appoinments))
-           
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Appointments fetched successfully", appoinments))
+
         } catch (error) {
 
             return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
-            .json(error instanceof CustomError ? error.statusCode : "Internal server Error")
-            
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
         }
     }
+
+
+    async getAppointmentDetail(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const patientId = req.user?.userId;
+
+            if (!patientId) {
+                throw new CustomError("Unauthorized access", StatusCode.UNAUTHORIZED)
+            }
+
+            const appointmentIdParam = req.params.id;
+
+            console.log("----->", appointmentIdParam);
+
+
+            if (!Types.ObjectId.isValid(appointmentIdParam)) {
+                throw new CustomError("Invalid appointment ID", StatusCode.BAD_REQUEST);
+            }
+
+
+            const appoinmentId = new Types.ObjectId(appointmentIdParam)
+            const patientObjectId = new Types.ObjectId(patientId)
+
+
+            const detail = await this._consultationBookingController.getAppoinmentDetailsById(
+                appoinmentId,
+                patientObjectId
+            )
+
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Appoinment details fetched successfully", detail))
+
+
+
+
+        } catch (error) {
+
+            console.error("appoinment details fetch error", error);
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
+        }
+    }
+
+
+    async cancelAppointment(req: Request, res: Response): Promise<Response> {
+        try {
+
+
+            const appoinmentId = req.params.id
+            const reason = req.body.reason;
+            const patientId = req.user?.userId
+
+            if (!patientId) {
+                throw new CustomError("Unauthorized", StatusCode.UNAUTHORIZED);
+            }
+
+            if (!Types.ObjectId.isValid(appoinmentId)) {
+                throw new CustomError("Invalid appointment ID", StatusCode.BAD_REQUEST);
+            }
+
+            const result = await this._consultationBookingController.cancelAppointment(
+                new Types.ObjectId(patientId),
+                new Types.ObjectId(appoinmentId),
+                reason
+            )
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Appointment cancelled successfully", result.refund))
+
+        } catch (error) {
+            console.error("Controller Error", error);
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server Error"))
+
+        }
+    }
+
 }
 
 

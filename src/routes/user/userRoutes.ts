@@ -20,6 +20,8 @@ import ConsultationBookingRepository from "../../repositories/implementation/con
 import ConsultationBookingService from "../../services/implementation/consultationBooking/consultationBookingService";
 import DoctorServiceRepository from "../../repositories/implementation/doctorService/doctorServiceRepository";
 import ConsultationBookingController from "../../controller/implementation/consultationBooking/consultationBookingController";
+import WalletRepository from "../../repositories/implementation/wallet/WalletRepository";
+import WalletService from "../../services/implementation/wallet/WalletService";
 const router = Router();
 
 
@@ -39,13 +41,15 @@ const departmentController = new DepartmentController(departmentService)
 const doctorServiceRepository = new DoctorServiceRepository()
 
 
+
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
 const doctorController = new DoctorController(doctorService)
 
-
+const walletRepository = new WalletRepository()
+const walletService = new WalletService(walletRepository)
 const consultationBookingRepository = new ConsultationBookingRepository()
-const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository)
+const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
 const consultationBookingController = new ConsultationBookingController(consultationBookingService)
 
 
@@ -110,6 +114,13 @@ router.get("/consultation-booking/details",authMiddleWare,checkUserBlocked,check
 router.get("/my-appoinments",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
     await consultationBookingController.getUserAppointments(req,res)
 })
+router.get("/my-appoinments-detail/:id",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.getAppointmentDetail(req,res)
+})
 
+
+router.patch("/appointments/:id/cancel",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
+    await consultationBookingController.cancelAppointment(req,res)
+})
 
 export default router

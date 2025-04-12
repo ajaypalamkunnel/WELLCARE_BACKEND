@@ -4,7 +4,7 @@ import { ISlot, SlotStatus } from "../../../model/doctorService/doctorSchedule";
 import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import IConsultationBookingRepository from "../../../repositories/interfaces/consultationBooking/IConsultationBookingRepository";
 import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
-import { InitiateBookingResponse, PopulatedServiceId, VerifyAndBookResponse } from "../../../types/bookingTypes";
+import { AppointmentDetailDTO, InitiateBookingResponse, PopulatedServiceId, VerifyAndBookResponse } from "../../../types/bookingTypes";
 import { CustomError } from "../../../utils/CustomError";
 import IConsultationBookingService from "../../interfaces/consultationBooking/IConsultationBookingService";
 import DoctorServiceRepository from "../../../repositories/implementation/doctorService/doctorServiceRepository";
@@ -12,6 +12,8 @@ import IDoctorServiceRepository from "../../../repositories/interfaces/doctorSer
 import { razorpayInstance } from "../../../utils/razorpayUtils";
 import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import crypto from "crypto";
+import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
+import IWalletService from "../../interfaces/wallet/IWalletService";
 
 
 class ConsultationBookingService implements IConsultationBookingService {
@@ -19,13 +21,19 @@ class ConsultationBookingService implements IConsultationBookingService {
     private _consultationBookingRepository: IConsultationBookingRepository
     private _doctorScheduleRepository: IDoctorScheduleRepository
     private _doctorServiceRepository: IDoctorServiceRepository
+    private _walletRepository:IWalletRepository
+    private _walletService:IWalletService
 
-
-    constructor(consultationBookingRepository: IConsultationBookingRepository, doctorScheduleRepository: IDoctorScheduleRepository, doctorServiceRepository: IDoctorServiceRepository) {
+    constructor(consultationBookingRepository: IConsultationBookingRepository, doctorScheduleRepository: IDoctorScheduleRepository, doctorServiceRepository: IDoctorServiceRepository,walletRepository:IWalletRepository,walletService:IWalletService) {
         this._consultationBookingRepository = consultationBookingRepository
         this._doctorScheduleRepository = doctorScheduleRepository
         this._doctorServiceRepository = doctorServiceRepository
+        this._walletRepository =  walletRepository
+        this._walletService = walletService
+
     }
+    
+    
     
 
     async getBookingDetails(bookingId: string, slotId: string): Promise<IConsultationBookingService & ISlot> {
@@ -297,6 +305,130 @@ class ConsultationBookingService implements IConsultationBookingService {
             }else{
                 throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
             }
+        }
+    }
+
+
+
+    async getAppoinmentDetailsById(appoinmentId: Types.ObjectId, patientId: Types.ObjectId): Promise<AppointmentDetailDTO> {
+        
+        try {
+
+            if(!Types.ObjectId.isValid(appoinmentId.toString())){
+                throw new CustomError("Invalid appointment ID", StatusCode.BAD_REQUEST)
+            }
+
+            const appointment = await this._consultationBookingRepository.findAppoinmentDetailById(appoinmentId,patientId)
+
+            if(!appointment){
+                throw new CustomError("Appoinment not found",StatusCode.NOT_FOUND)
+            }
+            return appointment
+        } catch (error) {
+
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            }
+            
+        }
+    }
+
+
+
+   async cancelAppointment(patientId: Types.ObjectId, appointmentId: Types.ObjectId, reason?: string): Promise<{ refund: { status: string; amount: number; }; }> {
+        try {
+            if(!Types.ObjectId.isValid(appointmentId.toString())){
+                throw new CustomError("Invalid appointment ID", StatusCode.BAD_REQUEST)
+            }
+
+
+            const appointment = await this._consultationBookingRepository.findByIdAndPatient(
+                appointmentId,
+                patientId
+            )
+
+
+            if(!appointment){
+                throw new CustomError("Appointment not Found",StatusCode.NOT_FOUND)
+            }
+
+
+            const schedule = await this._doctorScheduleRepository.findById(appointment.doctorScheduleId.toString())
+
+            if(!schedule){
+                throw new CustomError("Doctor schedule not found", StatusCode.NOT_FOUND)
+            }
+
+            console.log("****",schedule.availability)
+            console.log("===>",appointment.slotId)
+
+
+            const slot = schedule.availability.find(slot=>{
+                return slot.slot_id.toString() === appointment.slotId.toString()
+            })
+
+            console.log("slot :",slot)
+
+
+            if(!slot){
+                throw new CustomError("Slot not found in schedule", StatusCode.NOT_FOUND)
+            }
+
+            const slotStartTime = new Date(slot.start_time);
+
+            const now = new Date() 
+            const isEligibleForRefund = slotStartTime.getTime() - now.getTime() >= 4 * 60 * 60 * 1000;
+
+
+            const service = await this._doctorServiceRepository.findById(appointment.serviceId.toString())
+
+
+            if(!service){
+                throw new CustomError("Service not found",StatusCode.NOT_FOUND)
+            }
+
+            
+
+
+            const refundAmount = isEligibleForRefund ? service.fee :0
+
+            if(isEligibleForRefund){
+                await this._walletService.creditRefund(
+                    patientId,
+                    refundAmount,
+                    "Appoinement Refund",
+                    appointment._id
+
+                )
+            }
+
+
+            // Update appointment as cancelled
+
+            await this._consultationBookingRepository.updateAppointmentCancellation(appointment._id,{
+                status:"cancelled",
+                cancellation:{
+                    reason:reason || "Not specific",
+                    cancelledAt:now,
+                    refundStatus:isEligibleForRefund ? "eligible" : "not_eligible",
+                    refundAmount:refundAmount
+                }
+            })
+
+            return {
+                refund: {
+                    status: isEligibleForRefund ? "eligible" : "not_eligible",
+                    amount: refundAmount
+                  }
+
+            }
+        } catch (error) {
+            console.error("Cancellation failed:", error); 
+            
+            throw error instanceof CustomError ? error: new CustomError("Failed to cancel appointment", StatusCode.INTERNAL_SERVER_ERROR)
+
         }
     }
 
