@@ -89,3 +89,86 @@ export interface CancelAppointmentResponseDTO {
   };
 }
 
+
+
+
+export interface DoctorAppointmentListItemDTO {
+  _id: string;
+  appointmentDate: Date;
+  status: "booked" | "completed" | "cancelled" | "pending" | "rescheduled";
+  paymentStatus: "paid" | "pending" | "failed" | "unpaid" | "refunded";
+  slot: {
+    start_time: Date;
+    end_time: Date;
+  };
+  patient: {
+    _id: string;
+    fullName: string;
+    gender: "male" | "female";
+    profileUrl?: string;
+  };
+  service: {
+    name: string;
+    mode: "online" | "in-person" | "both";
+  };
+}
+
+
+
+export interface PaginatedAppointmentListDTO {
+  data: DoctorAppointmentListItemDTO[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+
+
+export interface DoctorAppointmentDetailDTO {
+  _id: string;
+  appointmentDate: Date;
+  status: string;
+  paymentStatus: string;
+
+  slot: {
+    start_time: Date;
+    end_time: Date;
+  };
+
+  service: {
+    name: string;
+    mode: "Online" | "In-Person";
+    fee: number;
+    description?: string;
+  };
+
+  patient: {
+    _id: string;
+    fullName: string;
+    gender: string;
+    mobile: string;
+    profileUrl?: string;
+    address?: {
+      houseName?: string;
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    personalInfo?: {
+      age: number;
+      blood_group: string;
+      allergies: string;
+      chronic_disease: string;
+    };
+  };
+
+  prescription?: {
+    _id: string;
+    fileUrl: string;
+    diagnosis: string;
+  };
+}

@@ -20,6 +20,11 @@ import { Roles } from "../../types/roles";
 import DoctorScheduleRepository from "../../repositories/implementation/doctorService/doctorScheduleRepository";
 import DoctorScheduleService from "../../services/implementation/doctorServiceService/DoctorScheduleService";
 import DoctorScheduleController from "../../controller/implementation/doctorServiceController/doctorScheduleController";
+import ConsultationBookingRepository from "../../repositories/implementation/consultationBooking/consultationBookingRepository";
+import ConsultationBookingService from "../../services/implementation/consultationBooking/consultationBookingService";
+import WalletRepository from "../../repositories/implementation/wallet/WalletRepository";
+import WalletService from "../../services/implementation/wallet/WalletService";
+import ConsultationBookingController from "../../controller/implementation/consultationBooking/consultationBookingController";
 
 
 const router = Router();
@@ -46,7 +51,12 @@ const doctorScheduleRepository = new DoctorScheduleRepository()
 const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
 const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
+const walletRepository = new WalletRepository()
+const walletService = new WalletService(walletRepository)
 
+const consultationAppointmentRepository = new ConsultationBookingRepository()
+const consultationAppointmentService = new ConsultationBookingService(consultationAppointmentRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
+const consultationAppointmentController = new ConsultationBookingController(consultationAppointmentService)
 
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
@@ -121,6 +131,14 @@ router.get("/fetch-schedules",authMiddleWare,checkDoctorBlocked,checkRole(Roles.
     console.log("hi gutsssss");
     
     await doctorScheduleController.listSchedules(req,res)
+})
+
+router.get("/appointments",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await consultationAppointmentController.listAppointments(req,res)
+})
+
+router.get("/appointments/:appointmentId/details",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await consultationAppointmentController.getAppointmentDetailForDoctor(req,res)
 })
 
 export default router

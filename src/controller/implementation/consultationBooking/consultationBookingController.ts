@@ -17,6 +17,7 @@ class ConsultationBookingController implements IConsultationBookingController {
     constructor(consultationBookingController: IConsultationBookingService) {
         this._consultationBookingController = consultationBookingController
     }
+    
 
 
 
@@ -198,6 +199,82 @@ class ConsultationBookingController implements IConsultationBookingController {
 
         }
     }
+
+    async listAppointments(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const doctorId = req.user?.userId;
+            const doctorIdObject = new Types.ObjectId(doctorId)
+
+            if(!doctorId){
+                throw new CustomError("Unauthorized access", StatusCode.UNAUTHORIZED);
+            }
+
+
+
+
+            const filters = {
+                date: req.query.date?.toString(),
+                mode: req.query.mode?.toString(),
+                status: req.query.status?.toString(),
+                page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
+                limit: 10,
+              };
+
+              console.log("Filters sent to API:", filters);
+              
+
+            const result = await this._consultationBookingController.findAppointmentsForDoctor(doctorIdObject,filters)
+
+              return res.status(StatusCode.OK).json(generateSuccessResponse("Appointments fetched successfully",result))
+            
+        } catch (error) {
+
+            console.log("List appoinments controller error",error)
+
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+            
+        }
+    }
+
+
+    async getAppointmentDetailForDoctor(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const doctorId = req.user?.userId;
+
+            if(!doctorId){
+                throw new CustomError("Unauthorized access", StatusCode.UNAUTHORIZED)
+            }
+
+            const { appointmentId } = req.params;
+
+            const appointmentDetail = await this._consultationBookingController.getAppointmentDetailForDoctor(
+                appointmentId,
+                new Types.ObjectId(doctorId)
+            )
+
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Appointment detail fetched", appointmentDetail))
+
+
+            
+        } catch (error) {
+
+            console.error(" getAppointmentDetailForDoctor error:", error);
+
+            return res
+              .status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+              .json(
+                generateErrorResponse(
+                  error instanceof CustomError ? error.message : "Internal server error"
+                )
+              );
+            
+        }
+    }
+    
 
 }
 
