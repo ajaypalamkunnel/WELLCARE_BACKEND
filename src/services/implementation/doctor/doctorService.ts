@@ -9,6 +9,7 @@ import UserRepository from "../../../repositories/implementation/user/userReposi
 import { CustomError } from "../../../utils/CustomError";
 import mongoose from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
+import { firstChatDTO } from "../../../types/chat";
 
 
 class DoctorService implements IDoctorService {
@@ -18,6 +19,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
+    
 
 
 
@@ -542,6 +544,27 @@ class DoctorService implements IDoctorService {
 
     }
 
+
+    async getDoctorChatInfo(doctorId: string): Promise<firstChatDTO> {
+        try {
+
+            const doctor = await this._doctorRepository.getBasicDoctorInfoById(doctorId);
+
+            if (!doctor) {
+                throw new CustomError("Doctor not found", StatusCode.NOT_FOUND);
+            }
+
+
+            return doctor
+
+        } catch (error) {
+            throw error instanceof CustomError
+            ? error
+            : new CustomError("Failed to fetch doctor info", StatusCode.INTERNAL_SERVER_ERROR);
+         
+
+        }
+    }
 
 
 

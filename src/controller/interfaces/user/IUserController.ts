@@ -16,5 +16,6 @@ interface UserController{
     changePassword(req:Request,res:Response):Promise<Response>
     completeUserRegistration(req:Request,res:Response):Promise<Response>
     getDoctorSchedules(req:Request,res:Response):Promise<Response>
+    getUserInfoForChat(req: Request, res: Response): Promise<Response>
 }
 export default UserController

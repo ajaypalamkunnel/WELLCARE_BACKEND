@@ -6,6 +6,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import { handleErrorResponse } from "../../../utils/errorHandler";
 import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
+import { ChatUser } from "../../../types/chat";
 
 
 class DoctorController implements IDoctorController {
@@ -15,7 +16,8 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
-    
+
+
     //------------------ Docotor basic registration at signup-----------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
@@ -94,13 +96,13 @@ class DoctorController implements IDoctorController {
                 sameSite: "strict",
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
             });
-            console.log("----->",doctor);
-            
+            console.log("----->", doctor);
+
             res.status(StatusCode.OK).json({
                 success: true,
                 message: "Login successful",
                 doctorAccessToken,
-                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isVerified: doctor?.isVerified,isSubscribed:doctor?.isSubscribed,subscriptionExpiryDate:doctor?.subscriptionExpiryDate }
+                doctor: { id: doctor?._id, email: doctor?.email, fullName: doctor?.fullName, isVerified: doctor?.isVerified, isSubscribed: doctor?.isSubscribed, subscriptionExpiryDate: doctor?.subscriptionExpiryDate }
             })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
@@ -432,13 +434,13 @@ class DoctorController implements IDoctorController {
     async getDoctorProfile(req: Request, res: Response): Promise<Response> {
         try {
 
-            const {doctorId} = req.params
+            const { doctorId } = req.params
 
-            console.log("====>",doctorId);
-            
+            console.log("====>", doctorId);
 
-            if(!doctorId){
-                return res.status(StatusCode.BAD_REQUEST).json({ message: "Doctor ID is required"})
+
+            if (!doctorId) {
+                return res.status(StatusCode.BAD_REQUEST).json({ message: "Doctor ID is required" })
             }
 
             const doctor = await this._doctorService.detailedDoctorProfile(doctorId)
@@ -446,20 +448,64 @@ class DoctorController implements IDoctorController {
             return res.status(StatusCode.OK).json(doctor)
 
 
-            
-        } catch (error:unknown) {
+
+        } catch (error: unknown) {
 
             console.error("Error fetching doctor profile:", error);
             if (error instanceof CustomError) {
                 return res.status(error.statusCode).json({ message: error.message });
-              }
+            }
 
-              if (error instanceof Error) {
+            if (error instanceof Error) {
                 return res.status(500).json({ message: error.message });
-              }
-            
-              return res.status(500).json({ message: "Internal Server Error" });
-            
+            }
+
+            return res.status(500).json({ message: "Internal Server Error" });
+
+        }
+    }
+
+
+    async getDoctorInfoForChat(req: Request, res: Response): Promise<Response> {
+        try {
+
+
+
+            const { doctorId } = req.params;
+
+            console.log(" getDoctorInfoForChat controller",doctorId )
+
+            if (!doctorId) {
+                throw new CustomError("Doctor ID is required", StatusCode.BAD_REQUEST);
+            }
+
+            const doctor = await this._doctorService.getDoctorChatInfo(doctorId);
+            console.log("element==",doctor)
+
+            const formatted: ChatUser = {
+                _id: doctor._id.toString(),
+                fullName: doctor.fullName,
+                profileImage: doctor?.profileImage,
+                lastMessage: "",
+                lastMessageTime: "",
+                unreadCount: 0,
+                isOnline: false
+            };
+
+
+            return res.status(200).json(generateSuccessResponse("Doctor info fetched", formatted));
+
+
+        } catch (error) {
+            console.error(" Error fetching doctor info:", error);
+            return res
+                .status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(
+                    generateErrorResponse(
+                        error instanceof CustomError ? error.message : "Internal Server Error"
+                    )
+                );
+
         }
     }
 

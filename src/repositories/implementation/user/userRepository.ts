@@ -6,6 +6,7 @@ import { BaseRepository } from "../../base/BaseRepository";
 import IUserRepository from "../../interfaces/user/IUser";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
+import { firstChatDTO } from "../../../types/chat";
 
 class UserRepository extends BaseRepository<IUser> implements IUserRepository {
 
@@ -161,6 +162,12 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
         }
 
     }
+
+
+    async getBasicUserInfoById(userId: string): Promise<firstChatDTO | null> {
+        return await User.findById(userId,"_id fullName profileUrl")
+    }
+    
 
 
     

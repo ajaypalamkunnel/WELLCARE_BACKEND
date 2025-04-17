@@ -22,6 +22,9 @@ import DoctorServiceRepository from "../../repositories/implementation/doctorSer
 import ConsultationBookingController from "../../controller/implementation/consultationBooking/consultationBookingController";
 import WalletRepository from "../../repositories/implementation/wallet/WalletRepository";
 import WalletService from "../../services/implementation/wallet/WalletService";
+import MessageRepository from "../../repositories/implementation/chat/MessageRepository";
+import ChatService from "../../services/implementation/chat/messageService";
+import MessageController from "../../controller/implementation/chat/MessageController";
 const router = Router();
 
 
@@ -52,7 +55,9 @@ const consultationBookingRepository = new ConsultationBookingRepository()
 const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
 const consultationBookingController = new ConsultationBookingController(consultationBookingService)
 
-
+const chatRepository = new MessageRepository()
+const chatService = new ChatService(chatRepository)
+const chatController = new MessageController(chatService)
 
 
 
@@ -100,6 +105,7 @@ router.get("/schedules",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),as
 })
 
 
+
 router.post("/consultation-booking/initiate",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
     await consultationBookingController.initiateAppointment(req,res)
 })
@@ -122,5 +128,19 @@ router.get("/my-appoinments-detail/:id",authMiddleWare,checkUserBlocked,checkRol
 router.patch("/appointments/:id/cancel",authMiddleWare,checkUserBlocked,checkRole(Roles.USER),async(req,res)=>{
     await consultationBookingController.cancelAppointment(req,res)
 })
+
+
+
+//inbox left side panel
+router.get("/inbox",authMiddleWare,checkRole(Roles.USER),(req,res)=>{
+    chatController.getInbox(req,res)
+})
+
+
+router.get("/user-info/:userId",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await userController.getUserInfoForChat(req,res)
+})
+
+
 
 export default router

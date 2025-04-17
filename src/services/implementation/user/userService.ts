@@ -13,6 +13,7 @@ import { isValidObjectId } from "mongoose";
 import { IScheduleResponse } from "../../../types/bookingTypes";
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
+import { firstChatDTO } from "../../../types/chat";
 
 
 
@@ -24,13 +25,13 @@ class UserService implements IUserService {
 
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository
-        
+
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
 
     private generteOTP(): string {
@@ -146,7 +147,7 @@ class UserService implements IUserService {
             throw new Error("Invalid email or password.")
         }
 
-        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email, role:"user" })
+        const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email, role: "user" })
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
         await this._userRepository.updateRefreshToken(user._id.toString(), refreshToken)
@@ -178,9 +179,9 @@ class UserService implements IUserService {
 
     async forgotPassword(email: string): Promise<void> {
         console.log("I am from forgotPassword");
-        
+
         console.log(email);
-        
+
         try {
             const user = await this._userRepository.findUserByEmail(email)
 
@@ -204,12 +205,12 @@ class UserService implements IUserService {
                 console.error("Failed to send OTP email:", emailError);
                 throw new Error("Failed to send OTP email. Please try again.");
             }
-    
+
             //Save OTP only if email was sent successfully
             await this._userRepository.update(user._id.toString(), { otp, otpExpires });
-    
+
             console.log(`Forgot password OTP sent to ${email}.`);
-            
+
         } catch (error) {
             console.error("Error in forgotPassword service:", error);
 
@@ -239,9 +240,9 @@ class UserService implements IUserService {
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
 
-            await this._userRepository.update(user._id.toString(),{password:hashedPassword})
+            await this._userRepository.update(user._id.toString(), { password: hashedPassword })
 
-            
+
         } catch (error) {
             console.error("Error in forgotPassword:", error);
 
@@ -251,36 +252,36 @@ class UserService implements IUserService {
                 throw new Error("An unexpected error occurred while processing the forgot password request.");
             }
         }
-        
+
     }
 
 
     async findOrCreateUser(email: string, name: string, avatar: string, role: string): Promise<IUser | null> {
         let user = await this._userRepository.findUserByEmail(email)
 
-      
-        
-        if(!user){
+
+
+        if (!user) {
             console.log("hi Ima patient")
             user = await this._userRepository.create({
-                fullName:name,
+                fullName: name,
                 email,
-                profileUrl:avatar,
-                password:email,
-                isVerified:false,
-                status:1,
-                refreshToken:""
+                profileUrl: avatar,
+                password: email,
+                isVerified: false,
+                status: 1,
+                refreshToken: ""
             });
             return user
         }
         return user
     }
-    
-   async generateTokens(user: IUser): Promise<{ accessToken: string; refreshToken: string; }> {
+
+    async generateTokens(user: IUser): Promise<{ accessToken: string; refreshToken: string; }> {
         const accessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        return {accessToken,refreshToken}
+        return { accessToken, refreshToken }
     }
 
     //for passport.js
@@ -301,83 +302,83 @@ class UserService implements IUserService {
 
     async updateUserStatus(userId: string, status: number): Promise<IUser | null> {
         try {
- 
-         if(![1,-1].includes(status)){
-             throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
- 
-         }
- 
-         const existingUser = await this._userRepository.findById(userId)
- 
-         if(!existingUser){
-             throw new Error("user not found")
-         }
- 
-         const updatedUser = await this._userRepository.updateUserStatus(userId, status)
- 
-         if(!updatedUser){
-             throw new Error("Failed to update user status")
-         }
-         return updatedUser
+
+            if (![1, -1].includes(status)) {
+                throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
+
+            }
+
+            const existingUser = await this._userRepository.findById(userId)
+
+            if (!existingUser) {
+                throw new Error("user not found")
+            }
+
+            const updatedUser = await this._userRepository.updateUserStatus(userId, status)
+
+            if (!updatedUser) {
+                throw new Error("Failed to update user status")
+            }
+            return updatedUser
         } catch (error) {
-         console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
-         throw error
-         
+            console.error(`Error in updateDoctorStatus: ${error instanceof Error ? error.message : error}`);
+            throw error
+
         }
-     }
+    }
 
 
     async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<{ success: true; message: string; }> {
-       try{
+        try {
 
             const user = await this._userRepository.findById(userId)
 
-            if(!user){
-                throw new CustomError("User not found",StatusCode.NOT_FOUND)
+            if (!user) {
+                throw new CustomError("User not found", StatusCode.NOT_FOUND)
             }
 
-            const isMatch = await PasswordUtils.comparePassword(currentPassword,user.password)
+            const isMatch = await PasswordUtils.comparePassword(currentPassword, user.password)
 
-            if(!isMatch){
-                throw new CustomError("Incorrect current password",StatusCode.BAD_REQUEST)
+            if (!isMatch) {
+                throw new CustomError("Incorrect current password", StatusCode.BAD_REQUEST)
             }
 
-            const isSamePassword = await PasswordUtils.comparePassword(newPassword,user.password)
+            const isSamePassword = await PasswordUtils.comparePassword(newPassword, user.password)
 
-            if(isSamePassword){
-                throw new CustomError("New password must be different from the old password",StatusCode.BAD_REQUEST)
+            if (isSamePassword) {
+                throw new CustomError("New password must be different from the old password", StatusCode.BAD_REQUEST)
             }
 
 
             const hashedPassword = await PasswordUtils.hashPassword(newPassword)
 
-            const updated = await this._userRepository.updatePassword(userId,hashedPassword)
+            const updated = await this._userRepository.updatePassword(userId, hashedPassword)
 
-            if(!updated){
-                throw new CustomError("Failed to update passsword",StatusCode.INTERNAL_SERVER_ERROR)
+            if (!updated) {
+                throw new CustomError("Failed to update passsword", StatusCode.INTERNAL_SERVER_ERROR)
 
             }
 
-            return {success:true,message:"Password updated succesfully"}
+            return { success: true, message: "Password updated succesfully" }
 
-       }catch(error){
+        } catch (error) {
 
-        if(error instanceof CustomError){
-            throw error
+            if (error instanceof CustomError) {
+                throw error
+            }
+
+            throw new CustomError("Internal Server error", StatusCode.INTERNAL_SERVER_ERROR)
+
         }
-
-        throw new CustomError("Internal Server error",StatusCode.INTERNAL_SERVER_ERROR)
-
-       }
     }
 
 
-    async completeUserRegistration(email: string,mobile:string, personalInfo: Partial<IUser["personalInfo"]>, address: IAddress,fullName?:string,): Promise<IUser> {
+    async completeUserRegistration(email: string, mobile: string, personalInfo: Partial<IUser["personalInfo"]>, address: IAddress, fullName?: string,): Promise<IUser> {
         try {
             const user = await this._userRepository.findUserByEmail(email)
 
-            if(!user){
-                throw new CustomError("User Not found",StatusCode.NOT_FOUND)
+            if (!user) {
+                throw new CustomError("User Not found", StatusCode.NOT_FOUND)
             }
 
 
@@ -388,27 +389,27 @@ class UserService implements IUserService {
                 allergies: personalInfo.allergies ?? user.personalInfo.allergies ?? "",
                 chronic_disease: personalInfo.chronic_disease ?? user.personalInfo.chronic_disease ?? ""
             };
-            const updatedUser = await this._userRepository.updateUserDetails(email,{
-                fullName:fullName || user.fullName,
+            const updatedUser = await this._userRepository.updateUserDetails(email, {
+                fullName: fullName || user.fullName,
                 personalInfo: completePersonalInfo,
                 mobile,
                 address,
-                isVerified:true
+                isVerified: true
             })
 
-            if(!updatedUser){
-                throw new CustomError("Failed to update user details",StatusCode.INTERNAL_SERVER_ERROR)
+            if (!updatedUser) {
+                throw new CustomError("Failed to update user details", StatusCode.INTERNAL_SERVER_ERROR)
             }
 
             return updatedUser
-            
+
         } catch (error) {
-            
-            if(error instanceof CustomError){
+
+            if (error instanceof CustomError) {
                 throw error;
             }
 
-            throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -418,44 +419,66 @@ class UserService implements IUserService {
         try {
 
 
-            if(!doctorId || !isValidObjectId(doctorId)){
-                throw new CustomError("Invalid or missing doctorId.",StatusCode.BAD_REQUEST)
+            if (!doctorId || !isValidObjectId(doctorId)) {
+                throw new CustomError("Invalid or missing doctorId.", StatusCode.BAD_REQUEST)
             }
 
 
             if (!date || isNaN(Date.parse(date))) {
-                throw new CustomError("Invalid or missing date.",StatusCode.BAD_REQUEST);
-              }
+                throw new CustomError("Invalid or missing date.", StatusCode.BAD_REQUEST);
+            }
 
 
-              const dateObj = new Date(date)
+            const dateObj = new Date(date)
 
-            
-            const schedules = await this._userRepository.fetchDoctorDaySchedule(doctorId,dateObj)
 
-           
+            const schedules = await this._userRepository.fetchDoctorDaySchedule(doctorId, dateObj)
+
+
 
 
             return schedules
         } catch (error) {
 
-            console.error("Error in fetchScheduleByDoctorAndDate schedule : ",error);
+            console.error("Error in fetchScheduleByDoctorAndDate schedule : ", error);
 
             if (error instanceof CustomError) {
                 throw error;
-              }
+            }
 
-            throw new CustomError("Error in fetching doctor schedule",StatusCode.INTERNAL_SERVER_ERROR)
-            
-            
+            throw new CustomError("Error in fetching doctor schedule", StatusCode.INTERNAL_SERVER_ERROR)
+
+
         }
     }
 
 
-    
-    
+    async getUserChatInfo(userId: string): Promise<firstChatDTO> {
+        try {
+
+            const user = await this._userRepository.getBasicUserInfoById(userId)
+
+            if (!user) {
+                throw new CustomError("user not found", StatusCode.NOT_FOUND);
+            }
+            return user
+
+        } catch (error) {
+            throw error instanceof CustomError
+                ? error
+                : new CustomError("Failed to fetch user info", StatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }
+
+
+
+
+
+
+
 
 export default UserService
 

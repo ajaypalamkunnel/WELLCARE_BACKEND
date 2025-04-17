@@ -14,6 +14,7 @@ import { threadId } from "worker_threads";
 import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 import { add } from "winston";
+import { ChatUser } from "../../../types/chat";
 
 class UserController implements IUserController {
 
@@ -22,8 +23,9 @@ class UserController implements IUserController {
     constructor(_userService: IUserService) {
         this._userService = _userService
     }
-    
-    
+
+
+
     //---------------------------Basic registration -----------------------------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
@@ -62,7 +64,7 @@ class UserController implements IUserController {
     }
 
     //--------------------------- Verify OTP -----------------------------------------------
-    
+
     async verifyOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body
@@ -70,17 +72,17 @@ class UserController implements IUserController {
                 res.status(StatusCode.BAD_REQUEST).json({ error: "Email and OTP are required" })
                 return
             }
-            
+
             await this._userService.verifyOtp(email, otp)
-            
+
             res.status(StatusCode.OK).json({ message: "OTP verified successfully. Your account is now activated." })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "OTP verification failed" })
         }
     }
-    
+
     //--------------------------- Login post request -----------------------------------------------
-    
+
     async postLogin(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body
@@ -98,9 +100,9 @@ class UserController implements IUserController {
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
-                
+
             })
-            
+
             res.cookie("auth_token", accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -114,7 +116,7 @@ class UserController implements IUserController {
                 success: true,
                 message: "Login succesful",
                 accessToken,
-                user: { id: user?._id, email: user?.email, isVerified:user?.isVerified, fullName: user?.fullName }
+                user: { id: user?._id, email: user?.email, isVerified: user?.isVerified, fullName: user?.fullName }
             })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Login failed" })
@@ -123,12 +125,12 @@ class UserController implements IUserController {
 
 
     //--------------------------- renew token -----------------------------------------------
-    
+
     async renewAuthTokens(req: Request, res: Response): Promise<void> {
         try {
             const oldRefreshToken = req.cookies.refreshToken;
-            
-            
+
+
             if (!oldRefreshToken) {
                 res.status(StatusCode.UNAUTHORIZED).json({ error: "Refresh token not found" })
                 return;
@@ -151,12 +153,12 @@ class UserController implements IUserController {
         }
     }
 
-//---------------------------forgot Password -----------------------------------------------
+    //---------------------------forgot Password -----------------------------------------------
 
-async forgotPassword(req: Request, res: Response): Promise<void> {
-    try {
-        const { email } = req.body
-        
+    async forgotPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { email } = req.body
+
             if (!email) {
                 res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
                 return
@@ -173,8 +175,8 @@ async forgotPassword(req: Request, res: Response): Promise<void> {
             });
         }
     }
-    
-//---------------------------update Password -----------------------------------------------
+
+    //---------------------------update Password -----------------------------------------------
 
     async updatePassword(req: Request, res: Response): Promise<void> {
         try {
@@ -275,9 +277,9 @@ async forgotPassword(req: Request, res: Response): Promise<void> {
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "Logout failed" });
         }
 
-        
+
     }
-    
+
     //------------------------------- Get user profile -----------------------------------
 
     async getProfile(req: Request, res: Response): Promise<void> {
@@ -298,10 +300,10 @@ async forgotPassword(req: Request, res: Response): Promise<void> {
         }
     }
 
-//------------------------------- user blocking and unblocking-----------------------------------
+    //------------------------------- user blocking and unblocking-----------------------------------
 
-async UpdateUserStatus(req: Request, res: Response): Promise<void> {
-    try {
+    async UpdateUserStatus(req: Request, res: Response): Promise<void> {
+        try {
 
             const { userId, status } = req.body
             console.log(">>>>", userId, ">>>", status);
@@ -330,28 +332,28 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
                 success: false,
                 message: error instanceof Error ? error.message : "An unexpected error occurred"
             })
-            
+
         }
     }
-    
+
     //------------------------------- change user password user -----------------------------------
-    
+
     async changePassword(req: Request, res: Response): Promise<Response> {
         try {
 
-            const {userId,oldPassword,newPassword} = req.body
+            const { userId, oldPassword, newPassword } = req.body
 
-            console.log("---",userId,oldPassword,newPassword);
-            
+            console.log("---", userId, oldPassword, newPassword);
 
-            if(!userId||!oldPassword||!newPassword){
-                throw new CustomError("All fields are required",StatusCode.BAD_REQUEST)
+
+            if (!userId || !oldPassword || !newPassword) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
             }
 
-            const result = await this._userService.changePassword(userId,oldPassword,newPassword)
+            const result = await this._userService.changePassword(userId, oldPassword, newPassword)
 
             return res.status(StatusCode.OK).json(generateSuccessResponse(result.message))
-            
+
         } catch (error) {
 
             const errMessage = (error as Error).message || "something went wrong"
@@ -359,8 +361,8 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
             console.error(`Password change error ${errMessage}`);
 
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(errMessage))
-            
-            
+
+
         }
     }
 
@@ -368,26 +370,26 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
     async completeUserRegistration(req: Request, res: Response): Promise<Response> {
         try {
             const data = req.body
-            console.log("contorller>>>>",data);
-            
-
-            const {email,fullName,mobile,personalInfo,address} = req.body
+            console.log("contorller>>>>", data);
 
 
-            if (!email ||!mobile|| !personalInfo || !address){
-                throw new CustomError("All fields are required",StatusCode.BAD_REQUEST)
+            const { email, fullName, mobile, personalInfo, address } = req.body
+
+
+            if (!email || !mobile || !personalInfo || !address) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
             }
 
-            const updatedUser = await this._userService.completeUserRegistration(email,mobile,personalInfo,address,fullName)
+            const updatedUser = await this._userService.completeUserRegistration(email, mobile, personalInfo, address, fullName)
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("User registration completed successfully",updatedUser))
-            
-            
+            return res.status(StatusCode.OK).json(generateSuccessResponse("User registration completed successfully", updatedUser))
+
+
         } catch (error) {
 
             return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
-            .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
-            
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
         }
     }
 
@@ -395,26 +397,69 @@ async UpdateUserStatus(req: Request, res: Response): Promise<void> {
         try {
 
             console.log("Ivade vannu");
-            
 
-            const {doctorId,date} = req.query;
+
+            const { doctorId, date } = req.query;
 
             const schedules = await this._userService.fetchScheduleByDoctorAndDate(
                 doctorId as string,
                 date as string
             )
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("Doctor schedules fetched successfully",schedules))
-            
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Doctor schedules fetched successfully", schedules))
+
         } catch (error) {
 
             console.error("Controller Error:", error);
 
             return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
                 .json(generateErrorResponse(error instanceof CustomError ? error.message : "internal server erroor"))
-            
+
         }
     }
+
+
+    async getUserInfoForChat(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const { userId } = req.params;
+
+            if (!userId) {
+                throw new CustomError("User ID is required", StatusCode.BAD_REQUEST);
+            }
+
+
+            const user = await this._userService.getUserChatInfo(userId)
+
+            const formatted: ChatUser = {
+                _id: user._id.toString(),
+                fullName: user.fullName,
+                profileImage: user?.profileImage,
+                lastMessage: "",
+                lastMessageTime: "",
+                unreadCount: 0,
+                isOnline: false
+            };
+
+            return res.status(StatusCode.OK)
+            .json(generateSuccessResponse("User info featched",formatted))
+
+        } catch (error) {
+
+            return res
+            .status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+            .json(
+              generateErrorResponse(
+                error instanceof CustomError ? error.message : "Internal Server Error"
+              )
+            );
+
+        }
+    }
+
+
+
+
 
 
 

@@ -2,6 +2,7 @@ import { promises } from "dns";
 import { IDoctor } from "../../../model/doctor/doctorModel";
 import { BaseRepository } from "../../base/BaseRepository";
 import { IBaseRepository } from "../../base/IBaseRepository";
+import { firstChatDTO } from "../../../types/chat";
 
 export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     findDoctorByEmail(email: string): Promise<IDoctor | null>
@@ -14,5 +15,7 @@ export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     findDoctorsWithFilters(filters:any,sortOption:any,page:number,limit:number):Promise<{doctors:IDoctor[];total:number}>
     getDoctorProfile(doctorId:string):Promise<IDoctor|null>
     findDoctorByIdAndGetSubscriptionDetails(doctorId:string):Promise<IDoctor|null>
+    getBasicDoctorInfoById(doctorId:string):Promise<firstChatDTO|null>
+
 
 }

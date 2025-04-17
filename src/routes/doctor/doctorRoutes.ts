@@ -25,6 +25,9 @@ import ConsultationBookingService from "../../services/implementation/consultati
 import WalletRepository from "../../repositories/implementation/wallet/WalletRepository";
 import WalletService from "../../services/implementation/wallet/WalletService";
 import ConsultationBookingController from "../../controller/implementation/consultationBooking/consultationBookingController";
+import MessageRepository from "../../repositories/implementation/chat/MessageRepository";
+import ChatService from "../../services/implementation/chat/messageService";
+import MessageController from "../../controller/implementation/chat/MessageController";
 
 
 const router = Router();
@@ -57,6 +60,12 @@ const walletService = new WalletService(walletRepository)
 const consultationAppointmentRepository = new ConsultationBookingRepository()
 const consultationAppointmentService = new ConsultationBookingService(consultationAppointmentRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
 const consultationAppointmentController = new ConsultationBookingController(consultationAppointmentService)
+
+
+
+const chatRepository = new MessageRepository()
+const chatService = new ChatService(chatRepository)
+const chatController = new MessageController(chatService)
 
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
@@ -140,5 +149,14 @@ router.get("/appointments",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOC
 router.get("/appointments/:appointmentId/details",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
     await consultationAppointmentController.getAppointmentDetailForDoctor(req,res)
 })
+
+//for inbox left side panel data
+router.get("/inbox",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+   await chatController.getInbox(req,res)
+})
+router.get("/doctor-info/:doctorId",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
+    await doctorController.getDoctorInfoForChat(req,res)
+})
+
 
 export default router

@@ -1,4 +1,5 @@
 import Doctor, { IDoctor } from "../../../model/doctor/doctorModel";
+import { firstChatDTO } from "../../../types/chat";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorRepository from "../../interfaces/doctor/IDoctor";
 
@@ -9,6 +10,7 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
     constructor() {
         super(Doctor);
     }
+    
     
     
 
@@ -116,6 +118,11 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
             console.error("Error featching doctors subscription",error);
             throw new Error("Database error while fetching doctor profile") 
         }
+    }
+
+
+    async getBasicDoctorInfoById(doctorId: string): Promise<firstChatDTO | null> {
+        return await Doctor.findById(doctorId,"_id fullName profileImage")
     }
 
 

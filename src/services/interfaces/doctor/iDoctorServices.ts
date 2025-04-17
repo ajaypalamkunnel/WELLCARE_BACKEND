@@ -1,5 +1,6 @@
 
 import { IDoctor } from "../../../model/doctor/doctorModel"
+import { firstChatDTO } from "../../../types/chat";
 
 export interface IDoctorService {
     registerBasicDetails(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor }>
@@ -49,5 +50,6 @@ export interface IDoctorService {
    detailedDoctorProfile(doctorId:string):Promise<Partial<IDoctor | null>> 
    
     // 
+    getDoctorChatInfo(doctorId: string):Promise<firstChatDTO>
 
 }

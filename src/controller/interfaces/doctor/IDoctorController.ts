@@ -18,6 +18,7 @@ interface IDoctorController{
     changePassword(req:Request,res:Response):Promise<Response>
     getDoctors(req: Request, res: Response): Promise<Response>;
     getDoctorProfile(req:Request,res:Response):Promise<Response>
+    getDoctorInfoForChat(req: Request, res: Response): Promise<Response>
 }
 
 
