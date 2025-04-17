@@ -13,6 +13,7 @@ class MessageController implements IMessageController {
     constructor(messageService: IChatService) {
         this._messageService = messageService
     }
+    
 
     async getChatHistory(req: Request, res: Response): Promise<Response> {
         try {
@@ -53,7 +54,7 @@ class MessageController implements IMessageController {
     }
 
 
-    async getInbox(req: Request, res: Response): Promise<Response> {
+    async getUserInbox(req: Request, res: Response): Promise<Response> {
         try {
 
             const userId = req.user?.userId
@@ -66,7 +67,9 @@ class MessageController implements IMessageController {
             }
 
 
-            const inbox = await this._messageService.getInboxForUser(new Types.ObjectId(userId))
+            const inbox = await this._messageService.getInboxForUser(new Types.ObjectId(userId),"Doctor")
+
+            console.log("🌟controller inbox ",inbox)
             return res.status(StatusCode.OK).json(generateSuccessResponse("Inbox fetched", inbox));
 
 
@@ -79,6 +82,24 @@ class MessageController implements IMessageController {
 
 
         }
+    }
+
+
+   async getDoctorInbox(req: Request, res: Response): Promise<Response> {
+        try {
+            const doctorId = req.user?.userId;
+            if (!doctorId) {
+              throw new CustomError("Unauthorized", StatusCode.UNAUTHORIZED);
+            }
+        
+            const inbox = await this._messageService.getInboxForUser(new Types.ObjectId(doctorId), "User");
+            return res.status(200).json(generateSuccessResponse("Inbox fetched", inbox));
+          } catch (error) {
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
+
+          }
     }
 }
 

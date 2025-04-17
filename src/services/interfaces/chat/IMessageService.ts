@@ -19,7 +19,7 @@ export interface IChatService{
       ): Promise<IMessage[]>;
 
 
-      getInboxForUser(userId: Types.ObjectId): Promise<ChatInboxItemDTO[]>
+      getInboxForUser(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]>
 
     
 

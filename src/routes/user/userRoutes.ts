@@ -133,10 +133,10 @@ router.patch("/appointments/:id/cancel",authMiddleWare,checkUserBlocked,checkRol
 
 //inbox left side panel
 router.get("/inbox",authMiddleWare,checkRole(Roles.USER),(req,res)=>{
-    chatController.getInbox(req,res)
+    chatController.getUserInbox(req,res)
 })
 
-
+// this is for fetching user information,
 router.get("/user-info/:userId",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
     await userController.getUserInfoForChat(req,res)
 })

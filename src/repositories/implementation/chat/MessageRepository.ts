@@ -61,7 +61,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
 
 
 
-    async getInbox(userId: Types.ObjectId): Promise<ChatInboxItemDTO[]> {
+    async getInbox(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
         try {
 
 
@@ -93,7 +93,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
                 },
                 {
                     $lookup: {
-                        from: "users", // will match either user or doctor dynamically
+                        from: lookupModel === "Doctor" ? "doctors" : "users", // will match either user or doctor dynamically
                         localField: "_id",
                         foreignField: "_id",
                         as: "user"

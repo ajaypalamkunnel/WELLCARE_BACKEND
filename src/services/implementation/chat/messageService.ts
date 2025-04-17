@@ -63,9 +63,9 @@ class ChatService implements IChatService {
     }
 
 
-    async getInboxForUser(userId: Types.ObjectId): Promise<ChatInboxItemDTO[]> {
+    async getInboxForUser(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
         try {
-            return await this._messageRepository.getInbox(userId);
+            return await this._messageRepository.getInbox(userId,lookupModel);
         } catch (error) {
             throw error instanceof CustomError
                 ? error

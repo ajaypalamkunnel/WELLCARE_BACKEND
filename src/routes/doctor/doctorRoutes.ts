@@ -152,8 +152,10 @@ router.get("/appointments/:appointmentId/details",authMiddleWare,checkDoctorBloc
 
 //for inbox left side panel data
 router.get("/inbox",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
-   await chatController.getInbox(req,res)
+   await chatController.getDoctorInbox(req,res)
 })
+
+// this is for fetching doctor information,
 router.get("/doctor-info/:doctorId",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
     await doctorController.getDoctorInfoForChat(req,res)
 })

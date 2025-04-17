@@ -22,7 +22,7 @@ export interface IMessageRepository{
       ): Promise<IMessage[]>;
 
 
-      getInbox(userId: Types.ObjectId): Promise<ChatInboxItemDTO[]>;
+      getInbox(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]>;
 
 
 
