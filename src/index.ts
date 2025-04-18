@@ -69,7 +69,7 @@ const io = new SocketIOServer(server, {
 const messageRepo = new MessageRepository()
 const chatService = new ChatService(messageRepo)
 
-export const onlineUsers = new Map<string, string>();
+export const onlineUsers = new Map<string, Set<string>>();
 
 io.on("connection", (socket) => {
     console.log("🔗 User connected:", socket.id);
@@ -81,7 +81,11 @@ io.on("connection", (socket) => {
 
     socket.on("user-online", ({ userId }) => {
         if (!userId) return
-        onlineUsers.set(userId, socket.id)
+
+        const existingSockets = onlineUsers.get(userId) || new Set()
+        existingSockets.add(socket.id)
+        
+        onlineUsers.set(userId, existingSockets)
         console.log(`✅ ${userId} is online via ${socket.id}`);
     })
 
@@ -104,10 +108,14 @@ io.on("connection", (socket) => {
                 type
             )
 
-            const receiverSocketId = onlineUsers.get(to);
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit("receive-message", savedMessage);
+            const receiverSocketIds = onlineUsers.get(to);
+            if (receiverSocketIds && receiverSocketIds.size > 0) {
+                for(const sockId of receiverSocketIds){
+                    io.to(sockId).emit("receive-message", savedMessage);
+                }
                 console.log(`Message delivered to ${to}`);
+            }else{
+                console.log(`📭 ${to} is offline. Message saved but not delivered`);
             }
 
             socket.emit("message-sent", { success: true, message: savedMessage })
@@ -118,12 +126,24 @@ io.on("connection", (socket) => {
     })
 
     socket.on("disconnect", () => {
-        const disconnectedUser = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)
+       for(const[userId,socketsSet] of onlineUsers.entries()){
+            if(socketsSet.has(socket.id)){
+                socketsSet.delete(socket.id)
 
-        if (disconnectedUser) {
-            onlineUsers.delete(disconnectedUser[0])
-            console.log(`❌ ${disconnectedUser[0]} went offline`);
-        }
+                if(socketsSet.size === 0){
+                    onlineUsers.delete(userId)
+                    console.log(`❌ ${userId} went offline (last socket disconnected)`);
+                }else{
+                    onlineUsers.set(userId,socketsSet)
+                    console.log(`🔌 ${userId} disconnected socket: ${socket.id}, still online in ${socketsSet.size} tab(s)`);
+                }
+                break
+            }
+       }
+    })
+
+    socket.on("error",(err)=>{
+        console.error("Socket error:", err);
     })
 })
 

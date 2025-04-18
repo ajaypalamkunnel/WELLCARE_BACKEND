@@ -5,6 +5,7 @@ import { IMessageRepository } from "../../interfaces/chat/IMessageRepository";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import { ChatInboxItemDTO } from "../../../types/chat";
+import { onlineUsers } from "../../..";
 
 class MessageRepository extends BaseRepository<IMessage> implements IMessageRepository {
 
@@ -119,9 +120,14 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
                     isRead: false,
                 });
 
+                const isOnline = onlineUsers.has(chat._id.toString())
+                console.log("⬇️",isOnline)
+
+
                 return {
                     ...chat,
                     unreadCount: count,
+                    isOnline,
                 };
             }));
 
