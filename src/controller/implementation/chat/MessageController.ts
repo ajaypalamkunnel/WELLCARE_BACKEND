@@ -14,6 +14,7 @@ class MessageController implements IMessageController {
         this._messageService = messageService
     }
     
+    
 
     async getChatHistory(req: Request, res: Response): Promise<Response> {
         try {
@@ -100,6 +101,42 @@ class MessageController implements IMessageController {
 
 
           }
+    }
+
+
+
+    async markMessagesAsRead(req: Request, res: Response): Promise<Response> {
+
+        const receiverId = req.user?.userId;
+        const senderId = req.params.senderId
+
+
+        if (!receiverId || !senderId) {
+            return res.status(StatusCode.BAD_REQUEST).json({ success: false, message: "Missing required parameters" });
+          }
+
+
+        try {
+
+            await this._messageService.markMessagesAsRead(
+                new Types.ObjectId(senderId),
+                new Types.ObjectId(receiverId)
+            )
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Messages marked as read"))
+            
+        } catch (error) {
+
+            return res.status(StatusCode.INTERNAL_SERVER_ERROR).json(
+                generateErrorResponse("Internal Server Error")
+            )
+            
+        }
+      
+       
+
+
+
     }
 }
 

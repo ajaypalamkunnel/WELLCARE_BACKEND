@@ -17,6 +17,7 @@ class ChatService implements IChatService {
         this._messageRepository = messageRepository
        
     }
+    
 
 
     async sendMessage(
@@ -71,6 +72,11 @@ class ChatService implements IChatService {
                 ? error
                 : new CustomError("Unable to fetch chat inbox", StatusCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+   async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
+       return this._messageRepository.markMessagesAsRead(senderId,receiverId)
     }
 
 

@@ -21,7 +21,7 @@ export interface IChatService{
 
       getInboxForUser(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]>
 
-    
+      markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void>
 
 }
 

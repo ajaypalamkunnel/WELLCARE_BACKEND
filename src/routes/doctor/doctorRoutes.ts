@@ -161,4 +161,20 @@ router.get("/doctor-info/:doctorId",authMiddleWare,checkRole(Roles.USER),async(r
 })
 
 
+router.post("/profile/addeducation",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.addEducation(req,res)
+})
+
+router.post("/profile/addCertificate",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.addCertification(req,res)
+})
+router.put("/profile/updateEducation",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.editEducation(req,res)
+})
+router.put("/profile/updateCertification",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.editCertification(req,res)
+})
+
+
+
 export default router

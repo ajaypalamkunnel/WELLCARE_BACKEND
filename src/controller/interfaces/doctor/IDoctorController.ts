@@ -19,6 +19,10 @@ interface IDoctorController{
     getDoctors(req: Request, res: Response): Promise<Response>;
     getDoctorProfile(req:Request,res:Response):Promise<Response>
     getDoctorInfoForChat(req: Request, res: Response): Promise<Response>
+    addEducation(req: Request, res: Response): Promise<Response>
+    addCertification(req:Request,res:Response):Promise<Response>
+    editEducation(req:Request,res:Response):Promise<Response>
+    editCertification(req:Request,res:Response):Promise<Response>
 }
 
 

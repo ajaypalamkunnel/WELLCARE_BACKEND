@@ -25,7 +25,7 @@ export interface IMessageRepository{
       getInbox(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]>;
 
 
-
+      markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> 
 
 
 }

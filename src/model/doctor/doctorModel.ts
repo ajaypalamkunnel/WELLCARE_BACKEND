@@ -14,12 +14,14 @@ export interface IRating {
 }
 
 export interface IEducation {
+    _id?:string
     degree: string;
     institution: string;
     yearOfCompletion: number;
 }
 
 export interface ICertification {
+    _id?:string
     name: string;
     issuedBy: string;
     yearOfIssue: number;

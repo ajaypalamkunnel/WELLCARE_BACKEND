@@ -1,6 +1,7 @@
 
-import { IDoctor } from "../../../model/doctor/doctorModel"
+import { ICertification, IDoctor, IEducation } from "../../../model/doctor/doctorModel"
 import { firstChatDTO } from "../../../types/chat";
+import { AddEducationDTO } from "../../../types/doctor";
 
 export interface IDoctorService {
     registerBasicDetails(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor }>
@@ -52,4 +53,11 @@ export interface IDoctorService {
     // 
     getDoctorChatInfo(doctorId: string):Promise<firstChatDTO>
 
+    addEducation(doctorId:string,data:AddEducationDTO):Promise<IEducation[]>
+
+    addCertification(doctorId:string,data:ICertification):Promise<ICertification>
+
+    updateEducation(educationId: string, data:IEducation): Promise<IEducation>;
+
+    updateCertification(doctorId:string,data:ICertification):Promise<ICertification>
 }

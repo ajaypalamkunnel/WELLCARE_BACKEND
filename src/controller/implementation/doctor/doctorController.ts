@@ -7,6 +7,8 @@ import { handleErrorResponse } from "../../../utils/errorHandler";
 import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 import { ChatUser } from "../../../types/chat";
+import DoctorService from "../../../services/implementation/doctor/doctorService";
+import { json } from "body-parser";
 
 
 class DoctorController implements IDoctorController {
@@ -16,6 +18,8 @@ class DoctorController implements IDoctorController {
     constructor(_doctorService: IDoctorService) {
         this._doctorService = _doctorService
     }
+    
+   
 
 
     //------------------ Docotor basic registration at signup-----------------------------
@@ -473,14 +477,14 @@ class DoctorController implements IDoctorController {
 
             const { doctorId } = req.params;
 
-            console.log(" getDoctorInfoForChat controller",doctorId )
+            console.log(" getDoctorInfoForChat controller", doctorId)
 
             if (!doctorId) {
                 throw new CustomError("Doctor ID is required", StatusCode.BAD_REQUEST);
             }
 
             const doctor = await this._doctorService.getDoctorChatInfo(doctorId);
-            console.log("element==",doctor)
+            console.log("element==", doctor)
 
             const formatted: ChatUser = {
                 _id: doctor._id.toString(),
@@ -508,6 +512,135 @@ class DoctorController implements IDoctorController {
 
         }
     }
+
+
+
+    async addEducation(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const doctorId = req.user?.userId
+
+            const { degree, institution, yearOfCompletion } = req.body;
+
+
+            if (!doctorId || !degree || !institution || !yearOfCompletion) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST);
+            }
+
+            const educationList = await this._doctorService.addEducation(doctorId, {
+                degree,
+                institution,
+                yearOfCompletion,
+            })
+
+            return res.status(StatusCode.CREATED)
+                .json(generateSuccessResponse("Education added successfully", educationList))
+
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal Server Error"))
+
+        }
+    }
+
+
+    async addCertification(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const doctorId = req.user?.userId
+
+            const { name, issuedBy, yearOfIssue } = req.body
+
+            if (!doctorId || !name || !issuedBy || !yearOfIssue) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
+            }
+
+            const certificateAdded = await this._doctorService.addCertification(doctorId, {
+                name,
+                issuedBy,
+                yearOfIssue
+            })
+
+            if (!certificateAdded) {
+                throw new CustomError("Failed to add certificate", StatusCode.BAD_REQUEST)
+            }
+
+            return res.status(StatusCode.ACCEPTED).json(generateSuccessResponse("Certificate added successfully", certificateAdded))
+
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
+
+
+        }
+    }
+
+
+    async editEducation(req: Request, res: Response): Promise<Response> {
+
+        try {
+
+            const doctorId = req.user?.userId;
+
+            console.log("--->",doctorId,"===>",req.body);
+            
+
+            if(!doctorId){
+                throw new CustomError("doctor id is required",StatusCode.BAD_REQUEST)
+            }
+            
+
+            const result = await this._doctorService.updateEducation(doctorId,req.body)
+
+            if(!result){
+                throw new CustomError("education updation failed",StatusCode.BAD_REQUEST)
+
+            }
+
+            return res.status(StatusCode.OK)
+            .json(generateSuccessResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
+            
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+            .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+            
+        }
+        
+    }
+
+
+    async editCertification(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const doctorId = req.user?.userId
+
+            if(!doctorId){
+                throw new CustomError("unauthorized user",StatusCode.BAD_REQUEST)
+            }
+
+            const result = this._doctorService.updateCertification(doctorId,req.body)
+
+            if (!result) {
+                throw new CustomError("certification updation failed", StatusCode.BAD_REQUEST)
+            }
+
+            return res.status(StatusCode.ACCEPTED)
+                .json(generateSuccessResponse("certification updated succesfully",result))
+            
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message:"Internal server error"))
+            
+        }
+    }
+
+
 
 
 

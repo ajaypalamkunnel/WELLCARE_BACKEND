@@ -12,6 +12,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
     constructor() {
         super(Message)
     }
+    
 
     async saveMessage(
         senderId: Types.ObjectId,
@@ -138,6 +139,19 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
             throw new CustomError("Failed to fetch inbox", StatusCode.INTERNAL_SERVER_ERROR);
 
         }
+    }
+
+
+
+    async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
+       await Message.updateMany(
+        {
+            senderId,
+            receiverId,
+            isRead:false
+        },
+        {$set:{isRead:true}}
+       )
     }
 
 }

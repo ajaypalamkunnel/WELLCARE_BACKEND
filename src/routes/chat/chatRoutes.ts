@@ -42,4 +42,9 @@ router.get("/status/:userId", authMiddleWare, async (req: Request, res: Response
     }
 });
 
+
+router.patch("/messages/mark-read/:senderId",authMiddleWare,(req,res)=>{
+    chatController.markMessagesAsRead(req,res)
+})
+
 export default router

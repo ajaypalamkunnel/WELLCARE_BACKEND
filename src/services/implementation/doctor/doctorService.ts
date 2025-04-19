@@ -1,4 +1,4 @@
-import { IDoctor } from "../../../model/doctor/doctorModel";
+import { ICertification, IDoctor, IEducation } from "../../../model/doctor/doctorModel";
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IDoctorService } from "../../interfaces/doctor/iDoctorServices";
@@ -10,6 +10,7 @@ import { CustomError } from "../../../utils/CustomError";
 import mongoose from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
+import { AddEducationDTO } from "../../../types/doctor";
 
 
 class DoctorService implements IDoctorService {
@@ -19,7 +20,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
-    
+
 
 
 
@@ -122,7 +123,7 @@ class DoctorService implements IDoctorService {
             throw new Error("Invalid email or Password")
         }
 
-        const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email,role:"doctor" })
+        const doctorAccessToken = JwtUtils.generateAccesToken({ userId: doctor._id, email: doctor.email, role: "doctor" })
         const doctorRefreshToken = JwtUtils.generateRefreshToken({ userId: doctor._id })
 
         await this._doctorRepository.updateDoctorRefreshToken(doctor._id.toString(), doctorRefreshToken)
@@ -458,21 +459,21 @@ class DoctorService implements IDoctorService {
             if (search) {
                 filters.fullName = { $regex: search, $options: "i" }
             }
-            
-            
+
+
 
             if (departmentId) {
                 filters.departmentId = new mongoose.Types.ObjectId(departmentId);
             }
 
-            
+
             if (experience && (experience.min !== undefined || experience.max !== undefined)) {
                 filters.experience = {};
                 if (experience.min !== undefined) filters.experience.$gte = experience.min;
                 if (experience.max !== undefined) filters.experience.$lte = experience.max;
             }
-            
-            
+
+
             if (gender) {
                 filters.gender = { $regex: `^${gender}$`, $options: "i" }; // Case-insensitive regex match
             }
@@ -490,7 +491,7 @@ class DoctorService implements IDoctorService {
             }
 
 
-            const {doctors,total} = await this._doctorRepository.findDoctorsWithFilters(
+            const { doctors, total } = await this._doctorRepository.findDoctorsWithFilters(
                 filters,
                 sortOption,
                 page,
@@ -498,10 +499,10 @@ class DoctorService implements IDoctorService {
             )
 
 
-            return{
+            return {
                 doctors,
                 total,
-                totalPages:Math.ceil(total/limit)
+                totalPages: Math.ceil(total / limit)
             }
 
 
@@ -513,33 +514,33 @@ class DoctorService implements IDoctorService {
         }
     }
 
-   async detailedDoctorProfile(doctorId:string):Promise<Partial<IDoctor | null>> {
+    async detailedDoctorProfile(doctorId: string): Promise<Partial<IDoctor | null>> {
 
         try {
 
             const doctor = await this._doctorRepository.getDoctorProfile(doctorId)
 
-            console.log("id ---",doctorId);
-            
+            console.log("id ---", doctorId);
 
-            console.log("service---",doctor);
-            
 
-            if(!doctor){
-                throw new CustomError("doctor not found",StatusCode.NOT_FOUND)
+            console.log("service---", doctor);
+
+
+            if (!doctor) {
+                throw new CustomError("doctor not found", StatusCode.NOT_FOUND)
             }
 
             return doctor
 
-            
+
         } catch (error) {
 
-            if(error instanceof CustomError){
+            if (error instanceof CustomError) {
                 throw error
             }
-           
-            throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
-            
+
+            throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
+
         }
 
     }
@@ -559,12 +560,148 @@ class DoctorService implements IDoctorService {
 
         } catch (error) {
             throw error instanceof CustomError
-            ? error
-            : new CustomError("Failed to fetch doctor info", StatusCode.INTERNAL_SERVER_ERROR);
-         
+                ? error
+                : new CustomError("Failed to fetch doctor info", StatusCode.INTERNAL_SERVER_ERROR);
+
 
         }
     }
+
+
+    async addEducation(doctorId: string, data: AddEducationDTO): Promise<IEducation[]> {
+        try {
+
+            const { degree, institution, yearOfCompletion } = data
+
+
+            if (!degree || !institution || !yearOfCompletion || !doctorId) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
+            }
+
+
+
+            const updatedEducation = await this._doctorRepository.addEducation(doctorId, data)
+
+            if (!updatedEducation.length) {
+                throw new CustomError("Failed to add education", StatusCode.BAD_REQUEST)
+            }
+
+            return updatedEducation
+
+        } catch (error) {
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+        }
+    }
+
+
+    async addCertification(doctorId: string, data: ICertification): Promise<ICertification> {
+
+        try {
+
+            const { name, issuedBy, yearOfIssue } = data
+
+            if (!doctorId || !name || !issuedBy || !yearOfIssue) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
+            }
+
+            const addedCertification = await this._doctorRepository.addCertification(doctorId, data)
+
+            if (!addedCertification) {
+                throw new CustomError("Failed to add certificate", StatusCode.BAD_REQUEST)
+            }
+
+
+            return addedCertification
+
+
+        } catch (error) {
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("Internal server Error", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+        }
+
+    }
+
+
+    async updateEducation(doctorId: string, data: IEducation): Promise<IEducation> {
+
+        try {
+
+            const { _id, degree, institution, yearOfCompletion } = data
+            console.log("---", data);
+
+            if (!_id || !degree || !institution || !yearOfCompletion || !doctorId) {
+                throw new CustomError("all field required", StatusCode.BAD_REQUEST)
+
+            }
+
+
+
+            const result = this._doctorRepository.editEducation(doctorId, data)
+
+            if (!result) {
+                throw new CustomError("education updation failed", StatusCode.BAD_REQUEST)
+            }
+
+            return result
+
+        } catch (error) {
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+        }
+
+    }
+
+
+    async updateCertification(doctorId: string, data: ICertification): Promise<ICertification> {
+
+
+        try {
+
+
+            const { _id, name, issuedBy, yearOfIssue } = data
+
+            if (!doctorId || !_id || !name || !issuedBy || !yearOfIssue) {
+                throw new CustomError("All fields are required", StatusCode.BAD_REQUEST)
+            }
+
+            const result = await this._doctorRepository.editCertification(doctorId, data)
+
+            if (!result) {
+                throw new CustomError("certification updation failed", StatusCode.BAD_REQUEST)
+            }
+
+            return result
+
+        } catch (error) {
+
+            console.error("Update certification error", error);
+
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("Interanl server error", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+        }
+    }
+
 
 
 
