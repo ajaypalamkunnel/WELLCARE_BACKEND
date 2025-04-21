@@ -1,5 +1,6 @@
 import { Types } from "mongoose"
 import { IWallet, IWalletTransaction } from "../../../model/userWallet/userWalletModal"
+import { WalletSummaryDTO } from "../../../types/wallet"
 
 
 
@@ -13,6 +14,10 @@ interface IWalletRepository{
         userId:Types.ObjectId,
         transaction:IWalletTransaction
     ):Promise<IWallet>
+
+    getWlletByUserId(userId:string):Promise<WalletSummaryDTO|null>
+
+
 
 }
 

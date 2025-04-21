@@ -143,4 +143,10 @@ router.get("/user-info/:userId",authMiddleWare,checkRole(Roles.DOCTOR),async(req
 
 
 
+
+//wallet
+
+router.get("/wallet")
+
+
 export default router

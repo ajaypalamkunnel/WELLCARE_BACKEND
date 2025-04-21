@@ -130,24 +130,27 @@ class UserController implements IUserController {
         try {
             const oldRefreshToken = req.cookies.refreshToken;
 
+            console.log("njan ivade vannu ",oldRefreshToken);
+            
+
 
             if (!oldRefreshToken) {
                 res.status(StatusCode.UNAUTHORIZED).json({ error: "Refresh token not found" })
                 return;
             }
 
-            const { accessToken, refreshToken } = await this._userService.renewAuthTokens(oldRefreshToken)
+            const { accessToken } = await this._userService.renewAuthTokens(oldRefreshToken)
 
 
-            res.cookie("refreshToken", refreshToken, {
+            res.cookie("auth_token", accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                maxAge: 2 * 60 * 60 * 1000 // 2 hour
             })
 
 
-            res.status(StatusCode.OK).json({ accessToken })
+            res.status(StatusCode.OK).json({success:true, accessToken })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Failed to refresh token" });
         }

@@ -17,7 +17,7 @@ export interface IUserService {
 
     loginUser(emial: string, password: string): Promise<{ user: IUser | null; accessToken: string; refreshToken: string }>
 
-    renewAuthTokens(token: string): Promise<{ accessToken: string; refreshToken: string }>;
+    renewAuthTokens(token: string): Promise<{ accessToken: string;}>;
 
     forgotPassword(email: string): Promise<void>
 

@@ -93,11 +93,7 @@ class ConsultationBookingService implements IConsultationBookingService {
     async initiateBooking(data: { patientId: string; doctorScheduleId: string; slotId: string; }): Promise<InitiateBookingResponse> {
         try {
 
-            console.log("service inn eathii");
-
-
-
-
+            
 
             const { doctorScheduleId, slotId } = data;
 
@@ -122,9 +118,7 @@ class ConsultationBookingService implements IConsultationBookingService {
             }
 
 
-            console.log("===>", slot);
-
-            console.log("******", schedule.serviceId);
+           
 
 
             const serviceFee = (schedule.serviceId as unknown as PopulatedServiceId).fee;
@@ -252,7 +246,14 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             )
 
+            const doctorObjectId = new Types.ObjectId(doctorId)
 
+            // const bookingDetails = await this._consultationBookingRepository.findAppointmentDetailForDoctor(result.appointment.id,doctorObjectId)
+
+            // console.log("Booking details******",bookingDetails);
+            
+
+        
 
             return {
                 bookingId: result.appointment._id.toString(),
@@ -477,6 +478,9 @@ class ConsultationBookingService implements IConsultationBookingService {
             if (!detail) {
                 throw new CustomError("Appointment not found or access denied", StatusCode.NOT_FOUND);
             }
+
+            console.log("booking details==>",detail);
+            
 
             return detail;
 

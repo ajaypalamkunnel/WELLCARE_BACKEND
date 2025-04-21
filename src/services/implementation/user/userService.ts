@@ -157,23 +157,32 @@ class UserService implements IUserService {
 
 
     // token renewl using this method
-    async renewAuthTokens(oldRefreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    async renewAuthTokens(oldRefreshToken: string): Promise<{ accessToken: string;}> {
 
+        console.log("******** servicill");
+        
         const decode = JwtUtils.verifyToken(oldRefreshToken, true)
+
+        console.log("========>",decode);
+        
 
         if (!decode || typeof decode === 'string' || !decode.userId) {
             throw new Error("Invalid refresh token");
         }
 
-        const user = await this._userRepository.findUserByEmail(decode.userId);
+        const user = await this._userRepository.findUserTokenById(decode.userId.toString());
+        console.log("njan olla token---->",user?.refreshToken);
+        
         if (!user || user.refreshToken !== oldRefreshToken) {
             throw new Error("Invalid refresh token")
         }
 
-        const newAccessToken = JwtUtils.generateAccesToken({ userId: user._id, email: user.email })
-        const newRefreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
+        const newAccessToken = JwtUtils.generateAccesToken({ userId: user?._id, email: user?.email,role: "user" })
+        console.log("service ill aatooo",newAccessToken);
+        
+        // const newRefreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
-        return { accessToken: newAccessToken, refreshToken: newRefreshToken }
+        return { accessToken: newAccessToken}
 
     }
 

@@ -15,6 +15,8 @@ interface IUserRepository extends IBaseRepository<IUser>{
 
     fetchDoctorDaySchedule(doctorId:string,date:Date):Promise<IScheduleResponse[]>
     getBasicUserInfoById(userId:string):Promise<firstChatDTO|null>
+
+    findUserTokenById(userId:string):Promise<IUser|null>
     
 
 }

@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import Wallet, { IWallet, IWalletTransaction } from "../../../model/userWallet/userWalletModal";
 import { BaseRepository } from "../../base/BaseRepository";
 import IWalletRepository from "../../interfaces/wallet/IWalletRepository";
+import { WalletSummaryDTO } from "../../../types/wallet";
 
 
 class WalletRepository extends BaseRepository<IWallet> implements IWalletRepository {
@@ -10,6 +11,8 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
     constructor() {
         super(Wallet)
     }
+    
+    
     async findByUserId(userId: Types.ObjectId): Promise<IWallet | null> {
         return await Wallet.findOne({ userId })
     }
@@ -33,6 +36,21 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
         return wallet
 
     }
+
+    getWlletByUserId(userId: string): Promise<WalletSummaryDTO | null> {
+        throw new Error("Method not implemented.");
+    }
+
+
+    // async getWlletByUserId(userId: string): Promise<WalletSummaryDTO | null> {
+    //     try {
+
+    //         const wallet  = await 
+            
+    //     } catch (error) {
+            
+    //     }
+    // }
 
 
 

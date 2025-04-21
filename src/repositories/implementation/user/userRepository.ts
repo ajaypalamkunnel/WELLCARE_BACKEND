@@ -167,6 +167,15 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     async getBasicUserInfoById(userId: string): Promise<firstChatDTO | null> {
         return await User.findById(userId,"_id fullName profileUrl")
     }
+
+
+
+    
+
+    async findUserTokenById(userId: string): Promise<IUser | null> {
+        return await User.findById(userId).select("-password")
+    }
+    
     
 
 
