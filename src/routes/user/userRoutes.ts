@@ -28,13 +28,16 @@ import MessageController from "../../controller/implementation/chat/MessageContr
 const router = Router();
 
 
+const walletRepository = new WalletRepository()
+const walletService = new WalletService(walletRepository)
+
 const doctorScheduleRepository = new DoctorScheduleRepository()
 const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
 const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const userRepository = new UserRepository()
 const userService = new UserService(userRepository)
-const userController = new UserController(userService)
+const userController = new UserController(userService,walletService)
 
 
 const departmentRepository = new DepartmentRepository()
@@ -48,9 +51,6 @@ const doctorServiceRepository = new DoctorServiceRepository()
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
 const doctorController = new DoctorController(doctorService)
-
-const walletRepository = new WalletRepository()
-const walletService = new WalletService(walletRepository)
 const consultationBookingRepository = new ConsultationBookingRepository()
 const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
 const consultationBookingController = new ConsultationBookingController(consultationBookingService)
@@ -142,6 +142,12 @@ router.get("/user-info/:userId",authMiddleWare,checkRole(Roles.DOCTOR),async(req
 })
 
 
+router.get("/wallet",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
+    await userController.getWalletSummary(req,res)
+})
+router.get("/wallet/transactions",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
+    await userController.getWalletTransactions(req,res)
+})
 
 
 //wallet

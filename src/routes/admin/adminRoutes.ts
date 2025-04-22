@@ -15,6 +15,8 @@ import SubscriptionService from "../../services/implementation/subscription/subs
 import SubscriptionController from "../../controller/implementation/subscription/subscriptionContrloller";
 import { checkRole } from "../../middleware/checkRole";
 import { Roles } from "../../types/roles";
+import WalletRepository from "../../repositories/implementation/wallet/WalletRepository";
+import WalletService from "../../services/implementation/wallet/WalletService";
 
 
 const router = Router();
@@ -26,9 +28,13 @@ const departmentRepository = new DepartmentRepository()
 const departmentService = new DepartmentService(departmentRepository)
 const departmentController = new DepartmentController(departmentService)
 
+const walletRepository = new WalletRepository()
+const walletService = new WalletService(walletRepository)
+
+
 const userRepository = new UserRepository()
 const userService = new UserService(userRepository)
-const userController = new UserController(userService)
+const userController = new UserController(userService,walletService)
 
 const adminRepository = new AdminRepository()
 const adminService = new AdminService(adminRepository, doctorRepository, userRepository)

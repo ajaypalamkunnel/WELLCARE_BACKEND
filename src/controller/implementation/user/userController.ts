@@ -15,14 +15,19 @@ import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
 import { add } from "winston";
 import { ChatUser } from "../../../types/chat";
+import IWalletService from "../../../services/interfaces/wallet/IWalletService";
 
 class UserController implements IUserController {
 
     private _userService: IUserService
+    private _walletService:IWalletService
 
-    constructor(_userService: IUserService) {
+    constructor(_userService: IUserService,walletService:IWalletService) {
         this._userService = _userService
+        this._walletService = walletService
     }
+    
+    
 
 
 
@@ -457,6 +462,57 @@ class UserController implements IUserController {
               )
             );
 
+        }
+    }
+
+
+    async getWalletSummary(req: Request, res: Response): Promise<Response> {
+
+        try {
+
+            const userId = req.user?.userId;
+
+            if(!userId){
+                throw new CustomError("User ID is required", StatusCode.BAD_REQUEST);
+            }
+
+            const walletSummary = await this._walletService.getWalletSummary(userId)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Wallet summary fetched successfully",walletSummary))
+            
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR)
+            .json(generateErrorResponse(error instanceof CustomError ? error.message:"internal server error"))
+            
+        }
+  
+    }
+
+
+
+    async getWalletTransactions(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const userId = req.user?.userId
+
+
+            if(!userId){
+                throw new CustomError("User ID is required", StatusCode.BAD_REQUEST);
+            }
+
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const sort = (req.query.sort as string) === "asc" ? "asc" : "desc"; // default to "desc"
+      
+            const result = await this._walletService.getWalletTransactions(userId,page,limit,sort)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Transactions fetched succesully",result))
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error" ))
+            
         }
     }
 

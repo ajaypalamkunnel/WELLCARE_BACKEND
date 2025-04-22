@@ -3,6 +3,7 @@ import IWalletService from "../../interfaces/wallet/IWalletService";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
+import { PaginatedTransactionResponseDTO, WalletSummaryDTO } from "../../../types/wallet";
 
 
 
@@ -14,6 +15,8 @@ class WalletService implements IWalletService{
     constructor(walletRepository:IWalletRepository){
         this._walletRepository = walletRepository
     }
+    
+    
 
 
     async creditRefund(userId: Types.ObjectId, amount: number, reason: string, relatedAppointmentId?: Types.ObjectId): Promise<void> {
@@ -49,6 +52,65 @@ class WalletService implements IWalletService{
             }else{
                 throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
             }
+            
+        }
+    }
+
+
+   async getWalletSummary(userId: string): Promise<WalletSummaryDTO> {
+
+        try {
+
+            const wallet = await this._walletRepository.getWlletByUserId(userId)
+
+            if(!wallet){
+                throw new CustomError("Wallet not found for this user",StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+            return {
+                balance: wallet.balance,
+                currency: wallet.currency,
+              };
+            
+        } catch (error) {
+
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            }
+            
+        }
+        
+
+    }
+
+
+    async getWalletTransactions(userId: string, page: number, limit: number, sortOrder?: "asc" | "desc"): Promise<PaginatedTransactionResponseDTO> {
+        try {
+
+            const { transactions, total } = await this._walletRepository.getPaginatedTransactions(
+                userId,
+                page,
+                limit,
+                sortOrder
+              );
+          
+              return {
+                transactions,
+                total,
+                page,
+                limit,
+              };
+
+
+            
+        } catch (error) {
+
+            console.error("transactions featching error");
+
+            throw new CustomError("transactions fetching error",StatusCode.INTERNAL_SERVER_ERROR)
+            
             
         }
     }
