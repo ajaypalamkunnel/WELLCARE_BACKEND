@@ -262,7 +262,7 @@ class DoctorController implements IDoctorController {
                 licenseDocument, IDProofDocument,
                 education, certifications } = req.body;
 
-            console.log("====>", req.body);
+            
 
 
             if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !availability || !profileImage || !licenseDocument || !IDProofDocument || !education || !certifications) {
@@ -440,7 +440,7 @@ class DoctorController implements IDoctorController {
 
             const { doctorId } = req.params
 
-            console.log("====>", doctorId);
+            
 
 
             if (!doctorId) {

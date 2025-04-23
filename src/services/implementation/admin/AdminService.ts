@@ -134,7 +134,7 @@ export class AdminService implements IAdminService{
             if(![1,-1].includes(status)){
                 throw new Error("Invalid status value. Use -1 for block, 1 for unblock.")
             }
-            console.log("====>",doctorId);
+           
             
             const existingDoctor = await this._doctorRepository.findById(doctorId)
 

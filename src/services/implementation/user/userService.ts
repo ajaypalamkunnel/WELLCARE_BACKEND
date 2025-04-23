@@ -159,11 +159,11 @@ class UserService implements IUserService {
     // token renewl using this method
     async renewAuthTokens(oldRefreshToken: string): Promise<{ accessToken: string;}> {
 
-        console.log("******** servicill");
+        
         
         const decode = JwtUtils.verifyToken(oldRefreshToken, true)
 
-        console.log("========>",decode);
+       
         
 
         if (!decode || typeof decode === 'string' || !decode.userId) {
@@ -178,8 +178,7 @@ class UserService implements IUserService {
         }
 
         const newAccessToken = JwtUtils.generateAccesToken({ userId: user?._id, email: user?.email,role: "user" })
-        console.log("service ill aatooo",newAccessToken);
-        
+       
         // const newRefreshToken = JwtUtils.generateRefreshToken({ userId: user._id })
 
         return { accessToken: newAccessToken}
@@ -187,7 +186,7 @@ class UserService implements IUserService {
     }
 
     async forgotPassword(email: string): Promise<void> {
-        console.log("I am from forgotPassword");
+        
 
         console.log(email);
 

@@ -48,7 +48,7 @@ class DoctorServiceController implements IDoctorServiceController {
 
             const { doctorId } = req.query;
 
-            console.log("====>>>",doctorId);
+           
             
 
             if(!doctorId){

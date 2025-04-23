@@ -96,7 +96,7 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();
-            console.log("kittith,===", schedules);
+            
 
 
             return {

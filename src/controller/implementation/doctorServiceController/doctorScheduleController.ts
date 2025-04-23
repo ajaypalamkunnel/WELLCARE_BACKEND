@@ -159,7 +159,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
         }));
 
 
-            console.log("Controller formattd slot====> ",formattedSlots);
+            
 
             
             
@@ -196,11 +196,11 @@ class DoctorScheduleController implements IDoctorScheduleController {
    async listSchedules(req: Request, res: Response): Promise<Response> {
         try {
 
-            console.log("list schedules");
+           
             
             const { doctorId, serviceId, startDate, endDate, status, page, limit } = req.query;
 
-            console.log("controller---->",req.query);
+           
             
 
             if (!doctorId) {
@@ -218,7 +218,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
                 Number(limit) || 10
             );
 
-            console.log("answer=====>",schedules)
+            
             
 
             return res.status(StatusCode.OK).json(generateSuccessResponse("Schedule fetched successfully",schedules))

@@ -553,8 +553,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
             ]
 
-            console.log("🧪 Final matchStage:", JSON.stringify(matchStage, null, 2));
-
+          
 
             const total = await ConsultationAppointmentModal.countDocuments(matchStage)
 

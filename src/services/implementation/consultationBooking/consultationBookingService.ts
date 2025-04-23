@@ -444,7 +444,7 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             const appointment = await this._consultationBookingRepository.findAppointmentsForDoctor(doctorId, filters)
 
-            console.log("====>", appointment);
+            
 
 
             return appointment

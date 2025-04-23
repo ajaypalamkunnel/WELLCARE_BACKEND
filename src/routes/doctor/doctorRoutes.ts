@@ -139,7 +139,6 @@ router.post("/create-schedule",authMiddleWare,checkDoctorBlocked,checkRole(Roles
 
 
 router.get("/fetch-schedules",authMiddleWare,checkDoctorBlocked,checkRole(Roles.DOCTOR),async(req,res)=>{
-    console.log("hi gutsssss");
     
     await doctorScheduleController.listSchedules(req,res)
 })

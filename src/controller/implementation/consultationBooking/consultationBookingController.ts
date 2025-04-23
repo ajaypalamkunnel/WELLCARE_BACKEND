@@ -221,7 +221,7 @@ class ConsultationBookingController implements IConsultationBookingController {
                 limit: 10,
               };
 
-              console.log("Filters sent to API:", filters);
+              
               
 
             const result = await this._consultationBookingController.findAppointmentsForDoctor(doctorIdObject,filters)

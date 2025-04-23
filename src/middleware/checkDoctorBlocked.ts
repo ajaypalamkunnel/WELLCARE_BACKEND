@@ -10,7 +10,7 @@ const checkDoctorBlocked = async (req:Request,res:Response,next:NextFunction) : 
         const doctorId = req.user?.userId;
 
 
-        console.log("checkDoctorBlocked=========>",doctorId);
+        
         
 
         if(!doctorId){
