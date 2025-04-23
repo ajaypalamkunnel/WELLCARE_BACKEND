@@ -16,6 +16,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
         this._doctorScheduleService = doctorScheduleService
     }
     
+    
    
 
 
@@ -230,6 +231,41 @@ class DoctorScheduleController implements IDoctorScheduleController {
                 .json(error instanceof CustomError ? error.message : "Internal server error")
             
             
+        }
+    }
+
+
+    async cancelSchedule(req: Request, res: Response): Promise<Response> {
+        try {
+
+            const scheduleId = req.params.scheduleId;
+            const reason = req.body.reason;
+            const doctorId = req.user?.userId;
+
+            console.log(reason,"==>",scheduleId,"==>",doctorId);
+            
+
+            if(!doctorId){
+                throw new CustomError("Unauthorized access",StatusCode.UNAUTHORIZED)
+            }
+
+            if(!scheduleId || !reason){
+                throw new CustomError("Schedule ID and reason are required",StatusCode.BAD_REQUEST)
+            }
+
+
+            await this._doctorScheduleService.cancelDoctorSchedule(scheduleId,reason,doctorId)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Schedule cancelled successfully and patients notified"))
+
+
+            
+        } catch (error) {
+
+            console.error("schedule cancelling error",error);
+
+            return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
         }
     }
 

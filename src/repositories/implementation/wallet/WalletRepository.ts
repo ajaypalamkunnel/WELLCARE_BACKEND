@@ -16,6 +16,7 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
 
 
 
+
     async findByUserId(userId: Types.ObjectId): Promise<IWallet | null> {
         return await Wallet.findOne({ userId })
     }
@@ -77,7 +78,7 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
                             { $skip: skip },
                             { $limit: limit },
                             {
-                                $project:{
+                                $project: {
                                     _id: 0,
                                     type: "$transactions.type",
                                     amount: "$transactions.amount",
@@ -88,8 +89,8 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
                                 }
                             }
                         ],
-                        totalCount:[
-                            {$count:"total"}
+                        totalCount: [
+                            { $count: "total" }
                         ]
                     }
                 }
@@ -97,20 +98,64 @@ class WalletRepository extends BaseRepository<IWallet> implements IWalletReposit
 
             ],
 
-        )
+            )
 
-        const transactions = result[0]?.paginatedTransactions || [];
-        const total = result[0]?.totalCount[0]?.total || 0;
-  
-        return { transactions, total,page,limit };
+            const transactions = result[0]?.paginatedTransactions || [];
+            const total = result[0]?.totalCount[0]?.total || 0;
+
+            return { transactions, total, page, limit };
 
 
 
         } catch (error) {
 
             console.error("Error fetching wallet transactions:", error);
-            throw new CustomError("Failed to fetch wallet transactions",StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Failed to fetch wallet transactions", StatusCode.INTERNAL_SERVER_ERROR)
         }
+    }
+
+
+    async addTransaction({ userId, amount, type, reason, relatedAppointmentId, status }: { userId: string; amount: number; type: "credit" | "debit"; reason: string; relatedAppointmentId?: string; status: "success" }): Promise<void> {
+
+        try {
+
+            let wallet = await Wallet.findOne({ userId })
+
+            const relatedAppointmentIdObjectId = new Types.ObjectId(relatedAppointmentId)
+
+            if (!wallet) {
+                wallet = new Wallet({
+                    userId,
+                    balance: 0,
+                    currency: "INR",
+                    transactions: [],
+                });
+            }
+
+
+
+            wallet.transactions.unshift({
+                type,
+                amount,
+                reason,
+                relatedAppointmentId: relatedAppointmentIdObjectId,
+                status,
+                createdAt: new Date()
+            })
+
+            wallet.balance += type === "credit" ? amount : -amount
+
+            await wallet.save()
+        } catch (error) {
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("wallet updating error", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
+        }
+
     }
 
 

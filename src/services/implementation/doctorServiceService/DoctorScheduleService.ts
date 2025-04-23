@@ -6,17 +6,25 @@ import { CustomError } from "../../../utils/CustomError";
 import IDoctorScheduleService from "../../interfaces/doctorServiceService/IDoctorScheduleService";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { IScheduleResponse } from "../../../types/bookingTypes";
+import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
+import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
+import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
+import { sendAppointmentCancellationEmail } from "../../../utils/emailUtils";
 
 
 class DoctorScheduleService implements IDoctorScheduleService {
 
-    private _doctorScheduleRepository: IDoctorScheduleRepository
+    private _doctorScheduleRepository: IDoctorScheduleRepository;
+    private _walletRepository: IWalletRepository;
 
-    constructor(doctorScheduleRepository: IDoctorScheduleRepository) {
-        this._doctorScheduleRepository = doctorScheduleRepository
+    constructor(doctorScheduleRepository: IDoctorScheduleRepository, walletRepository: IWalletRepository) {
+        this._doctorScheduleRepository = doctorScheduleRepository,
+            this._walletRepository = walletRepository
+
     }
-    
-    
+
+
+
 
 
 
@@ -178,16 +186,16 @@ class DoctorScheduleService implements IDoctorScheduleService {
 
 
 
-    async getDoctorSchedules(doctorId: string, serviceId?: string, startDate?: string, endDate?: string, status?: "completed" | "upcoming", page: number = 1, limit: number=10): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
+    async getDoctorSchedules(doctorId: string, serviceId?: string, startDate?: string, endDate?: string, status?: "completed" | "upcoming", page: number = 1, limit: number = 10): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
         try {
-            
 
 
-             // Convert dates to proper UTC for database queries
-             const start = startDate ? new Date(startDate) : undefined;
-             const end = endDate ? new Date(endDate) : undefined;
 
-             return await this._doctorScheduleRepository.fetchSchedules(
+            // Convert dates to proper UTC for database queries
+            const start = startDate ? new Date(startDate) : undefined;
+            const end = endDate ? new Date(endDate) : undefined;
+
+            return await this._doctorScheduleRepository.fetchSchedules(
                 doctorId,
                 serviceId,
                 start,
@@ -195,16 +203,94 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 status,
                 page,
                 limit
-             )
-            
+            )
+
         } catch (error) {
-            throw new CustomError("Error in fetching schedules:",StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Error in fetching schedules:", StatusCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+
+    async cancelDoctorSchedule(scheduleId: string, reason: string, doctorId: string): Promise<void> {
+        try {
+
+            const schedule = await this._doctorScheduleRepository.findById(scheduleId)
+
+
+            if (!schedule) {
+                throw new CustomError("Schedule not found", StatusCode.NOT_FOUND)
+            }
+
+            if (schedule.doctorId.toString() !== doctorId) {
+                throw new CustomError("Unauthorized. This schedule does not belong to you.", StatusCode.UNAUTHORIZED)
+            }
+
+            if (new Date(schedule.date) < new Date()) {
+                throw new CustomError("Cannot cancel a past schedule", StatusCode.BAD_REQUEST);
+            }
+
+
+            const appointments: any = await ConsultationAppointmentModal.find(
+                {
+                    doctorScheduleId: scheduleId,
+                    status: "booked"
+                }
+            ).populate("patientId", "email fullName")
+                .populate("serviceId", "fee")
+
+
+            for (const appointment of appointments) {
+
+                appointment.status = "cancelled";
+                await appointment.save()
+
+                if (appointment.paymentStatus === "paid") {
+                    const refundAmount = appointment.serviceId?.fee ?? 100;
+
+                    await this._walletRepository.addTransaction({
+                        userId: appointment.patientId,
+                        amount: refundAmount,
+                        type: "credit",
+                        reason: "Doctor cancelled schedule - refund",
+                        relatedAppointmentId: appointment._id,
+                        status: "success"
+                    })
+
+                }
+
+                const email = appointment.patientId.email;
+                const appointmentDate = appointment.appointmentDate.toLocaleString();
+                await sendAppointmentCancellationEmail(email, appointmentDate, reason)
+
+            }
+
+            const cancelled = await this._doctorScheduleRepository.cancelSchedule(scheduleId, reason)
+
+            if (!cancelled) {
+                throw new CustomError("Schedule was already cancelled or could not be updated", StatusCode.BAD_REQUEST)
+            }
+
+
+
+
+
+        } catch (error) {
+
+            console.error("===> service error",error);
+            
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError("Error in cancelling doctor schedule:", StatusCode.INTERNAL_SERVER_ERROR)
+            }
+
         }
     }
 
 
 
-    
+
 
 
 

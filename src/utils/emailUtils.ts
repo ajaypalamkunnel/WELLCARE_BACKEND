@@ -95,3 +95,33 @@ export const sendApplicationApprovalEmail = async (email: string) => {
         console.error("Error sending approval email:", error);
     }
 };
+
+
+
+
+export const sendAppointmentCancellationEmail = async (email: string, date: string, reason: string) => {
+    try {
+      const mailOptions = {
+        from: `"WellCare" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Appointment Cancelled by Doctor",
+        html: `
+          <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f4f4f4;">
+            <div style="max-width: 480px; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15); border-top: 5px solid #03C03C;">
+              <h2 style="color: #03C03C;">WellCare Health Services</h2>
+              <p style="font-size: 16px;">Dear User,</p>
+              <p style="font-size: 16px;">Your appointment scheduled for <strong>${date}</strong> has been <strong style="color: #d9534f;">cancelled</strong> by the doctor.</p>
+              <p style="font-size: 16px;">Reason: <strong>${reason}</strong></p>
+              <p style="font-size: 16px;">A refund has been initiated to your wallet.</p>
+              <p style="font-size: 14px; color: #999; margin-top: 20px;">Best Regards,<br>WellCare Team</p>
+            </div>
+          </div>
+        `
+      };
+  
+      await transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error("Error sending appointment cancellation email:", error);
+    }
+  };
+  

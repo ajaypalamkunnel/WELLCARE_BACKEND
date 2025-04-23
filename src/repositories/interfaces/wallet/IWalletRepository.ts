@@ -24,6 +24,22 @@ interface IWalletRepository{
         sortOrder?: "asc" | "desc"
       ): Promise<PaginatedTransactionResponseDTO>;
 
+      addTransaction({
+        userId,
+        amount,
+        type,
+        reason,
+        relatedAppointmentId,
+        status
+      }: {
+        userId: string;
+        amount: number;
+        type: "credit" | "debit";
+        reason: string;
+        relatedAppointmentId?: string;
+        status?: "success" | "pending" | "failed";
+      }): Promise<void> 
+
 
 
 }

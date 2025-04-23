@@ -50,12 +50,14 @@ const doctorServiceRepository = new DoctorServiceRepository()
 const doctorServiceService = new DoctorServiceService(doctorServiceRepository,doctorRepository,doctorSubscriptionRepository)
 const doctorServiceController = new DoctorServiceController(doctorServiceService)
 
-const doctorScheduleRepository = new DoctorScheduleRepository()
-const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
-const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const walletRepository = new WalletRepository()
 const walletService = new WalletService(walletRepository)
+
+
+const doctorScheduleRepository = new DoctorScheduleRepository()
+const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository,walletRepository)
+const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const consultationAppointmentRepository = new ConsultationBookingRepository()
 const consultationAppointmentService = new ConsultationBookingService(consultationAppointmentRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
@@ -175,6 +177,10 @@ router.put("/profile/updateCertification",authMiddleWare,checkRole(Roles.DOCTOR)
     await doctorController.editCertification(req,res)
 })
 
+
+router.patch("/schedules/:scheduleId/cancel",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorScheduleController.cancelSchedule(req,res)
+})
 
 
 export default router

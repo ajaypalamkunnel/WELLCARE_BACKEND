@@ -12,7 +12,7 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
     constructor() {
         super(DoctorSchedules)
     }
-    
+
 
 
 
@@ -129,52 +129,80 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                     },
                 },
             }).populate("serviceId", "name fee mode");
-    
+
             return schedule;
         } catch (error) {
             console.log("Error while getting schedule by slot:", error);
             throw new CustomError("Failed to fetch schedule", StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
-    
 
-    async getScheduleById(scheduleId: string):Promise<IDoctorAvailability>{
+
+    async getScheduleById(scheduleId: string): Promise<IDoctorAvailability> {
         try {
 
-            const schedule =  await DoctorSchedules.findById(scheduleId).populate("serviceId", "name fee mode")
+            const schedule = await DoctorSchedules.findById(scheduleId).populate("serviceId", "name fee mode")
 
             return schedule!
 
-            
+
         } catch (error) {
 
-            console.log("Error while get Schedule By I in repository : ",error)
+            console.log("Error while get Schedule By I in repository : ", error)
 
-            throw new CustomError("Failed to fetch schedule",StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Failed to fetch schedule", StatusCode.INTERNAL_SERVER_ERROR)
 
-            
+
         }
 
-    
+
     }
 
     async findAvailableSlot(scheduleId: string, slotId: string) {
-        console.log("akath findAvailableSlot==",slotId);
-        
+        console.log("akath findAvailableSlot==", slotId);
+
         return await DoctorSchedules.findOne({
-          _id: scheduleId,
-          "availability.slot_id": slotId,
-          "availability.status": "available"
+            _id: scheduleId,
+            "availability.slot_id": slotId,
+            "availability.status": "available"
         }).populate("serviceId", "name fee mode")
-      }
-
-
-    
+    }
 
 
 
+    async cancelSchedule(scheduleId: string, reason: string): Promise<boolean> {
+        console.log("repository ill vannnu",scheduleId,"----",reason);
+        
+        try {
 
-    
+            const result = await DoctorSchedules.updateOne(
+                {
+                    _id:new mongoose.Types.ObjectId(scheduleId),
+                    isCancelled:false
+                },
+                {
+                    $set:{
+                        isCancelled:true,
+                        cancellationReason:reason,
+                        cancelledAt:new Date(),
+                        "availability.$[].status": "cancelled",
+                    }
+                }
+            )
+            return result.modifiedCount > 0
+        } catch (error) {
+            throw new CustomError("Error while cancelling schema",StatusCode.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+
+
+
+
+
+
+
+
 }
 
 

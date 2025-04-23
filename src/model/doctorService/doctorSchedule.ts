@@ -28,6 +28,9 @@ import { IDoctorService } from "./doctorServicesModal";
         start_time: Date;
         end_time: Date;
         duration: number;
+        isCancelled:boolean;
+        cancellationReason:string;
+        cancelledAt:Date;
         availability: ISlot[];
     }
 
@@ -39,6 +42,9 @@ import { IDoctorService } from "./doctorServicesModal";
         start_time: { type: Date, required: true },
         end_time: { type: Date, required: true },
         duration: { type: Number, required: true },
+        isCancelled: { type: Boolean, default: false },
+        cancellationReason: { type: String },
+        cancelledAt: { type: Date },
         availability:[
             {
                 slot_id: { type: Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },

@@ -43,6 +43,6 @@ export default interface IDoctorScheduleRepository extends IBaseRepository<IDoct
 
 
     findAvailableSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
-
+    cancelSchedule(scheduleId: string, reason: string): Promise<boolean>;
 
 }

@@ -45,7 +45,7 @@ interface IDoctorScheduleService{
     ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }>
 
 
-    
+    cancelDoctorSchedule(scheduleId: string, reason: string, doctorId: string): Promise<void>;
 
 }
 

@@ -106,6 +106,7 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
             const schedules = await DoctorSchedules.aggregate<IScheduleResponse>([
                 {
                     $match: {
+                        isCancelled:false,
                         doctorId: new mongoose.Types.ObjectId(doctorId),
                         date: {
                             $gte: startOfDay,

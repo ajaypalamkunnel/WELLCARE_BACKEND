@@ -32,7 +32,7 @@ const walletRepository = new WalletRepository()
 const walletService = new WalletService(walletRepository)
 
 const doctorScheduleRepository = new DoctorScheduleRepository()
-const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository)
+const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository,walletRepository)
 const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const userRepository = new UserRepository()

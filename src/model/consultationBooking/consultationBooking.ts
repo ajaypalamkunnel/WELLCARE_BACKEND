@@ -34,7 +34,7 @@ export interface IConsultationAppointment extends Document {
 
 const ConsultationAppointmentSchema = new Schema<IConsultationAppointment>(
   {
-    patientId: { type: Schema.Types.ObjectId, required: true, ref: "Patient" },
+    patientId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
     doctorId: { type: Schema.Types.ObjectId, required: true, ref: "Doctor" },
     departmentId: { type: Schema.Types.ObjectId, required: true, ref: "Department" },
     serviceId: { type: Schema.Types.ObjectId, required: true, ref: "Service" },
