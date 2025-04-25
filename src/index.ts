@@ -72,7 +72,7 @@ const chatService = new ChatService(messageRepo)
 export const onlineUsers = new Map<string, Set<string>>();
 
 io.on("connection", (socket) => {
-    console.log("🔗 User connected:", socket.id);
+    console.log(" User connected:", socket.id);
     console.log("Cookies:", socket.handshake.headers.cookie);
 
     socket.on("error", (err) => {
@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
         existingSockets.add(socket.id)
         
         onlineUsers.set(userId, existingSockets)
-        console.log(`✅ ${userId} is online via ${socket.id}`);
+        console.log(` ${userId} is online via ${socket.id}`);
     })
 
     socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole  }) => {
@@ -135,7 +135,7 @@ io.on("connection", (socket) => {
                     console.log(`❌ ${userId} went offline (last socket disconnected)`);
                 }else{
                     onlineUsers.set(userId,socketsSet)
-                    console.log(`🔌 ${userId} disconnected socket: ${socket.id}, still online in ${socketsSet.size} tab(s)`);
+                    console.log(`✅ ${userId} disconnected socket: ${socket.id}, still online in ${socketsSet.size} tab(s)`);
                 }
                 break
             }
