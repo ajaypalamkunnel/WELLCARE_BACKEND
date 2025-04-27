@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IMessage } from "../../../model/chat/message";
+import { IMessage, MediaType } from "../../../model/chat/message";
 import { ChatInboxItemDTO } from "../../../types/chat";
 
 
@@ -11,7 +11,9 @@ export interface IMessageRepository{
         senderModel: "User" | "Doctor",
         receiverModel: "User" | "Doctor",
         content: string,
-        type: "text" | "image" | "file"
+        type: "text" | "image" | "file",
+        mediaUrl?: string,
+        mediaType?: MediaType
       ): Promise<IMessage>;
       
 

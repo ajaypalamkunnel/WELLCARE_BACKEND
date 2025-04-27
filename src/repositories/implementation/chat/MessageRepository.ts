@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import Message, { IMessage } from "../../../model/chat/message";
+import Message, { IMessage, MediaType } from "../../../model/chat/message";
 import { BaseRepository } from "../../base/BaseRepository";
 import { IMessageRepository } from "../../interfaces/chat/IMessageRepository";
 import { CustomError } from "../../../utils/CustomError";
@@ -12,7 +12,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
     constructor() {
         super(Message)
     }
-    
+
 
     async saveMessage(
         senderId: Types.ObjectId,
@@ -20,8 +20,21 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
         senderModel: "User" | "Doctor",
         receiverModel: "User" | "Doctor",
         content: string,
-        type: "text" | "image" | "file"
+        type: "text" | "image" | "file",
+        mediaUrl?: string,
+        mediaType?: MediaType
+
     ): Promise<IMessage> {
+
+        console.log("repo===>",mediaUrl);
+        
+
+        if (!content && !mediaUrl) {
+            throw new CustomError("Message must contain text or media", StatusCode.BAD_REQUEST);
+        }
+
+
+
         try {
             const message = new Message({
                 senderId,
@@ -30,6 +43,8 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
                 receiverModel,
                 content,
                 type,
+                mediaUrl,
+                mediaType,
             });
 
             return await message.save();
@@ -63,7 +78,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
 
 
 
-    async getInbox(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
+    async getInbox(userId: Types.ObjectId, lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
         try {
 
 
@@ -122,7 +137,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
                 });
 
                 const isOnline = onlineUsers.has(chat._id.toString())
-                console.log("⬇️",isOnline)
+                console.log("⬇️", isOnline)
 
 
                 return {
@@ -144,14 +159,14 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
 
 
     async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
-       await Message.updateMany(
-        {
-            senderId,
-            receiverId,
-            isRead:false
-        },
-        {$set:{isRead:true}}
-       )
+        await Message.updateMany(
+            {
+                senderId,
+                receiverId,
+                isRead: false
+            },
+            { $set: { isRead: true } }
+        )
     }
 
 }

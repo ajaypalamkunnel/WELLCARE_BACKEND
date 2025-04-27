@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IMessage } from "../../../model/chat/message";
+import { IMessage, MediaType } from "../../../model/chat/message";
 import { IMessageRepository } from "../../../repositories/interfaces/chat/IMessageRepository";
 import { IChatService } from "../../interfaces/chat/IMessageService";
 import { CustomError } from "../../../utils/CustomError";
@@ -11,13 +11,13 @@ import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 class ChatService implements IChatService {
 
     private _messageRepository: IMessageRepository
-    
+
 
     constructor(messageRepository: IMessageRepository) {
         this._messageRepository = messageRepository
-       
+
     }
-    
+
 
 
     async sendMessage(
@@ -26,12 +26,17 @@ class ChatService implements IChatService {
         senderModel: "User" | "Doctor",
         receiverModel: "User" | "Doctor",
         content: string,
-        type: "text" | "image" | "file"
+        type: "text" | "image" | "file",
+        mediaUrl?: string,
+        mediaType?: MediaType
     ): Promise<IMessage> {
         try {
-            if (!content.trim()) {
+            if (!content.trim() && !mediaUrl?.trim()) {
                 throw new CustomError("Message content cannot be empty", StatusCode.BAD_REQUEST);
             }
+
+            console.log("service ==>",mediaUrl);
+            
 
             return await this._messageRepository.saveMessage(
                 senderId,
@@ -39,7 +44,9 @@ class ChatService implements IChatService {
                 senderModel,
                 receiverModel,
                 content,
-                type
+                type,
+                mediaUrl,
+                mediaType
             );
         } catch (error) {
             if (error instanceof CustomError) {
@@ -64,9 +71,9 @@ class ChatService implements IChatService {
     }
 
 
-    async getInboxForUser(userId: Types.ObjectId,lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
+    async getInboxForUser(userId: Types.ObjectId, lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]> {
         try {
-            return await this._messageRepository.getInbox(userId,lookupModel);
+            return await this._messageRepository.getInbox(userId, lookupModel);
         } catch (error) {
             throw error instanceof CustomError
                 ? error
@@ -75,12 +82,12 @@ class ChatService implements IChatService {
     }
 
 
-   async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
-       return this._messageRepository.markMessagesAsRead(senderId,receiverId)
+    async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
+        return this._messageRepository.markMessagesAsRead(senderId, receiverId)
     }
 
 
-   
+
 
 }
 

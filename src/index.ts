@@ -89,15 +89,24 @@ io.on("connection", (socket) => {
         console.log(` ${userId} is online via ${socket.id}`);
     })
 
-    socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole  }) => {
+    socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole,mediaUrl,mediaType  }) => {
         try {
-            console.log("***",message);
             
-
-            if (!to || !message || !from) {
+            console.log("***",mediaUrl);
+            
+            if (!to || !from) {
                 socket.emit("error", { message: "Invalid message payload" })
                 return;
             }
+            
+            if (!message?.trim() && !mediaUrl?.trim()) {
+                console.log(">>>",mediaUrl);
+                
+                socket.emit("error", { message: "Message must contain text or media" });
+                return;
+            }
+            
+
 
             const savedMessage = await chatService.sendMessage(
                 new Types.ObjectId(from),
@@ -105,7 +114,9 @@ io.on("connection", (socket) => {
                 fromRole,
                 toRole,
                 message,
-                type
+                type,
+                mediaUrl,
+                mediaType
             )
 
             const receiverSocketIds = onlineUsers.get(to);
