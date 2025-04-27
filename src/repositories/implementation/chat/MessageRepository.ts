@@ -12,7 +12,7 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
     constructor() {
         super(Message)
     }
-
+    
 
     async saveMessage(
         senderId: Types.ObjectId,
@@ -168,6 +168,35 @@ class MessageRepository extends BaseRepository<IMessage> implements IMessageRepo
             { $set: { isRead: true } }
         )
     }
+
+
+    async markMessageAsDeleted(messageId: Types.ObjectId): Promise<void> {
+        try {
+
+            const result = await Message.findById(messageId); // correct
+
+            if (!result) {
+                console.warn(` Message not found with id ${messageId}`);
+                throw new CustomError("Message not found", StatusCode.NOT_FOUND);
+            }
+    
+            result.isDeleted = true;
+            await result.save();
+        
+            
+        } catch (error) {
+            console.error(" Error marking message as deleted:", error);
+            throw new CustomError("Failed to delete message", StatusCode.INTERNAL_SERVER_ERROR);
+          
+        }
+    }
+
+
+    
+
+
+   
+    
 
 }
 

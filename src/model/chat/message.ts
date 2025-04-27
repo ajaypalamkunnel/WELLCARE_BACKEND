@@ -12,6 +12,7 @@ export interface IMessage extends Document {
   mediaUrl: string;
   mediaType: MediaType;
   isRead: boolean;
+  isDeleted:boolean;
   createdAt: Date;
 }
 
@@ -26,6 +27,7 @@ const MessageSchema = new Schema<IMessage>(
     mediaUrl: { type: String },
     mediaType: { type: String, enum: ["image", "video", "file"] },
     isRead: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

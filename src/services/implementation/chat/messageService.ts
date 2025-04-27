@@ -17,6 +17,7 @@ class ChatService implements IChatService {
         this._messageRepository = messageRepository
 
     }
+    
 
 
 
@@ -84,6 +85,13 @@ class ChatService implements IChatService {
 
     async markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> {
         return this._messageRepository.markMessagesAsRead(senderId, receiverId)
+    }
+
+
+    async deleteMessage(messageId: Types.ObjectId): Promise<void> {
+        console.log("serviecee=-",messageId);
+        
+        return this._messageRepository.markMessageAsDeleted(messageId)
     }
 
 

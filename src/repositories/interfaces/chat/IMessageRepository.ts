@@ -29,5 +29,7 @@ export interface IMessageRepository{
 
       markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void> 
 
+      markMessageAsDeleted(messageId: Types.ObjectId): Promise<void>
+
 
 }

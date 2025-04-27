@@ -25,5 +25,8 @@ export interface IChatService {
 
   markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void>
 
+
+  deleteMessage(messageId: Types.ObjectId): Promise<void>
+
 }
 

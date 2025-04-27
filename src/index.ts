@@ -89,21 +89,20 @@ io.on("connection", (socket) => {
         console.log(` ${userId} is online via ${socket.id}`);
     })
 
-    socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole,mediaUrl,mediaType  }) => {
+    socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole,mediaUrl,mediaType  },callback) => {
         try {
             
             console.log("***",mediaUrl);
             
             if (!to || !from) {
-                socket.emit("error", { message: "Invalid message payload" })
-                return;
+                return callback({ success: false, message: "Invalid message payload" });
             }
             
             if (!message?.trim() && !mediaUrl?.trim()) {
                 console.log(">>>",mediaUrl);
                 
-                socket.emit("error", { message: "Message must contain text or media" });
-                return;
+                return callback({ success: false, message: "Message must contain text or media" });
+            
             }
             
 
@@ -129,11 +128,68 @@ io.on("connection", (socket) => {
                 console.log(`📭 ${to} is offline. Message saved but not delivered`);
             }
 
-            socket.emit("message-sent", { success: true, message: savedMessage })
+            callback({ success: true, message: savedMessage });
         } catch (error) {
             console.error(" Error in send-message:", error);
-            socket.emit("error", { message: "Failed to send message" });
+            callback({ success: false, message: "Failed to send message" });
         }
+    })
+
+
+    socket.on("delete-message",async({messageId,userId})=>{
+
+        console.log("ivade vannuu ",messageId,"--",userId);
+        
+
+        try {
+
+            if(!messageId || !userId){
+                socket.emit("error",{message: "Invalid delete request"})
+                return
+            }
+
+
+            const message = await messageRepo.findById(messageId)
+
+            console.log("message :=",message);
+            
+
+            if(!message){
+                socket.emit("error",{message:"Message not found"})
+                return 
+            }
+
+            if(message.senderId.toString() !== userId){
+                console.log("ninakku pattillaa");
+                
+                socket.emit("error",{message:"You can only delete your own message"})
+                return 
+            }
+
+            await chatService.deleteMessage(new Types.ObjectId(messageId))
+
+            const receiverSocketIds = onlineUsers.get(message.receiverId.toString())
+            const senderSocketIds = onlineUsers.get(userId);
+
+
+            if(receiverSocketIds){
+                for(const sockId of receiverSocketIds){
+                    io.to(sockId).emit("message-deleted",{messageId})
+                }
+            }
+
+            if(senderSocketIds){
+                for (const sockId of senderSocketIds) {
+                    io.to(sockId).emit("message-deleted", { messageId });
+                  }
+            }
+        } catch (error) {
+
+            console.error("❌ Error in delete-message socket event:", error);
+            socket.emit("error", { message: "Failed to delete message" });
+            
+        }
+
     })
 
     socket.on("disconnect", () => {
