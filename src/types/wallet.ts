@@ -24,3 +24,21 @@ export interface PaginatedTransactionResponseDTO {
   page: number;
   limit: number;
 }
+
+
+
+export interface DoctorWalletSummaryDTO {
+  totalCredited: number;
+  totalWithdrawn: number;
+  balance: number;
+  withdrawable: number;
+  transactions: {
+    type: "credit" | "debit";
+    amount: number;
+    reason: string;
+    relatedAppointmentId?: string;
+    status: "success" | "pending" | "failed";
+    createdAt: Date;
+  }[];
+  totalTransactions: number;
+}

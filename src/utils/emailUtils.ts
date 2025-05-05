@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
+import { generatePrescriptionPDFBuffer } from "./pdfGenerator";
+import { IPrescription } from "../model/prescription/prescription Modal";
 
 dotenv.config()
 
@@ -124,4 +126,39 @@ export const sendAppointmentCancellationEmail = async (email: string, date: stri
       console.error("Error sending appointment cancellation email:", error);
     }
   };
+
+
+
+// ---------------------prescription mail
   
+
+export const sendPrescriptionEmail = async (email: string, prescription: IPrescription) => {
+    try {
+        const pdfBuffer = await generatePrescriptionPDFBuffer(prescription);
+
+        const mailOptions = {
+            from: `"WellCare" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: "Your Prescription from WellCare",
+            html: `
+                <div style="font-family: Arial, sans-serif;">
+                    <h2>Hi,</h2>
+                    <p>Your prescription from your recent consultation is ready.</p>
+                    <p>Please find the attached prescription document.</p>
+                    <p>Take care,<br/>WellCare Team</p>
+                </div>
+            `,
+            attachments: [
+                {
+                    filename: "Prescription.pdf",
+                    content: pdfBuffer,
+                    contentType: "application/pdf"
+                }
+            ]
+        };
+
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Error sending prescription email:", error);
+    }
+};

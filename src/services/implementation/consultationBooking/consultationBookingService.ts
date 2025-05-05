@@ -4,7 +4,7 @@ import { ISlot, SlotStatus } from "../../../model/doctorService/doctorSchedule";
 import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import IConsultationBookingRepository from "../../../repositories/interfaces/consultationBooking/IConsultationBookingRepository";
 import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
-import { AppointmentDetailDTO, DoctorAppointmentDetailDTO, InitiateBookingResponse, PaginatedAppointmentListDTO, PopulatedServiceId, VerifyAndBookResponse } from "../../../types/bookingTypes";
+import { AppointmentDetailDTO, DoctorAppointmentDetailDTO, InitiateBookingResponse, PaginatedAppointmentListDTO, PopulatedServiceId, Reason, VerifyAndBookResponse } from "../../../types/bookingTypes";
 import { CustomError } from "../../../utils/CustomError";
 import IConsultationBookingService from "../../interfaces/consultationBooking/IConsultationBookingService";
 import DoctorServiceRepository from "../../../repositories/implementation/doctorService/doctorServiceRepository";
@@ -14,6 +14,7 @@ import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import crypto from "crypto";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import IWalletService from "../../interfaces/wallet/IWalletService";
+import IDoctorWalletRepository from "../../../repositories/interfaces/doctorWallet/IDoctorWallet";
 
 
 class ConsultationBookingService implements IConsultationBookingService {
@@ -23,13 +24,16 @@ class ConsultationBookingService implements IConsultationBookingService {
     private _doctorServiceRepository: IDoctorServiceRepository
     private _walletRepository: IWalletRepository
     private _walletService: IWalletService
+    private _doctorWalletRepository: IDoctorWalletRepository
 
-    constructor(consultationBookingRepository: IConsultationBookingRepository, doctorScheduleRepository: IDoctorScheduleRepository, doctorServiceRepository: IDoctorServiceRepository, walletRepository: IWalletRepository, walletService: IWalletService) {
+
+    constructor(consultationBookingRepository: IConsultationBookingRepository, doctorScheduleRepository: IDoctorScheduleRepository, doctorServiceRepository: IDoctorServiceRepository, walletRepository: IWalletRepository, walletService: IWalletService, doctorWalletRepository: IDoctorWalletRepository) {
         this._consultationBookingRepository = consultationBookingRepository
         this._doctorScheduleRepository = doctorScheduleRepository
         this._doctorServiceRepository = doctorServiceRepository
         this._walletRepository = walletRepository
         this._walletService = walletService
+        this._doctorWalletRepository = doctorWalletRepository
 
     }
 
@@ -93,7 +97,7 @@ class ConsultationBookingService implements IConsultationBookingService {
     async initiateBooking(data: { patientId: string; doctorScheduleId: string; slotId: string; }): Promise<InitiateBookingResponse> {
         try {
 
-            
+
 
             const { doctorScheduleId, slotId } = data;
 
@@ -118,7 +122,7 @@ class ConsultationBookingService implements IConsultationBookingService {
             }
 
 
-           
+
 
 
             const serviceFee = (schedule.serviceId as unknown as PopulatedServiceId).fee;
@@ -251,9 +255,9 @@ class ConsultationBookingService implements IConsultationBookingService {
             // const bookingDetails = await this._consultationBookingRepository.findAppointmentDetailForDoctor(result.appointment.id,doctorObjectId)
 
             // console.log("Booking details******",bookingDetails);
-            
 
-        
+
+
 
             return {
                 bookingId: result.appointment._id.toString(),
@@ -404,6 +408,15 @@ class ConsultationBookingService implements IConsultationBookingService {
                     appointment._id
 
                 )
+            } else {
+                await this._doctorWalletRepository.addTransaction(
+                    service.doctorId.toString(),
+                    refundAmount,
+                    "credit",
+                    Reason.AppointmentCancelNotERefund,
+                    appointmentId.toString(),
+                    "success",
+                )
             }
 
 
@@ -444,7 +457,7 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             const appointment = await this._consultationBookingRepository.findAppointmentsForDoctor(doctorId, filters)
 
-            
+
 
 
             return appointment
@@ -479,8 +492,8 @@ class ConsultationBookingService implements IConsultationBookingService {
                 throw new CustomError("Appointment not found or access denied", StatusCode.NOT_FOUND);
             }
 
-            console.log("booking details==>",detail);
-            
+
+
 
             return detail;
 
@@ -493,13 +506,13 @@ class ConsultationBookingService implements IConsultationBookingService {
         }
     }
 }
-   
 
 
-    
 
 
-    
+
+
+
 
 
 

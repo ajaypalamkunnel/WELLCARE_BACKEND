@@ -25,8 +25,14 @@ import WalletService from "../../services/implementation/wallet/WalletService";
 import MessageRepository from "../../repositories/implementation/chat/MessageRepository";
 import ChatService from "../../services/implementation/chat/messageService";
 import MessageController from "../../controller/implementation/chat/MessageController";
+import DoctorWalletRepository from "../../repositories/implementation/doctorWallet/DoctorWallet";
+import DoctorWalletService from "../../services/implementation/doctorWallet/doctorWalletService";
 const router = Router();
 
+
+
+const doctorWalletRepo = new DoctorWalletRepository()
+const doctorWalletService = new DoctorWalletService(doctorWalletRepo)
 
 const walletRepository = new WalletRepository()
 const walletService = new WalletService(walletRepository)
@@ -50,9 +56,9 @@ const doctorServiceRepository = new DoctorServiceRepository()
 
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
-const doctorController = new DoctorController(doctorService)
+const doctorController = new DoctorController(doctorService,doctorWalletService)
 const consultationBookingRepository = new ConsultationBookingRepository()
-const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
+const consultationBookingService = new ConsultationBookingService(consultationBookingRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService,doctorWalletRepo)
 const consultationBookingController = new ConsultationBookingController(consultationBookingService)
 
 const chatRepository = new MessageRepository()

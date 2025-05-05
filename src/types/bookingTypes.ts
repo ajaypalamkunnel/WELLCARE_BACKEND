@@ -48,6 +48,7 @@ export interface AppointmentDetailDTO {
   _id: string;
   appointmentDate: string;
   status: string;
+  prescriptionUrl?:string
   paymentStatus: string;
   slot: {
     start_time: string;
@@ -171,4 +172,15 @@ export interface DoctorAppointmentDetailDTO {
     fileUrl: string;
     diagnosis: string;
   };
+}
+
+
+export interface bookingFeeDTO{
+  fee:number
+
+}
+
+export enum Reason{
+  AppoinTmentFee = "appointment fee",
+  AppointmentCancelNotERefund = "appoinment canceled not eligible for refund"
 }

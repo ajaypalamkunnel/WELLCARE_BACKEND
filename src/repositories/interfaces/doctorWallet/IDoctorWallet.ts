@@ -1,4 +1,5 @@
-import { IDoctorWallet } from "../../../model/doctorWallet/doctorWallet";
+import { IDoctorWallet, IDoctorWalletTransaction } from "../../../model/doctorWallet/doctorWallet";
+import { DoctorWalletSummaryDTO } from "../../../types/wallet";
 
 
 interface IDoctorWalletRepository{
@@ -22,6 +23,21 @@ interface IDoctorWalletRepository{
         totalWithdrawn: number;
         balance: number;
       }>;
+
+
+      getWalletOverview(
+        doctorId: string,
+        type?: "credit" | "debit",
+        page?:number,
+        limit?:number,
+      ): Promise<DoctorWalletSummaryDTO>
+
+
+
+      requestWithdrawal(
+        doctorId: string,
+        amount: number
+      ): Promise<void> 
 
 
 

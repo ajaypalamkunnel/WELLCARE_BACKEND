@@ -23,6 +23,8 @@ interface IDoctorController{
     addCertification(req:Request,res:Response):Promise<Response>
     editEducation(req:Request,res:Response):Promise<Response>
     editCertification(req:Request,res:Response):Promise<Response>
+    getWalletSummary(req:Request,res:Response):Promise<Response>
+    witdraw(req:Request,res:Response):Promise<Response>
 }
 
 

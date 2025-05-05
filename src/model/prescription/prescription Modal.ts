@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema,Document, Types } from "mongoose";
 
 
 
@@ -12,17 +12,18 @@ export interface IMedicine{
 }
 
 export interface IPrescription extends Document{
-    appoinmentId : mongoose.Types.ObjectId;
+    _id: Types.ObjectId;
+    appointmentId : mongoose.Types.ObjectId;
     doctorId:mongoose.Types.ObjectId;
     patientId:mongoose.Types.ObjectId;
     medicines:IMedicine[];
-    notes?:string,
+    
     createdAt?:Date
 
 }
 
 const PrescriptionSchema = new Schema<IPrescription>({
-    appoinmentId:{type:Schema.Types.ObjectId, required:true, ref:"ConsultationAppointment"},
+    appointmentId:{type:Schema.Types.ObjectId, required:true, ref:"ConsultationAppointment"},
     doctorId:{type:Schema.Types.ObjectId,required:true,ref:"Doctor"},
     patientId:{type:Schema.Types.ObjectId,required:true,ref:"user"},
     medicines:[
@@ -34,7 +35,7 @@ const PrescriptionSchema = new Schema<IPrescription>({
             consumption_method:{type:String,required:true},
         }
     ],
-    notes:{type:String},
+    
 })
 
 const Prescription = mongoose.model<IPrescription>(

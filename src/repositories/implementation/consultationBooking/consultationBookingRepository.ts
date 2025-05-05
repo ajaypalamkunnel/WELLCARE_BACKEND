@@ -7,7 +7,7 @@ import IConsultationBookingRepository from "../../interfaces/consultationBooking
 import DoctorSchedules, { SlotStatus } from "../../../model/doctorService/doctorSchedule";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
-import { AppointmentDetailDTO, DoctorAppointmentDetailDTO, DoctorAppointmentListItemDTO, PaginatedAppointmentListDTO } from "../../../types/bookingTypes";
+import { AppointmentDetailDTO, bookingFeeDTO, DoctorAppointmentDetailDTO, DoctorAppointmentListItemDTO, PaginatedAppointmentListDTO } from "../../../types/bookingTypes";
 import { startOfDay, endOfDay, addDays } from "date-fns";
 
 
@@ -16,7 +16,8 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
     constructor() {
         super(ConsultationAppointmentModal)
     }
-   
+
+
     async getABookingDetails(bookingId: string): Promise<IConsultationAppointment> {
         try {
 
@@ -41,6 +42,9 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
             if (!result) {
                 throw new CustomError("Booking not found", StatusCode.NOT_FOUND)
             }
+
+            console.log("===>result:", result);
+
 
             return result
 
@@ -309,6 +313,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
                         _id: 1,
                         appointmentDate: 1,
                         status: 1,
+                        prescriptionUrl: 1,
                         paymentStatus: 1,
                         slot: {
                             start_time: 1,
@@ -380,11 +385,6 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
     async findAppointmentsForDoctor(doctorId: Types.ObjectId, filters: { date?: string; mode?: string; status?: string; page?: number; limit?: number }): Promise<PaginatedAppointmentListDTO> {
         try {
 
-            console.log("📦 Filters received:", filters);
-
-            
-
-
             const matchStage: any = {
                 doctorId: doctorId
             }
@@ -430,13 +430,13 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
                 // Capitalize each word (handles "in-person", "online", etc.)
                 normalizedMode = normalizedMode
-                  .split("-")
-                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join("-");
-              
-                
-              }
-              
+                    .split("-")
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join("-");
+
+
+            }
+
 
             const page = filters.page && filters.page > 0 ? filters.page : 1
             const limit = filters.limit && filters.limit > 0 ? filters.limit : 10;
@@ -495,17 +495,17 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
                 ...(filters.mode && filters.mode !== "all"
                     ? [
                         {
-                          $match: {
-                            "service.mode": filters.mode
-                              .toLowerCase()
-                              .split("-")
-                              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                              .join("-")
-                          }
+                            $match: {
+                                "service.mode": filters.mode
+                                    .toLowerCase()
+                                    .split("-")
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                    .join("-")
+                            }
                         }
-                      ]
+                    ]
                     : []),
-                  
+
 
 
                 {
@@ -553,7 +553,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
             ]
 
-          
+
 
             const total = await ConsultationAppointmentModal.countDocuments(matchStage)
 
@@ -591,129 +591,156 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
 
     async findAppointmentDetailForDoctor(appointmentId: Types.ObjectId, doctorId: Types.ObjectId): Promise<DoctorAppointmentDetailDTO | null> {
-       try {
+        try {
 
-        const pipeline: PipelineStage[] = [
-            {
-              $match: {
-                _id: appointmentId,
-                doctorId: doctorId
-              }
-            },
-            // Join Doctor Schedule for slot info
-            {
-              $lookup: {
-                from: "doctorschedules",
-                localField: "doctorScheduleId",
-                foreignField: "_id",
-                as: "schedule"
-              }
-            },
-            { $unwind: "$schedule" },
-            {
-              $addFields: {
-                slot: {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: "$schedule.availability",
-                        as: "slot",
-                        cond: { $eq: ["$$slot.slot_id", "$slotId"] }
-                      }
-                    },
-                    0
-                  ]
+            const pipeline: PipelineStage[] = [
+                {
+                    $match: {
+                        _id: appointmentId,
+                        doctorId: doctorId
+                    }
+                },
+                // Join Doctor Schedule for slot info
+                {
+                    $lookup: {
+                        from: "doctorschedules",
+                        localField: "doctorScheduleId",
+                        foreignField: "_id",
+                        as: "schedule"
+                    }
+                },
+                { $unwind: "$schedule" },
+                {
+                    $addFields: {
+                        slot: {
+                            $arrayElemAt: [
+                                {
+                                    $filter: {
+                                        input: "$schedule.availability",
+                                        as: "slot",
+                                        cond: { $eq: ["$$slot.slot_id", "$slotId"] }
+                                    }
+                                },
+                                0
+                            ]
+                        }
+                    }
+                },
+
+                // Join Service
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "serviceId",
+                        foreignField: "_id",
+                        as: "service"
+                    }
+                },
+                { $unwind: "$service" },
+
+                // Join Patient (User)
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "patientId",
+                        foreignField: "_id",
+                        as: "patient"
+                    }
+                },
+                { $unwind: "$patient" },
+
+                // Join Prescription (optional)
+                {
+                    $lookup: {
+                        from: "prescriptions",
+                        localField: "prescriptionId",
+                        foreignField: "_id",
+                        as: "prescription"
+                    }
+                },
+
+                // Project fields
+                {
+                    $project: {
+                        _id: 1,
+                        appointmentDate: 1,
+                        status: 1,
+                        paymentStatus: 1,
+                        slot: {
+                            start_time: 1,
+                            end_time: 1
+                        },
+                        service: {
+                            name: 1,
+                            mode: 1,
+                            fee: 1,
+                            description: 1
+                        },
+                        patient: {
+                            _id: 1,
+                            fullName: 1,
+                            gender: 1,
+                            mobile: 1,
+                            address: 1,
+                            profileUrl: 1,
+                            personalInfo: 1
+                        },
+                        prescription: {
+                            $cond: [
+                                { $gt: [{ $size: "$prescription" }, 0] },
+                                {
+                                    _id: { $arrayElemAt: ["$prescription._id", 0] },
+                                    fileUrl: { $arrayElemAt: ["$prescription.fileUrl", 0] },
+                                    diagnosis: { $arrayElemAt: ["$prescription.diagnosis", 0] }
+                                },
+                                null
+                            ]
+                        }
+                    }
                 }
-              }
-            },
-          
-            // Join Service
-            {
-              $lookup: {
-                from: "services",
-                localField: "serviceId",
-                foreignField: "_id",
-                as: "service"
-              }
-            },
-            { $unwind: "$service" },
-          
-            // Join Patient (User)
-            {
-              $lookup: {
-                from: "users",
-                localField: "patientId",
-                foreignField: "_id",
-                as: "patient"
-              }
-            },
-            { $unwind: "$patient" },
-          
-            // Join Prescription (optional)
-            {
-              $lookup: {
-                from: "prescriptions",
-                localField: "prescriptionId",
-                foreignField: "_id",
-                as: "prescription"
-              }
-            },
-          
-            // Project fields
-            {
-              $project: {
-                _id: 1,
-                appointmentDate: 1,
-                status: 1,
-                paymentStatus: 1,
-                slot: {
-                  start_time: 1,
-                  end_time: 1
-                },
-                service: {
-                  name: 1,
-                  mode: 1,
-                  fee: 1,
-                  description: 1
-                },
-                patient: {
-                  _id: 1,
-                  fullName: 1,
-                  gender: 1,
-                  mobile:1,
-                  address:1,
-                  profileUrl: 1,
-                  personalInfo: 1
-                },
-                prescription: {
-                  $cond: [
-                    { $gt: [{ $size: "$prescription" }, 0] },
-                    {
-                      _id: { $arrayElemAt: ["$prescription._id", 0] },
-                      fileUrl: { $arrayElemAt: ["$prescription.fileUrl", 0] },
-                      diagnosis: { $arrayElemAt: ["$prescription.diagnosis", 0] }
-                    },
-                    null
-                  ]
-                }
-              }
+            ];
+
+            const result = await ConsultationAppointmentModal.aggregate<DoctorAppointmentDetailDTO>(pipeline)
+
+
+
+            return result.length > 0 ? result[0] : null
+
+
+        } catch (error) {
+
+            console.error(" Error fetching appointment detail:", error);
+            throw new CustomError("Failed to fetch appointment detail", StatusCode.INTERNAL_SERVER_ERROR);
+
+
+        }
+    }
+
+
+    async getAppointmentFee(appointmentId: string): Promise<bookingFeeDTO> {
+        try {
+
+            const bookingFee = await ConsultationAppointmentModal.findById(appointmentId)
+                .populate({
+                    path: "serviceId",
+                    select: "fee",
+                })
+
+
+            if (!bookingFee || !bookingFee.serviceId) {
+                throw new CustomError("Booking fetching error", StatusCode.BAD_REQUEST);
             }
-          ];
 
-          const result = await ConsultationAppointmentModal.aggregate<DoctorAppointmentDetailDTO>(pipeline)
-          
+            const fee = (bookingFee.serviceId as any).fee; // Use `as any` if TS doesn't infer populated type
+
+            return { fee };
+        } catch (error) {
+
+            console.error("Error fetching appointment fee:", error);
+            throw new CustomError("Internal Server Error", StatusCode.INTERNAL_SERVER_ERROR);
 
 
-          return result.length > 0 ? result[0] :null
-
-         
-       } catch (error) {
-
-        console.error(" Error fetching appointment detail:", error);
-        throw new CustomError("Failed to fetch appointment detail", StatusCode.INTERNAL_SERVER_ERROR);
-  
-        
-       }
+        }
     }
 
 

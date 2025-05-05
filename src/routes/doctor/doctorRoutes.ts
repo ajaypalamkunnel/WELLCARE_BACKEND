@@ -28,13 +28,22 @@ import ConsultationBookingController from "../../controller/implementation/consu
 import MessageRepository from "../../repositories/implementation/chat/MessageRepository";
 import ChatService from "../../services/implementation/chat/messageService";
 import MessageController from "../../controller/implementation/chat/MessageController";
+import PrescriptionRepository from "../../repositories/implementation/prescription/Prescription";
+import PrescriptionService from "../../services/implementation/prescription/prescriptionService";
+import PrescriptionController from "../../controller/implementation/prescription/PrescriptionController";
+import DoctorWallet from "../../model/doctorWallet/doctorWallet";
+import DoctorWalletRepository from "../../repositories/implementation/doctorWallet/DoctorWallet";
+import DoctorWalletService from "../../services/implementation/doctorWallet/doctorWalletService";
 
 
 const router = Router();
 
+const doctorWalletRepo = new DoctorWalletRepository()
+const doctorWalletService = new DoctorWalletService(doctorWalletRepo)
+
 const doctorRepository = new DoctorRepository()
 const doctorService = new DoctorService(doctorRepository)
-const doctorController = new DoctorController(doctorService)
+const doctorController = new DoctorController(doctorService,doctorWalletService)
 
 
 const subscriptionRepository = new SubscriptionRepositroy()
@@ -60,7 +69,7 @@ const doctorScheduleService = new DoctorScheduleService(doctorScheduleRepository
 const doctorScheduleController = new DoctorScheduleController(doctorScheduleService)
 
 const consultationAppointmentRepository = new ConsultationBookingRepository()
-const consultationAppointmentService = new ConsultationBookingService(consultationAppointmentRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService)
+const consultationAppointmentService = new ConsultationBookingService(consultationAppointmentRepository,doctorScheduleRepository,doctorServiceRepository,walletRepository,walletService,doctorWalletRepo)
 const consultationAppointmentController = new ConsultationBookingController(consultationAppointmentService)
 
 
@@ -68,6 +77,11 @@ const consultationAppointmentController = new ConsultationBookingController(cons
 const chatRepository = new MessageRepository()
 const chatService = new ChatService(chatRepository)
 const chatController = new MessageController(chatService)
+
+const prescriptionRepo = new PrescriptionRepository()
+const prescriptionService = new PrescriptionService(prescriptionRepo,doctorWalletRepo,consultationAppointmentRepository)
+const prescriptionController = new PrescriptionController(prescriptionService)
+
 
 
 router.post("/signup/basic_details", (req, res) => doctorController.registerBasicDetails(req, res))
@@ -179,6 +193,20 @@ router.put("/profile/updateCertification",authMiddleWare,checkRole(Roles.DOCTOR)
 
 router.patch("/schedules/:scheduleId/cancel",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
     await doctorScheduleController.cancelSchedule(req,res)
+})
+
+
+router.post("/submit-prescription",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await prescriptionController.submitPrescription(req,res)
+})
+router.get("/fetch-prescription/:appointmentId",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await prescriptionController.getPrescription(req,res)
+})
+router.get("/getWalletSummary",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.getWalletSummary(req,res)
+})
+router.post("/withdraw",authMiddleWare,checkRole(Roles.DOCTOR),async(req,res)=>{
+    await doctorController.witdraw(req,res)
 })
 
 

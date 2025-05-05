@@ -2,7 +2,7 @@ import { Types, UpdateWriteOpResult } from "mongoose";
 import { IPayment } from "../../../model/bookingPayment/bookingPayment";
 import { IConsultationAppointment } from "../../../model/consultationBooking/consultationBooking";
 import { SlotStatus } from "../../../model/doctorService/doctorSchedule";
-import { AppointmentDetailDTO, DoctorAppointmentDetailDTO, DoctorAppointmentListItemDTO, PaginatedAppointmentListDTO } from "../../../types/bookingTypes";
+import { AppointmentDetailDTO, bookingFeeDTO, DoctorAppointmentDetailDTO, DoctorAppointmentListItemDTO, PaginatedAppointmentListDTO } from "../../../types/bookingTypes";
 
 
 interface IConsultationBookingRepository {
@@ -52,6 +52,9 @@ interface IConsultationBookingRepository {
     appointmentId: Types.ObjectId,
     doctorId: Types.ObjectId
   ): Promise<DoctorAppointmentDetailDTO | null>
+
+
+  getAppointmentFee(appointmentId:string):Promise<bookingFeeDTO>
 
 
 }

@@ -20,6 +20,7 @@ import MessageRepository from './repositories/implementation/chat/MessageReposit
 import ChatService from './services/implementation/chat/messageService';
 import { Types } from 'mongoose';
 import DoctorRepository from './repositories/implementation/doctor/doctorRepository';
+import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
 
 connectDB()
 const app = express()
@@ -208,6 +209,8 @@ io.on("connection", (socket) => {
             }
        }
     })
+
+    registerWebRTCSocketHandlers(io,socket)
 
     socket.on("error",(err)=>{
         console.error("Socket error:", err);

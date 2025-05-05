@@ -26,6 +26,7 @@ export interface IConsultationAppointment extends Document {
   slotId: mongoose.Types.ObjectId;
   status: SlotStatus;
   prescriptionId?: mongoose.Types.ObjectId;
+  prescriptionUrl?:string;
   paymentStatus: PaymentStatus;
   cancellation?: ICancellation;
   createdAt?: Date;
@@ -58,6 +59,7 @@ const ConsultationAppointmentSchema = new Schema<IConsultationAppointment>(
       }
     },
     prescriptionId: { type: Schema.Types.ObjectId, ref: "Prescription", default: null },
+    prescriptionUrl:{type:String},
     paymentStatus: {
       type: String,
       enum: ["paid", "unpaid", "pending", "failed", "refunded"],
