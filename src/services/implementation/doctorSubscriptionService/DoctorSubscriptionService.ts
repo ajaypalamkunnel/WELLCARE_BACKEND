@@ -173,12 +173,20 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                     endDate.setFullYear(endDate.getFullYear() + plan.duration.value);
                 }
 
+                console.log("Payment varunna daetails : ",payment);
+                
+
 
                 const updatedSubscription = await this._doctorSubscriptionRepo.updateByOrderId(paymentData.razorpay_order_id, {
                     paymentStatus: "paid",
                     status: "active",
                     startDate: new Date(),
                     endDate: endDate,
+                    paymentDetails:{
+                        paymentId:paymentData.razorpay_order_id,
+                        paymentMethod:payment.method,
+                        paymentAmount:plan.finalPrice
+                    }
                 });
 
                 if (!updatedSubscription) {
