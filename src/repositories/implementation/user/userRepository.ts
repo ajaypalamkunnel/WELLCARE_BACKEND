@@ -7,6 +7,7 @@ import IUserRepository from "../../interfaces/user/IUser";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
+import NotificationModel, { INotification } from "../../../model/notification/notificationModel";
 
 class UserRepository extends BaseRepository<IUser> implements IUserRepository {
 
@@ -176,6 +177,15 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     async findUserTokenById(userId: string): Promise<IUser | null> {
         return await User.findById(userId).select("-password")
     }
+
+
+    async getAllNotifications(userId: string): Promise<INotification[]> {
+        const notifIcations = await NotificationModel.find({ userId })
+        .sort({ createdAt: -1 })
+
+    return notifIcations
+    }
+    
     
     
 

@@ -43,7 +43,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
                 throw new CustomError("Booking not found", StatusCode.NOT_FOUND)
             }
 
-            console.log("===>result:", result);
+          
 
 
             return result

@@ -6,6 +6,7 @@ import { AddEducationDTO } from "../../../types/doctor";
 import { CustomError } from "../../../utils/CustomError";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorRepository from "../../interfaces/doctor/IDoctor";
+import NotificationModel, { INotification } from "../../../model/notification/notificationModel";
 
 
 class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorRepository {
@@ -263,8 +264,8 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
     async editCertification(doctorId: string, updateCertification: ICertification): Promise<ICertification> {
         try {
 
-            console.log("repo---",updateCertification);
-            
+            console.log("repo---", updateCertification);
+
 
             const { _id, name, issuedBy, yearOfIssue } = updateCertification
 
@@ -283,8 +284,8 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
                 , { new: true, projection: { certifications: 1 } }
             )
 
-            console.log("....",updated);
-            
+            console.log("....", updated);
+
 
             if (!updated) {
                 throw new CustomError("certification entry not found", StatusCode.NOT_FOUND);
@@ -294,7 +295,7 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
                 (cert) => cert._id?.toString() === _id
             )
 
-            if(!updatedCertification){
+            if (!updatedCertification) {
                 throw new CustomError("Updated certification not found", StatusCode.NOT_FOUND)
             }
 
@@ -302,17 +303,27 @@ class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorReposit
             return updatedCertification
         } catch (error) {
 
-            console.error("certifiacation updating error",error);
-            
+            console.error("certifiacation updating error", error);
 
-            if(error instanceof CustomError){
+
+            if (error instanceof CustomError) {
                 throw error
-            }else{
-                throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            } else {
+                throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
             }
 
         }
     }
+
+
+    async getAllNotifications(userId: string): Promise<INotification[]> {
+        const notifIcations = await NotificationModel.find({ userId })
+            .sort({ createdAt: -1 })
+
+        return notifIcations
+
+    }
+
 
 
 

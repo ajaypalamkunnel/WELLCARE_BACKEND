@@ -1,6 +1,7 @@
 
 
 import { IDepartment } from "../../../model/department/departmentModel";
+import { INotification } from "../../../model/notification/notificationModel";
 import { IAddress, IUser } from "../../../model/user/userModel";
 import { IScheduleResponse } from "../../../types/bookingTypes";
 import { firstChatDTO } from "../../../types/chat";
@@ -45,5 +46,7 @@ export interface IUserService {
     fetchScheduleByDoctorAndDate(doctorId: string, date: string): Promise<IScheduleResponse[]>
 
     getUserChatInfo(userId: string): Promise<firstChatDTO>
+
+    fetchNotifications(userId:string):Promise<INotification[]>
 
 }

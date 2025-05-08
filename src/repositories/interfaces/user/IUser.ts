@@ -1,3 +1,4 @@
+import { INotification } from '../../../model/notification/notificationModel';
 import {IUser} from '../../../model/user/userModel';
 import { IScheduleResponse } from '../../../types/bookingTypes';
 import { firstChatDTO } from '../../../types/chat';
@@ -17,6 +18,8 @@ interface IUserRepository extends IBaseRepository<IUser>{
     getBasicUserInfoById(userId:string):Promise<firstChatDTO|null>
 
     findUserTokenById(userId:string):Promise<IUser|null>
+    getAllNotifications(userId:string):Promise<INotification[]>
+    
     
 
 }

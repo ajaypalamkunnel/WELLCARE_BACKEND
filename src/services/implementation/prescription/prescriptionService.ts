@@ -13,6 +13,8 @@ import { generatePrescriptionPDFBuffer } from "../../../utils/pdfGenerator";
 import IDoctorWalletRepository from "../../../repositories/interfaces/doctorWallet/IDoctorWallet";
 import IConsultationBookingRepository from "../../../repositories/interfaces/consultationBooking/IConsultationBookingRepository";
 import { bookingFeeDTO, Reason } from "../../../types/bookingTypes";
+import { sendNotificationToUser } from "../../../utils/notification/sendNotification";
+import { io } from "../../..";
 
 
 class PrescriptionService implements IPrescriptionService {
@@ -91,6 +93,20 @@ class PrescriptionService implements IPrescriptionService {
             if (patient?.email) {
                 await sendPrescriptionEmail(patient.email, savedPrescription)
             }
+
+            sendNotificationToUser(
+                io,
+                appointmentDetails.patientId.toString(),
+                "user",
+                "Your resend Consultation prescription",
+                "Your recent consultation prescription is now available. You can access it via your registered email or by visiting the Appointments section in your account."
+            )
+
+
+
+
+
+
 
             return savedPrescription
 

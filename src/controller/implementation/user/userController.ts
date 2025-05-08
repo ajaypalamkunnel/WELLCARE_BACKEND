@@ -9,7 +9,7 @@ import { error } from "console";
 import passport from "passport";
 import { IUser } from "../../../model/user/userModel";
 import { IUserType } from "../../../types/user";
-import { StatusCode } from "../../../constants/statusCode";
+import { ERROR_MESSAGES, StatusCode } from "../../../constants/statusCode";
 import { threadId } from "worker_threads";
 import { CustomError } from "../../../utils/CustomError";
 import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
@@ -26,6 +26,7 @@ class UserController implements IUserController {
         this._userService = _userService
         this._walletService = walletService
     }
+   
     
     
 
@@ -516,6 +517,31 @@ class UserController implements IUserController {
         }
     }
 
+
+   async listNotifications(req: Request, res: Response): Promise<Response> {
+        try {
+        
+                    const userId = req.user?.userId
+
+                    console.log("user id : ",userId);
+                    
+        
+                    if(!userId){
+                        throw new CustomError("Unauthorized",StatusCode.BAD_REQUEST)
+                    }
+        
+                    const result = await this._userService.fetchNotifications(userId)
+        
+                    return res.status(StatusCode.OK).json(generateSuccessResponse("Notifications fetched", result))
+                
+               } catch (error) {
+        
+                return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+        
+                
+               }
+    }
 
 
 

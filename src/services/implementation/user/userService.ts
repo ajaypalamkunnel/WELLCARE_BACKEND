@@ -14,6 +14,7 @@ import { IScheduleResponse } from "../../../types/bookingTypes";
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import { firstChatDTO } from "../../../types/chat";
+import { INotification } from "../../../model/notification/notificationModel";
 
 
 
@@ -27,7 +28,7 @@ class UserService implements IUserService {
         this._userRepository = userRespository
 
     }
-
+   
 
 
 
@@ -477,6 +478,21 @@ class UserService implements IUserService {
                 : new CustomError("Failed to fetch user info", StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    async fetchNotifications(userId: string): Promise<INotification[]> {
+        try {
+
+            const notifications = await this._userRepository.getAllNotifications(userId)
+
+            return notifications
+
+        } catch (error) {
+
+            throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
+
+        }
+    }
+
 
 
 }

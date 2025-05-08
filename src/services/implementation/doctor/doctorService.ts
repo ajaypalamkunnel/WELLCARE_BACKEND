@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
+import { INotification } from "../../../model/notification/notificationModel";
 
 
 class DoctorService implements IDoctorService {
@@ -20,6 +21,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository
     }
+
 
 
 
@@ -698,6 +700,21 @@ class DoctorService implements IDoctorService {
             } else {
                 throw new CustomError("Interanl server error", StatusCode.INTERNAL_SERVER_ERROR)
             }
+
+        }
+    }
+
+
+    async fetchNotifications(userId: string): Promise<INotification[]> {
+        try {
+
+            const notifications = await this._doctorRepository.getAllNotifications(userId)
+
+            return notifications
+
+        } catch (error) {
+
+            throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
 
         }
     }

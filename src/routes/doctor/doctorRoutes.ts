@@ -217,6 +217,10 @@ router.post("/withdraw", authMiddleWare, checkRole(Roles.DOCTOR), async (req, re
     await doctorController.witdraw(req, res)
 })
 
+router.get("/get-notifications", authMiddleWare, checkRole(Roles.DOCTOR), async (req, res) => {
+    await doctorController.listNotifications(req, res)
+})
+
 //report generation Rourtes
 
 router.get(

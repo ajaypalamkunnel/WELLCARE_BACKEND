@@ -5,6 +5,7 @@ import { IBaseRepository } from "../../base/IBaseRepository";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
 import { Certificate } from "tls";
+import { INotification } from "../../../model/notification/notificationModel";
 
 export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     findDoctorByEmail(email: string): Promise<IDoctor | null>
@@ -21,6 +22,7 @@ export default interface IDoctorRepository extends IBaseRepository<IDoctor> {
     addEducation(doctorId:string,education:AddEducationDTO):Promise<IEducation[]>
     addCertification(doctorId:string,certification:ICertification):Promise<ICertification>
     editEducation(doctorId:string,updateEducation:IEducation):Promise<IEducation>
-    editCertification(doctorId:String,updateCertification:ICertification):Promise<ICertification>
+    editCertification(doctorId:string,updateCertification:ICertification):Promise<ICertification>
+    getAllNotifications(userId:string):Promise<INotification[]>
 
 }

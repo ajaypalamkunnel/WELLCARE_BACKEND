@@ -10,6 +10,7 @@ import { ChatUser } from "../../../types/chat";
 import DoctorService from "../../../services/implementation/doctor/doctorService";
 import { json } from "body-parser";
 import IDoctorWalletService from "../../../services/interfaces/doctorWallet/IDoctorWalletService";
+import { Types } from "mongoose";
 
 
 class DoctorController implements IDoctorController {
@@ -21,6 +22,7 @@ class DoctorController implements IDoctorController {
         this._doctorService = _doctorService
         this._walletService = walletService
     }
+    
 
 
 
@@ -701,6 +703,33 @@ class DoctorController implements IDoctorController {
                 .json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
 
         }
+    }
+
+
+    async listNotifications(req: Request, res: Response): Promise<Response> {
+       try {
+
+            const userId = req.user?.userId
+
+            console.log("here===>",userId)
+
+            if(!userId){
+                throw new CustomError("Unauthorized",StatusCode.BAD_REQUEST)
+            }
+
+            const result = await this._doctorService.fetchNotifications(userId)
+
+            
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Notifications fetched", result))
+        
+       } catch (error) {
+
+        return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+        .json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+
+        
+       }
     }
 
 

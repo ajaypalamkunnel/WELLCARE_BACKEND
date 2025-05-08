@@ -19,5 +19,6 @@ interface UserController{
     getUserInfoForChat(req: Request, res: Response): Promise<Response>
     getWalletSummary(req: Request, res: Response): Promise<Response>;
     getWalletTransactions(req: Request, res: Response): Promise<Response>;
+    listNotifications(req:Request,res:Response):Promise<Response>
 }
 export default UserController

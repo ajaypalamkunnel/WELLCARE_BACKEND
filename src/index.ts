@@ -21,6 +21,8 @@ import ChatService from './services/implementation/chat/messageService';
 import { Types } from 'mongoose';
 import DoctorRepository from './repositories/implementation/doctor/doctorRepository';
 import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
+import { registerNotificationSocketHandlers } from './utils/notification/notificationSocket';
+import { sendNotificationToUser } from './utils/notification/sendNotification';
 
 connectDB()
 const app = express()
@@ -58,7 +60,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // Socket.io
-const io = new SocketIOServer(server, {
+export const io = new SocketIOServer(server, {
     cors: {
         origin: "http://localhost:3000",
         credentials: true,
@@ -92,6 +94,13 @@ io.on("connection", (socket) => {
 
     socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole,mediaUrl,mediaType  },callback) => {
         try {
+            console.log("===>",toRole)
+            let role: "Doctor" | "user"
+            if(toRole === "User"){
+                role = "user"
+            }else{
+                role = "Doctor"
+            }
             
             console.log("***",mediaUrl);
             
@@ -124,6 +133,13 @@ io.on("connection", (socket) => {
                 for(const sockId of receiverSocketIds){
                     io.to(sockId).emit("receive-message", savedMessage);
                 }
+                await sendNotificationToUser(
+                    io,
+                    to,
+                    role,
+                    "📩 New chat",
+                    message
+                )
                 console.log(`Message delivered to ${to}`);
             }else{
                 console.log(`📭 ${to} is offline. Message saved but not delivered`);
@@ -209,7 +225,7 @@ io.on("connection", (socket) => {
             }
        }
     })
-
+    registerNotificationSocketHandlers(io,socket)
     registerWebRTCSocketHandlers(io,socket)
 
     socket.on("error",(err)=>{

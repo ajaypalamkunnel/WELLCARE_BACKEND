@@ -25,6 +25,7 @@ interface IDoctorController{
     editCertification(req:Request,res:Response):Promise<Response>
     getWalletSummary(req:Request,res:Response):Promise<Response>
     witdraw(req:Request,res:Response):Promise<Response>
+    listNotifications(req:Request,res:Response):Promise<Response>
 }
 
 

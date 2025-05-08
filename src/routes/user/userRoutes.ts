@@ -154,6 +154,9 @@ router.get("/wallet",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
 router.get("/wallet/transactions",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
     await userController.getWalletTransactions(req,res)
 })
+router.get("/get-notifications",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
+    await userController.listNotifications(req,res)
+})
 
 
 //wallet

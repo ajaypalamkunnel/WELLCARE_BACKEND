@@ -1,5 +1,6 @@
 
 import { ICertification, IDoctor, IEducation } from "../../../model/doctor/doctorModel"
+import { INotification } from "../../../model/notification/notificationModel";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
 
@@ -60,4 +61,6 @@ export interface IDoctorService {
     updateEducation(educationId: string, data:IEducation): Promise<IEducation>;
 
     updateCertification(doctorId:string,data:ICertification):Promise<ICertification>
+
+    fetchNotifications(userId:string):Promise<INotification[]>
 }

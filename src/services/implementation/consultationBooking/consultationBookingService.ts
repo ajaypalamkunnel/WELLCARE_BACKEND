@@ -15,7 +15,9 @@ import crypto from "crypto";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import IWalletService from "../../interfaces/wallet/IWalletService";
 import IDoctorWalletRepository from "../../../repositories/interfaces/doctorWallet/IDoctorWallet";
-
+import { io } from "../../../index";
+import { sendNotificationToUser } from "../../../utils/notification/sendNotification";
+import dayjs from "dayjs";
 
 class ConsultationBookingService implements IConsultationBookingService {
 
@@ -61,7 +63,7 @@ class ConsultationBookingService implements IConsultationBookingService {
             })
 
 
-            console.log("Selected slot==>", selectdSlot)
+            
 
             if (!selectdSlot) {
                 throw new CustomError("Slot not found in schedule", StatusCode.NOT_FOUND);
@@ -256,13 +258,32 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             // console.log("Booking details******",bookingDetails);
 
+            console.log("*****ivadannu vittuee");
+            
+            await sendNotificationToUser(
+                io,
+                doctorId,
+                "Doctor",
+                "New Appointment Booked",
+                `An appointment has been booked by a patient on ${dayjs(schedule.date).format("DD MMM YYYY")}`,
+            )
+
+            await sendNotificationToUser(
+                io,
+                patientId,
+                "user",
+                "Booking Confirmed",
+                `Your appointment with the doctor is confirmed for ${dayjs(schedule.date).format("DD MMM YYYY")}`,
+                `/patient/appointments`
+            )
 
 
 
             return {
                 bookingId: result.appointment._id.toString(),
                 slot_id: slotId,
-                status: "success"
+                status: "success",
+
             }
 
 
