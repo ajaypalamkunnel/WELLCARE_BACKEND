@@ -37,6 +37,7 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
         }
     }
 
+
     async findConflictingSchedules(doctorId: mongoose.Types.ObjectId, serviceId: mongoose.Types.ObjectId, date: Date, start_time: Date, end_time: Date): Promise<IDoctorAvailability | null> {
         try {
 
@@ -96,7 +97,7 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();
-            
+
 
 
             return {
@@ -171,27 +172,27 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
 
 
     async cancelSchedule(scheduleId: string, reason: string): Promise<boolean> {
-        console.log("repository ill vannnu",scheduleId,"----",reason);
-        
+        console.log("repository ill vannnu", scheduleId, "----", reason);
+
         try {
 
             const result = await DoctorSchedules.updateOne(
                 {
-                    _id:new mongoose.Types.ObjectId(scheduleId),
-                    isCancelled:false
+                    _id: new mongoose.Types.ObjectId(scheduleId),
+                    isCancelled: false
                 },
                 {
-                    $set:{
-                        isCancelled:true,
-                        cancellationReason:reason,
-                        cancelledAt:new Date(),
+                    $set: {
+                        isCancelled: true,
+                        cancellationReason: reason,
+                        cancelledAt: new Date(),
                         "availability.$[].status": "cancelled",
                     }
                 }
             )
             return result.modifiedCount > 0
         } catch (error) {
-            throw new CustomError("Error while cancelling schema",StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError("Error while cancelling schema", StatusCode.INTERNAL_SERVER_ERROR)
         }
     }
 

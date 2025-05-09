@@ -86,7 +86,7 @@ class SubscriptionController implements ISubscriptionController {
 
             const subscriptionPlans = await this._subscriptionService.getSubscriptionPlans()
 
-            
+
 
             return res.status(StatusCode.OK).json(generateSuccessResponse("subscription plans fetched successfully", subscriptionPlans))
         } catch (error: unknown) {

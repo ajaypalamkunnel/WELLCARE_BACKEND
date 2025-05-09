@@ -15,7 +15,7 @@ class DoctorSubscriptionController implements IDoctorSubscriptionController {
     constructor(doctorSubscriptionService: IDoctorSubscriptionService) {
         this._doctorSubscriptionService = doctorSubscriptionService
     }
-    
+
     async createSubscriptionOrder(req: Request, res: Response): Promise<Response> {
         try {
 
@@ -68,23 +68,23 @@ class DoctorSubscriptionController implements IDoctorSubscriptionController {
         try {
 
 
-            console.log("hiiii getDoctorSubscriptionn");
-            
 
-            const {subscriptionId} = req.params
 
-            console.log("subs: ",subscriptionId);
-            
+
+            const { subscriptionId } = req.params
+
+            console.log("subs: ", subscriptionId);
+
 
             const mySubscription = await this._doctorSubscriptionService.getDoctorSubscription(subscriptionId)
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("Subscription details retrieved successfully",mySubscription))
-            
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Subscription details retrieved successfully", mySubscription))
+
         } catch (error) {
             console.error("Error fetching subscription details:", error);
 
-           return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal Server Error"))
-            
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR).json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal Server Error"))
+
         }
     }
 

@@ -16,20 +16,16 @@ import { generateErrorResponse, generateSuccessResponse } from "../../../utils/r
 import { add } from "winston";
 import { ChatUser } from "../../../types/chat";
 import IWalletService from "../../../services/interfaces/wallet/IWalletService";
-
+import axios from 'axios'
 class UserController implements IUserController {
 
     private _userService: IUserService
-    private _walletService:IWalletService
+    private _walletService: IWalletService
 
-    constructor(_userService: IUserService,walletService:IWalletService) {
+    constructor(_userService: IUserService, walletService: IWalletService) {
         this._userService = _userService
         this._walletService = walletService
     }
-   
-    
-    
-
 
 
     //---------------------------Basic registration -----------------------------------------------
@@ -136,8 +132,8 @@ class UserController implements IUserController {
         try {
             const oldRefreshToken = req.cookies.refreshToken;
 
-            console.log("njan ivade vannu ",oldRefreshToken);
-            
+            console.log("njan ivade vannu ", oldRefreshToken);
+
 
 
             if (!oldRefreshToken) {
@@ -156,7 +152,7 @@ class UserController implements IUserController {
             })
 
 
-            res.status(StatusCode.OK).json({success:true, accessToken })
+            res.status(StatusCode.OK).json({ success: true, accessToken })
         } catch (error) {
             res.status(StatusCode.BAD_REQUEST).json({ error: error instanceof Error ? error.message : "Failed to refresh token" });
         }
@@ -451,17 +447,17 @@ class UserController implements IUserController {
             };
 
             return res.status(StatusCode.OK)
-            .json(generateSuccessResponse("User info featched",formatted))
+                .json(generateSuccessResponse("User info featched", formatted))
 
         } catch (error) {
 
             return res
-            .status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
-            .json(
-              generateErrorResponse(
-                error instanceof CustomError ? error.message : "Internal Server Error"
-              )
-            );
+                .status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(
+                    generateErrorResponse(
+                        error instanceof CustomError ? error.message : "Internal Server Error"
+                    )
+                );
 
         }
     }
@@ -473,21 +469,21 @@ class UserController implements IUserController {
 
             const userId = req.user?.userId;
 
-            if(!userId){
+            if (!userId) {
                 throw new CustomError("User ID is required", StatusCode.BAD_REQUEST);
             }
 
             const walletSummary = await this._walletService.getWalletSummary(userId)
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("Wallet summary fetched successfully",walletSummary))
-            
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Wallet summary fetched successfully", walletSummary))
+
         } catch (error) {
 
-            return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR)
-            .json(generateErrorResponse(error instanceof CustomError ? error.message:"internal server error"))
-            
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "internal server error"))
+
         }
-  
+
     }
 
 
@@ -498,53 +494,78 @@ class UserController implements IUserController {
             const userId = req.user?.userId
 
 
-            if(!userId){
+            if (!userId) {
                 throw new CustomError("User ID is required", StatusCode.BAD_REQUEST);
             }
 
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
             const sort = (req.query.sort as string) === "asc" ? "asc" : "desc"; // default to "desc"
-      
-            const result = await this._walletService.getWalletTransactions(userId,page,limit,sort)
 
-            return res.status(StatusCode.OK).json(generateSuccessResponse("Transactions fetched succesully",result))
+            const result = await this._walletService.getWalletTransactions(userId, page, limit, sort)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Transactions fetched succesully", result))
         } catch (error) {
 
-            return res.status(error instanceof CustomError ? error.statusCode:StatusCode.INTERNAL_SERVER_ERROR)
-                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error" ))
-            
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(generateErrorResponse(error instanceof CustomError ? error.message : "Internal server error"))
+
         }
     }
 
 
-   async listNotifications(req: Request, res: Response): Promise<Response> {
+    async listNotifications(req: Request, res: Response): Promise<Response> {
         try {
-        
-                    const userId = req.user?.userId
 
-                    console.log("user id : ",userId);
-                    
-        
-                    if(!userId){
-                        throw new CustomError("Unauthorized",StatusCode.BAD_REQUEST)
-                    }
-        
-                    const result = await this._userService.fetchNotifications(userId)
-        
-                    return res.status(StatusCode.OK).json(generateSuccessResponse("Notifications fetched", result))
-                
-               } catch (error) {
-        
-                return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+            const userId = req.user?.userId
+
+            console.log("user id : ", userId);
+
+
+            if (!userId) {
+                throw new CustomError("Unauthorized", StatusCode.BAD_REQUEST)
+            }
+
+            const result = await this._userService.fetchNotifications(userId)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("Notifications fetched", result))
+
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
                 .json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
-        
-                
-               }
+
+
+        }
     }
 
 
+    async downloadPrescription(req: Request, res: Response): Promise<void> {
 
+        const { filename } = req.query
+
+        console.log("Hello ==>",filename);
+        
+
+        const cloudinaryUrl = `https://res.cloudinary.com/dy3yrxbmg/raw/upload/prescriptions/${filename}`;
+
+        try {
+
+            const fileResponse = await axios.get(cloudinaryUrl, {
+                responseType: "stream"
+            })
+            const customDownloadName = `Prescription_${Date.now()}.pdf`;
+            
+            res.setHeader("Content-Disposition", `attachment; filename="${customDownloadName}"`);
+            res.setHeader("Content-Type", fileResponse.headers["content-type"]);
+            
+            fileResponse.data.pipe(res);
+
+        } catch (error) {
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to download file" });
+        }
+
+    }
 
 
 

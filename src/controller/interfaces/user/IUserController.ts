@@ -20,5 +20,6 @@ interface UserController{
     getWalletSummary(req: Request, res: Response): Promise<Response>;
     getWalletTransactions(req: Request, res: Response): Promise<Response>;
     listNotifications(req:Request,res:Response):Promise<Response>
+    downloadPrescription(req:Request,res:Response):Promise<void>
 }
 export default UserController

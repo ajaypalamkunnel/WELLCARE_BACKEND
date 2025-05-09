@@ -158,6 +158,10 @@ router.get("/get-notifications",authMiddleWare,checkRole(Roles.USER),async(req,r
     await userController.listNotifications(req,res)
 })
 
+router.get("/download-prescription",authMiddleWare,checkRole(Roles.USER),async(req,res)=>{
+    await userController.downloadPrescription(req,res)
+})
+
 
 //wallet
 

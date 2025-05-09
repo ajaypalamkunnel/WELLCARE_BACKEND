@@ -12,10 +12,10 @@ class AdminController implements IAdminController {
     constructor(adminService: IAdminService) {
         this._adminService = adminService
     }
-    
-   
-    
-    
+
+
+
+
 
 
     async login(req: Request, res: Response): Promise<void> {
@@ -59,29 +59,29 @@ class AdminController implements IAdminController {
     }
 
 
-    async logout(req:Request,res:Response):Promise<void>{
+    async logout(req: Request, res: Response): Promise<void> {
         try {
-          
-            res.clearCookie("refreshTokenAdmin",{
-                httpOnly:true,
-                secure:process.env.NODE_ENV === "production",
-                sameSite:"strict"
+
+            res.clearCookie("refreshTokenAdmin", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict"
             })
 
-            res.clearCookie("accessTokenAdmin",{
-                httpOnly:true,
-                secure:process.env.NODE_ENV === "production",
-                sameSite:"strict"
+            res.clearCookie("accessTokenAdmin", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict"
 
             })
 
             res.status(StatusCode.OK).json({
-                success:true,
-                message:"Logout successfull"
+                success: true,
+                message: "Logout successfull"
             })
-            
-        } catch (error:unknown) {
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({error:"logout failed"})
+
+        } catch (error: unknown) {
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ error: "logout failed" })
         }
     }
 
@@ -106,24 +106,24 @@ class AdminController implements IAdminController {
         try {
             const page = Number(req.query.page) || 1
             const limit = Number(req.query.limit) || 10
-            console.log("page===>",page);
-            console.log("limit===>",limit);
-            
-            const {users,totalUsers} = await this._adminService.getAllUsers(page,limit)
-            
-             res.status(StatusCode.OK).json({
-                success:true,
-                message:"Users retrived successfully",
-                data:{users,totalUsers,currentPage: page, totalPages: Math.ceil(totalUsers! / limit) }
+            console.log("page===>", page);
+            console.log("limit===>", limit);
+
+            const { users, totalUsers } = await this._adminService.getAllUsers(page, limit)
+
+            res.status(StatusCode.OK).json({
+                success: true,
+                message: "Users retrived successfully",
+                data: { users, totalUsers, currentPage: page, totalPages: Math.ceil(totalUsers! / limit) }
             })
         } catch (error) {
             console.error(`Controller Error: ${error instanceof Error ? error.message : error}`);
 
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message:error instanceof Error ? error.message : "An unexpected error occurred"
+                message: error instanceof Error ? error.message : "An unexpected error occurred"
             })
-            
+
         }
     }
 
@@ -162,10 +162,10 @@ class AdminController implements IAdminController {
 
         }
     }
-   
 
 
-   
+
+
 
 }
 
