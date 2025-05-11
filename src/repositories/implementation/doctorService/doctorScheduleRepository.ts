@@ -4,7 +4,7 @@ import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorScheduleRepository, { Pagination } from "../../interfaces/doctorService/IDoctorScheduleRepository";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
-import { IScheduleResponse } from "../../../types/bookingTypes";
+
 
 
 class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> implements IDoctorScheduleRepository {
@@ -12,6 +12,7 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
     constructor() {
         super(DoctorSchedules)
     }
+
 
 
 
@@ -34,6 +35,36 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
         } catch (error) {
             console.error("Error in findOverlappingSchedules:", error);
             throw new CustomError("Database error while checking overlapping schedules.", StatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    async markSlotAsPending(scheduleId: string, slotId: string): Promise<boolean> {
+        try {
+
+            const result = await DoctorSchedules.findByIdAndUpdate(
+                {
+                    _id: scheduleId,
+                    "availability.slot_id": slotId,
+                    "availability.status": "available"
+                },
+                {
+                    $set: {
+                        "availability.$[elem].status": "pending",
+                        "availability.$[elem].pendingAt": new Date()
+                    }
+                },
+                {
+                    arrayFilters: [{ "elem.slot_id": slotId }],
+                    new: true
+                }
+            )
+
+            return !!result
+
+        } catch (error) {
+            throw error
         }
     }
 
@@ -170,6 +201,15 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
     }
 
 
+    findPendingSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null> {
+        return DoctorSchedules.findOne({
+            _id: scheduleId,
+            "availability.slot_id": slotId,
+            "availability.status": "pending"
+        }).populate("serviceId", "name fee mode")
+    }
+
+
 
     async cancelSchedule(scheduleId: string, reason: string): Promise<boolean> {
         console.log("repository ill vannnu", scheduleId, "----", reason);
@@ -195,6 +235,52 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
             throw new CustomError("Error while cancelling schema", StatusCode.INTERNAL_SERVER_ERROR)
         }
     }
+
+
+    async releaseExpiredPendingSlots(expirationMinutes: number = 10): Promise<mongoose.UpdateResult> {
+
+        try {
+
+            const cutoff = new Date(Date.now() - expirationMinutes * 60 * 1000)
+
+            const result = await DoctorSchedules.updateMany(
+                {
+                    "availability": {
+                        $elemMatch: {
+                            status: "pending",
+                            pendingAt: { $lt: cutoff }
+                        }
+                    }
+                },
+                {
+                    $set:{
+                        "availability.$[elem].status": "available"
+                    },
+                    $unset:{
+                        "availability.$[elem].pendingAt": ""
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                          "elem.status": "pending",
+                          "elem.pendingAt": { $lt: cutoff }
+                        }
+                      ]
+                }
+            )
+
+            return result
+
+        } catch (error) {
+            throw error
+        }
+
+    }
+
+
+
+
 
 
 

@@ -20,6 +20,10 @@ interface IConsultationBookingRepository {
 
   getPaymentByOrderId(orderId: string): Promise<IPayment | null>;
 
+ 
+
+
+
   getABookingDetails(bookingId: string): Promise<IConsultationAppointment>
 
   findAppointmentsByPatientAndStatus(

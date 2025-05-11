@@ -51,7 +51,7 @@ class UserController implements IUserController {
 
 
     async resendOtp(req: Request, res: Response): Promise<Response> {
-        console.log("koiiiiii");
+        
 
         try {
             const { email } = req.body

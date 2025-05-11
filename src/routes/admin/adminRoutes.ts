@@ -110,6 +110,14 @@ router.get("/doctor-analytics/top-performing", authMiddleWare, checkRole(Roles.A
 })
 
 
+router.get(
+  "/view-document/:type/:doctorId",
+  authMiddleWare, 
+  checkRole(Roles.Admin),
+  (req, res) => adminController.viewDoctorDocument(req, res)
+);
+
+
 
 
 export default router

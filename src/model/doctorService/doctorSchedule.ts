@@ -63,6 +63,10 @@ import { IDoctorService } from "./doctorServicesModal";
                     default: "available",
                 },
                 is_break: { type: Boolean, default: false },
+                pendingAt: {
+                    type: Date,
+                    default: null
+                  }
                 
             }
         ]

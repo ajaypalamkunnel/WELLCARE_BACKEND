@@ -8,6 +8,7 @@ import { IDoctor } from "../../../model/doctor/doctorModel";
 import { IUser } from "../../../model/user/userModel";
 import DoctorRepository from "../../../repositories/implementation/doctor/doctorRepository";
 import UserRepository from "../../../repositories/implementation/user/userRepository";
+import { DoctorFilter } from "../../../types/bookingTypes";
 
 
 export class AdminService implements IAdminService{
@@ -95,15 +96,11 @@ export class AdminService implements IAdminService{
        }
     }
 
-    async fetchAllDoctors(): Promise<IDoctor[] | null> {
+    async fetchAllDoctors(page: number, limit: number, searchTerm?: string,filters?:DoctorFilter): Promise<{ data: IDoctor[]; total: number }> {
         try {
-            const doctors = await this._adminRepository.findAllDoctors();
-            
-            if (!doctors || doctors.length === 0) {
-                return null; // Return null if no doctors are found
-            }
-    
-            return doctors;
+           const result = this._adminRepository.findAllDoctors(page,limit,searchTerm,filters)
+
+           return result
         } catch (error) {
             console.error("Error fetching doctors:", error);
             throw new Error("Failed to fetch doctors");
@@ -111,13 +108,13 @@ export class AdminService implements IAdminService{
     }
     
     
-    async getAllUsers(page: number, limit: number): Promise<{ users: IUser[]; totalUsers: number |null }> {
+    async getAllUsers(page: number, limit: number,searchTerm?: string): Promise<{ users: IUser[]; totalUsers: number |null }> {
         try {
 
             console.log(" getAllUsers serveie");
             
             
-            const result = await this._adminRepository.getAllUsers(page, limit);
+            const result = await this._adminRepository.getAllUsers(page, limit,searchTerm);
             // console.log(">>>>>>>>>",result)
             return {
                 users: result.users,

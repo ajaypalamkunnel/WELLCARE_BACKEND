@@ -184,3 +184,14 @@ export enum Reason{
   AppoinTmentFee = "appointment fee",
   AppointmentCancelNotERefund = "appoinment canceled not eligible for refund"
 }
+
+
+export interface DoctorFilter {
+  isVerified?: string;       // "true" | "false"
+  status?: string;           // "1" | "-1"
+  availability?: string;     // "Online,Offline"
+  departmentId?: string;     // ObjectId string
+  isSubscribed?: string;     // "true" | "false"
+  minExp?: string;           // number as string
+  maxExp?: string;           // number as string
+}

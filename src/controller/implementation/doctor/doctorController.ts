@@ -80,16 +80,14 @@ class DoctorController implements IDoctorController {
 
         try {
             const { email, password } = req.body
-            console.log("Iam from controller of doctor", email);
-            console.log("Iam from controller of doctor", password);
-
+           
             if (!email || !password) {
                 res.status(StatusCode.BAD_REQUEST).json({ error: "Email and password are required" })
                 return
             }
 
             const { doctorAccessToken, doctorRefreshToken, doctor } = await this._doctorService.loginDoctor(email, password)
-            console.log(doctorAccessToken, "===", doctorRefreshToken);
+           
 
             res.cookie("doctorRefreshToken", doctorRefreshToken, {
                 httpOnly: true,
@@ -105,7 +103,7 @@ class DoctorController implements IDoctorController {
                 sameSite: "strict",
                 maxAge: 2 * 60 * 60 * 1000, // 2 hours
             });
-            console.log("----->", doctor);
+            
 
             res.status(StatusCode.OK).json({
                 success: true,
@@ -123,7 +121,7 @@ class DoctorController implements IDoctorController {
 
         try {
             const { email } = req.body
-            console.log("Hi i am from forgotPasswordDoctor controller", email);
+            
 
             if (!email) {
                 res.status(StatusCode.BAD_REQUEST).json({ success: false, error: "Email is required" })
@@ -181,12 +179,7 @@ class DoctorController implements IDoctorController {
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
             });
 
-            // res.status(StatusCode.OK).json({
-            //     success: true,
-            //     message: "Google authentication successful",
-            //     accessToken,
-            //     doctor: { id: doctor._id, email: doctor.email, role: doctor.role },
-            // });
+            
 
             res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=doctor`);
 
@@ -288,11 +281,11 @@ class DoctorController implements IDoctorController {
 
     async updateDoctorStatus(req: Request, res: Response): Promise<void> {
 
-        console.log("updated conrtoller");
+        
         try {
             const { doctorId, status } = req.body
 
-            console.log("==>", doctorId, "==>,", status);
+           
 
 
             if (!doctorId || (status !== 1 && status !== -1)) {
@@ -393,7 +386,7 @@ class DoctorController implements IDoctorController {
     async changePassword(req: Request, res: Response): Promise<Response> {
         try {
             const { doctorId, oldPassword, newPassword } = req.body;
-            console.log("------->", doctorId, oldPassword, newPassword);
+           
 
 
             if (!doctorId || !oldPassword || !newPassword) {
@@ -482,14 +475,14 @@ class DoctorController implements IDoctorController {
 
             const { doctorId } = req.params;
 
-            console.log(" getDoctorInfoForChat controller", doctorId)
+            
 
             if (!doctorId) {
                 throw new CustomError("Doctor ID is required", StatusCode.BAD_REQUEST);
             }
 
             const doctor = await this._doctorService.getDoctorChatInfo(doctorId);
-            console.log("element==", doctor)
+            
 
             const formatted: ChatUser = {
                 _id: doctor._id.toString(),
@@ -590,7 +583,7 @@ class DoctorController implements IDoctorController {
 
             const doctorId = req.user?.userId;
 
-            console.log("--->", doctorId, "===>", req.body);
+            
 
 
             if (!doctorId) {
@@ -711,7 +704,7 @@ class DoctorController implements IDoctorController {
 
             const userId = req.user?.userId
 
-            console.log("here===>",userId)
+           
 
             if(!userId){
                 throw new CustomError("Unauthorized",StatusCode.BAD_REQUEST)

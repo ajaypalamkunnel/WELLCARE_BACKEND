@@ -23,6 +23,7 @@ import DoctorRepository from './repositories/implementation/doctor/doctorReposit
 import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
 import { registerNotificationSocketHandlers } from './utils/notification/notificationSocket';
 import { sendNotificationToUser } from './utils/notification/sendNotification';
+import { startPendingSlotCleanupJob } from './jobs/pendingSlotCleanup';
 
 connectDB()
 const app = express()
@@ -241,5 +242,9 @@ app.use("/api/chat",chatRouter)
 app.get('/', (req, res) => {
     res.send("Welcome to Wellcare")
 })
+
+// startPendingSlotCleanupJob().then(()=>{
+//     console.log("🕒 Pending slot cleanup cron initialized");
+// })
 
 server.listen(PORT, () => console.log(`Server connected on port ${PORT}`));

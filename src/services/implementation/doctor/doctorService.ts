@@ -35,7 +35,7 @@ class DoctorService implements IDoctorService {
         }
 
         const existingUser = await this._doctorRepository.findDoctorByEmail(email!)
-        console.log(existingUser);
+
 
         if (existingUser) {
             throw new Error("Email already Exist")
@@ -58,7 +58,6 @@ class DoctorService implements IDoctorService {
         })
 
         await sendOTPEmail(email, otp)
-        console.log("create new user: ", doctor);
 
         return { doctor }
     }
@@ -82,7 +81,7 @@ class DoctorService implements IDoctorService {
 
     async verifyOtp(email: string, otp: string): Promise<void> {
         const doctor = await this._doctorRepository.findDoctorByEmail(email)
-        console.log(doctor);
+
 
 
         if (!doctor) {
@@ -106,10 +105,9 @@ class DoctorService implements IDoctorService {
     }
 
     async loginDoctor(email: string, password: string): Promise<{ doctor: IDoctor | null; doctorAccessToken: string; doctorRefreshToken: string; }> {
-        console.log("hi I am from login doctor");
+
 
         const doctor = await this._doctorRepository.findDoctorByEmail(email)
-        console.log("hii ", doctor);
 
         if (!doctor) {
             throw new Error("Invalid email or Password")
@@ -138,7 +136,7 @@ class DoctorService implements IDoctorService {
 
 
     async forgotPassword(email: string): Promise<void> {
-        console.log("I am from forgotPassword of doctor");
+
 
         try {
 
@@ -166,7 +164,7 @@ class DoctorService implements IDoctorService {
                 throw new Error("Failed to send OTP email. Please try again.");
             }
             await this._doctorRepository.update(doctor._id.toString(), { otp, otpExpires })
-            console.log(`Forgot password OTP sent to ${email}.`);
+
         } catch (error) {
 
             console.error("Error in forgotPassword service:", error)
@@ -218,7 +216,7 @@ class DoctorService implements IDoctorService {
 
 
         if (!doctor) {
-            console.log("hi iMa doctor");
+
 
             doctor = await this._doctorRepository.create({
                 fullName: name,
@@ -261,17 +259,14 @@ class DoctorService implements IDoctorService {
     async registerDoctor(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor; }> {
 
         try {
-            console.log("<=== registerDoctor service function ==>");
+
 
 
             const { fullName, email, mobile, departmentId, specialization, experience, gender, licenseNumber, availability, clinicAddress, profileImage, licenseDocument, IDProofDocument, education, certifications } = doctorDetails;
 
-            // if (!fullName || !email || !mobile || !departmentId || !experience || !licenseNumber || !profileImage || !licenseDocument || !IDProofDocument) {
-            //     throw new Error("All required fields must be provided");
-            // }
+
 
             const existingDoctor = await this._doctorRepository.findDoctorByEmail(email!);
-            // console.log(">>>>>>>>", existingDoctor);
 
 
             if (!existingDoctor) {
@@ -416,7 +411,7 @@ class DoctorService implements IDoctorService {
             }
 
             const isMatch = await PasswordUtils.comparePassword(currentPassword, user.password)
-            console.log(">>>", isMatch);
+
 
             if (!isMatch) {
                 throw new CustomError("Incorrect current password", 400);
@@ -522,10 +517,7 @@ class DoctorService implements IDoctorService {
 
             const doctor = await this._doctorRepository.getDoctorProfile(doctorId)
 
-            console.log("id ---", doctorId);
 
-
-            console.log("service---", doctor);
 
 
             if (!doctor) {
@@ -640,7 +632,7 @@ class DoctorService implements IDoctorService {
         try {
 
             const { _id, degree, institution, yearOfCompletion } = data
-            console.log("---", data);
+
 
             if (!_id || !degree || !institution || !yearOfCompletion || !doctorId) {
                 throw new CustomError("all field required", StatusCode.BAD_REQUEST)

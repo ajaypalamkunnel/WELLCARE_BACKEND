@@ -9,10 +9,6 @@ const checkDoctorBlocked = async (req:Request,res:Response,next:NextFunction) : 
 
         const doctorId = req.user?.userId;
 
-
-        
-        
-
         if(!doctorId){
              res.status(StatusCode.UNAUTHORIZED).json({message:"Unauthorized access"});
              return

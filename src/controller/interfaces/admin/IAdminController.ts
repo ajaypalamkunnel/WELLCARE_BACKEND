@@ -5,6 +5,7 @@ interface IAdminController{
     fetchAllDoctors(req:Request,res:Response):Promise<void>
     getAllUsers(req:Request,res:Response):Promise<void>
     updateDoctorStatus(req:Request,res:Response):Promise<void>
+    viewDoctorDocument(req: Request, res: Response): Promise<void>
 }
 
 export default IAdminController

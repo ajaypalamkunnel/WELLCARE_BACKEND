@@ -39,7 +39,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
             }
         ]);
 
-        console.log("repo==>", result);
+        
 
 
 
@@ -173,7 +173,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                 { $sort: { subscriptionCount: -1 } },
             ])
 
-            console.log("Plan distribution : ", result);
+            
 
 
             return result

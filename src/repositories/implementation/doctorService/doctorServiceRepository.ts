@@ -19,7 +19,7 @@ class DoctorServiceRepository extends BaseRepository<IDoctorService> implements 
     
     async findAllServiceByDoctorId(doctorId: string): Promise<IDoctorService[]> {
         try {
-            console.log("koiiii");
+            
             
 
             return await Services.find({doctorId}).sort({ createdAt: -1 })

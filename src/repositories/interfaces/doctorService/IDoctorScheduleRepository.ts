@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { UpdateResult } from "mongoose";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { IBaseRepository } from "../../base/IBaseRepository";
 import { IScheduleResponse } from "../../../types/bookingTypes";
@@ -35,6 +35,11 @@ export default interface IDoctorScheduleRepository extends IBaseRepository<IDoct
         limit?: number
     ): Promise<{schedules:IDoctorAvailability[];pagination:Pagination}>
 
+    markSlotAsPending(
+        scheduleId: string,
+        slotId: string
+      ): Promise<boolean>
+
 
     getScheduleBySlot(scheduleId:string,slotId:string):Promise<IDoctorAvailability|null>
     
@@ -43,6 +48,12 @@ export default interface IDoctorScheduleRepository extends IBaseRepository<IDoct
 
 
     findAvailableSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
+
+    findPendingSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
+
+
     cancelSchedule(scheduleId: string, reason: string): Promise<boolean>;
+
+    releaseExpiredPendingSlots(expirationMinutes: number): Promise<UpdateResult>
 
 }

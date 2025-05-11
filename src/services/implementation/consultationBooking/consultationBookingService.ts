@@ -99,8 +99,6 @@ class ConsultationBookingService implements IConsultationBookingService {
     async initiateBooking(data: { patientId: string; doctorScheduleId: string; slotId: string; }): Promise<InitiateBookingResponse> {
         try {
 
-
-
             const { doctorScheduleId, slotId } = data;
 
             console.log(doctorScheduleId, slotId);
@@ -108,10 +106,7 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             const schedule = await this._doctorScheduleRepository.getScheduleBySlot(doctorScheduleId, slotId)
 
-            console.log("--->", schedule);
-
-
-
+            console.log("✅--->", schedule);
 
             if (!schedule) {
                 throw new CustomError("Slot is either booked or invalid", StatusCode.CONFLICT)
@@ -124,13 +119,13 @@ class ConsultationBookingService implements IConsultationBookingService {
             }
 
 
+            const marked = await this._doctorScheduleRepository.markSlotAsPending(doctorScheduleId,slot.slot_id.toString())
 
-
+            if (!marked) {
+                throw new CustomError("Slot is already booked or being processed", StatusCode.CONFLICT);
+              }
 
             const serviceFee = (schedule.serviceId as unknown as PopulatedServiceId).fee;
-
-
-            // const service = await this._doctorServiceRepository.findById(serviceId)
 
 
             const amount = serviceFee
@@ -208,9 +203,9 @@ class ConsultationBookingService implements IConsultationBookingService {
                 throw new CustomError("Invalid or already processed payment", StatusCode.BAD_REQUEST);
             }
 
-            // ivade kurach prashname und pinnes set akkak
+            // ivade kurach prashname und pinnes set akka
 
-            const schedule = await this._doctorScheduleRepository.findAvailableSlot(doctorScheduleId, slotId)
+            const schedule = await this._doctorScheduleRepository.findPendingSlot(doctorScheduleId, slotId)
 
             console.log("ivade ille???", schedule);
 
@@ -254,11 +249,8 @@ class ConsultationBookingService implements IConsultationBookingService {
 
             const doctorObjectId = new Types.ObjectId(doctorId)
 
-            // const bookingDetails = await this._consultationBookingRepository.findAppointmentDetailForDoctor(result.appointment.id,doctorObjectId)
-
-            // console.log("Booking details******",bookingDetails);
-
-            console.log("*****ivadannu vittuee");
+         
+          
             
             await sendNotificationToUser(
                 io,
@@ -388,15 +380,14 @@ class ConsultationBookingService implements IConsultationBookingService {
                 throw new CustomError("Doctor schedule not found", StatusCode.NOT_FOUND)
             }
 
-            console.log("****", schedule.availability)
-            console.log("===>", appointment.slotId)
+           
 
 
             const slot = schedule.availability.find(slot => {
                 return slot.slot_id.toString() === appointment.slotId.toString()
             })
 
-            console.log("slot :", slot)
+          
 
 
             if (!slot) {

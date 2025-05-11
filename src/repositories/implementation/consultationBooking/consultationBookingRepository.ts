@@ -18,6 +18,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
     }
 
 
+
     async getABookingDetails(bookingId: string): Promise<IConsultationAppointment> {
         try {
 
@@ -43,7 +44,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
                 throw new CustomError("Booking not found", StatusCode.NOT_FOUND)
             }
 
-          
+
 
 
             return result
@@ -60,6 +61,14 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
         }
     }
+
+
+
+
+
+
+
+
 
     async createBookingWithPayment(
         appointmentData: Partial<IConsultationAppointment>,
@@ -80,7 +89,7 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
                 {
                     _id: appointmentData.doctorScheduleId,
                     "availability.slot_id": appointmentData.slotId,
-                    "availability.status": "available"
+                    "availability.status": "pending"
                 }
 
             ).session(session)
@@ -94,7 +103,9 @@ class ConsultationBookingRepository extends BaseRepository<IConsultationAppointm
 
             const updatedSchedule = await DoctorSchedules.findOneAndUpdate(
                 {
-                    _id: appointmentData.doctorScheduleId
+                    _id: appointmentData.doctorScheduleId,
+                    "availability.slot_id": appointmentData.slotId,
+                    "availability.status": "pending"
                 },
                 {
                     $set: { "availability.$[elem].status": "booked" }

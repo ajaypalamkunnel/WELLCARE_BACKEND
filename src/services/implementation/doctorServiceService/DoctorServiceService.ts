@@ -47,16 +47,16 @@ class DoctorServiceService implements IDoctorServiceService {
 
             const totalServices = await this._doctorServiceRepository.countDoctorServices(doctorId.toString())
 
-            console.log(">>", totalServices);
+         
 
 
             const subscription = await this._doctorSubscriptionRepository.findActiveSubscription(doctorId.toString())
-            console.log("subscription===>", subscription);
+         
 
             const serviceLimit = subscription?.planId && "serviceLimit" in subscription.planId ? subscription.planId.serviceLimit : 0
 
             if (totalServices >= serviceLimit) {
-                console.log("gooys**********");
+              
                 
                 throw new CustomError("Service limit exceeded", StatusCode.FORBIDDEN)
             }
@@ -68,8 +68,7 @@ class DoctorServiceService implements IDoctorServiceService {
                 updatedAt: new Date()
             }
 
-            console.log("..........", serviceData);
-
+           
 
             return await this._doctorServiceRepository.create(serviceData)
         } catch (error) {

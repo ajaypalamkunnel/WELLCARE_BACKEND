@@ -259,7 +259,7 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
                 { $sort: { totalRevenue: -1 } }
             ]);
 
-            console.log("****", result as TopServiceData[]);
+            
             return result as TopServiceData[];
 
 

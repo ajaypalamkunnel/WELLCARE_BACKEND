@@ -85,7 +85,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
     async generateSlot(req: Request, res: Response): Promise<Response> {
         try {
 
-            console.log("generarte slot****", req.body);
+            
 
 
             const { doctorId, service, date, start_time, end_time, duration } = req.body;

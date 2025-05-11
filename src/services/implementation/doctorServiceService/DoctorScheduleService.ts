@@ -31,9 +31,7 @@ class DoctorScheduleService implements IDoctorScheduleService {
     async validateSchedule(doctorId: string, serviceId: string, date: Date, startTime: Date, endTime: Date): Promise<IScheduleValidationResponse> {
         try {
 
-            console.log("*******service");
-
-            console.log("service==>", doctorId, "==", startTime, "==", endTime, "==", serviceId);
+          
             const overlappingSchedule = await this._doctorScheduleRepository.findOverlappingSchedules(
                 doctorId,
                 serviceId,
@@ -109,7 +107,7 @@ class DoctorScheduleService implements IDoctorScheduleService {
         duration: number
     ): Promise<TempSlot[] | null> {
 
-        console.log("****", date.toString());
+        
         // 1. Get date components in local time (IST)
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
