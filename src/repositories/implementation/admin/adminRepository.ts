@@ -7,28 +7,28 @@ import { BaseRepository } from "../../base/BaseRepository";
 import IAdminRepository from "../../interfaces/admin/IAdminRepository";
 import { Query } from "mongoose";
 
-
-class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository {
-
+class AdminRepository
+    extends BaseRepository<IAdmin>
+    implements IAdminRepository {
     constructor() {
-        super(Admin)
+        super(Admin);
     }
-
-
-
 
     async findAdminByEmail(email: string): Promise<IAdmin | null> {
-        return await Admin.findOne({ email })
+        return await Admin.findOne({ email });
     }
 
-    async findAllDoctors(page: number, limit: number, searchTerm?: string, filters?: DoctorFilter): Promise<{ data: IDoctor[], total: number }> {
-
-        const query: any = {}
+    async findAllDoctors(
+        page: number,
+        limit: number,
+        searchTerm?: string,
+        filters?: DoctorFilter
+    ): Promise<{ data: IDoctor[]; total: number }> {
+        const query: any = {};
 
         if (searchTerm) {
-            query.fullName = { $regex: searchTerm, $options: 'i' }
+            query.fullName = { $regex: searchTerm, $options: "i" };
         }
-
 
         if (filters) {
             if (filters.isVerified !== undefined && filters.isVerified !== "") {
@@ -51,17 +51,20 @@ class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository
                 query.isSubscribed = filters.isSubscribed === "true";
             }
 
-            if ((filters.minExp && filters.minExp !== "") || (filters.maxExp && filters.maxExp !== "")) {
+            if (
+                (filters.minExp && filters.minExp !== "") ||
+                (filters.maxExp && filters.maxExp !== "")
+            ) {
                 query.experience = {};
-                if (filters.minExp && filters.minExp !== "") query.experience.$gte = parseInt(filters.minExp);
-                if (filters.maxExp && filters.maxExp !== "") query.experience.$lte = parseInt(filters.maxExp);
+                if (filters.minExp && filters.minExp !== "")
+                    query.experience.$gte = parseInt(filters.minExp);
+                if (filters.maxExp && filters.maxExp !== "")
+                    query.experience.$lte = parseInt(filters.maxExp);
             }
         }
 
-
-
-        console.log("***", query)
-        const skip = (page - 1) * limit
+        console.log("***", query);
+        const skip = (page - 1) * limit;
 
         const [data, total] = await Promise.all([
             Doctor.find(query)
@@ -69,53 +72,54 @@ class AdminRepository extends BaseRepository<IAdmin> implements IAdminRepository
                 .select("-password -refreshToken -otp -otpExpires")
                 .skip(skip)
                 .limit(limit),
-            Doctor.countDocuments(query)
-        ])
+            Doctor.countDocuments(query),
+        ]);
 
-        return { data, total }
-
+        return { data, total };
     }
 
-    async getAllUsers(page: number, limit: number, searchTerm?: string): Promise<{ users: IUser[]; totalUsers?: number | null; }> {
+    async getAllUsers(
+        page: number,
+        limit: number,
+        searchTerm?: string
+    ): Promise<{ users: IUser[]; totalUsers?: number | null }> {
         try {
-            const query: any = {}
+            const query: any = {};
 
             if (searchTerm) {
-                query.fullName = { $regex: searchTerm, $options: 'i' }
+                query.fullName = { $regex: searchTerm, $options: "i" };
             }
-
-
-
 
             const skip = (page - 1) * limit;
             const users = await User.find(query)
                 .select("-password -refreshToken -otp -otpExpires")
                 .skip(skip)
                 .limit(limit)
-                .exec()
+                .exec();
 
-            const totalUsers = await User.countDocuments()
+            const totalUsers = await User.countDocuments();
 
-            return { users, totalUsers }
-
+            return { users, totalUsers };
         } catch (error) {
             console.error("Error fetching users:", error);
             throw new Error("Error fetching users");
         }
     }
 
-
-    async udateDoctorStatus(doctorId: string, status: number): Promise<IDoctor | null> {
+    async udateDoctorStatus(
+        doctorId: string,
+        status: number
+    ): Promise<IDoctor | null> {
         if (![1, -1].includes(status)) {
             throw new Error("Invalid status value. Use -1 for block, 1 for unblock.");
         }
 
-        return await Doctor.findByIdAndUpdate(doctorId, { status }, { new: true }).select("-password -refreshToken")
+        return await Doctor.findByIdAndUpdate(
+            doctorId,
+            { status },
+            { new: true }
+        ).select("-password -refreshToken");
     }
-
-
-
-
 }
 
-export default AdminRepository
+export default AdminRepository;

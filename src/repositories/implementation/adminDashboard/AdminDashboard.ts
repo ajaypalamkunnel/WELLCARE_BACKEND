@@ -1,58 +1,53 @@
 import { StatusCode } from "../../../constants/statusCode";
 import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
-import DoctorSubscription, { IDoctorSubscription } from "../../../model/subscription/doctorSubscriptions";
-import { IDoctorSubscriptionPopulated, PlanDistributionDTO, RevenueTrendDTO } from "../../../types/admin/adminDashboardDto";
+import DoctorSubscription, {
+    IDoctorSubscription,
+} from "../../../model/subscription/doctorSubscriptions";
+import {
+    IDoctorSubscriptionPopulated,
+    PlanDistributionDTO,
+    RevenueTrendDTO,
+} from "../../../types/admin/adminDashboardDto";
 import { CustomError } from "../../../utils/CustomError";
 import IAdminDashboardRepository from "../../interfaces/adminDashboard/IAdminDashboard";
 
-
 class AdminDashboardRepository implements IAdminDashboardRepository {
-
-
-
-
-
     async getTotalRevenue(): Promise<number> {
         const result = await DoctorSubscription.aggregate([
             {
                 $match: {
-                    paymentStatus: "paid"
-                }
+                    paymentStatus: "paid",
+                },
             },
             {
                 $lookup: {
                     from: "subscriptions", // collection name (Mongo uses lowercase + plural by default)
                     localField: "planId",
                     foreignField: "_id",
-                    as: "plan"
-                }
+                    as: "plan",
+                },
             },
             {
-                $unwind: "$plan"
+                $unwind: "$plan",
             },
             {
                 $group: {
                     _id: null,
-                    total: { $sum: "$plan.finalPrice" }
-                }
-            }
+                    total: { $sum: "$plan.finalPrice" },
+                },
+            },
         ]);
 
-        
-
-
-
-        return result[0]?.total || 0
+        return result[0]?.total || 0;
     }
-
 
     async getActiveSubscriptionCount(): Promise<number> {
-        return await DoctorSubscription.countDocuments({ status: "active" })
+        return await DoctorSubscription.countDocuments({ status: "active" });
     }
-    async getMostSubscribedPlans(limit = 5): Promise<{ planName: string; subscriptionCount: number; }[]> {
-
-
+    async getMostSubscribedPlans(
+        limit = 5
+    ): Promise<{ planName: string; subscriptionCount: number }[]> {
         const result = await DoctorSubscription.aggregate([
             {
                 $group: {
@@ -68,7 +63,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                     localField: "_id",
                     foreignField: "_id",
                     as: "plan",
-                }
+                },
             },
             { $unwind: "$plan" },
             {
@@ -77,19 +72,19 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                     subscriptionCount: 1,
                 },
             },
-        ])
+        ]);
 
-        return result
+        return result;
     }
 
-
-
-    async getRevenueTrend(startDate: Date, endDate: Date, interval: "day" | "week" | "month"): Promise<RevenueTrendDTO[]> {
+    async getRevenueTrend(
+        startDate: Date,
+        endDate: Date,
+        interval: "day" | "week" | "month"
+    ): Promise<RevenueTrendDTO[]> {
         try {
-
             console.log("Start Date:", startDate);
             console.log("End Date:", endDate);
-
 
             const dateFormat = {
                 day: "%Y-%m-%d",
@@ -103,14 +98,14 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         paymentStatus: "paid",
                         createdAt: { $gte: startDate, $lte: endDate },
                         "paymentDetails.paymentAmount": { $gt: 0 }, // ensure data is valid
-                    }
+                    },
                 },
                 {
                     $group: {
                         _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
                         totalRevenue: { $sum: "$paymentDetails.paymentAmount" },
                         transactionCount: { $sum: 1 },
-                    }
+                    },
                 },
                 { $sort: { _id: 1 } },
                 {
@@ -119,32 +114,33 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         totalRevenue: 1,
                         transactionCount: 1,
                         _id: 0,
-                    }
-                }
+                    },
+                },
             ]);
 
             console.log("Reveneue trend : ", result);
 
-
-            return result
-
-
+            return result;
         } catch (error) {
-            throw new CustomError("revenue summary fethching error :", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError(
+                "revenue summary fethching error :",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
-    async getPlanDistribution(startDate?: Date, endDate?: Date): Promise<PlanDistributionDTO[]> {
+    async getPlanDistribution(
+        startDate?: Date,
+        endDate?: Date
+    ): Promise<PlanDistributionDTO[]> {
         try {
             const match: any = {
-                paymentStatus: "paid"
-            }
+                paymentStatus: "paid",
+            };
 
             if (startDate && endDate) {
                 match.createdAt = { $gte: startDate, $lte: endDate };
             }
-
 
             const result = await DoctorSubscription.aggregate([
                 { $match: match },
@@ -171,25 +167,24 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                     },
                 },
                 { $sort: { subscriptionCount: -1 } },
-            ])
+            ]);
 
-            
-
-
-            return result
-
+            return result;
         } catch (error) {
-            throw new CustomError("Failed to fetch plan distribution", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError(
+                "Failed to fetch plan distribution",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
-
-    async getSubscriptionsForReport(startDate?: Date, endDate?: Date): Promise<IDoctorSubscriptionPopulated[]> {
+    async getSubscriptionsForReport(
+        startDate?: Date,
+        endDate?: Date
+    ): Promise<IDoctorSubscriptionPopulated[]> {
         try {
-
             const match: any = {
-                paymentStatus: "paid"
+                paymentStatus: "paid",
             };
 
             if (startDate && endDate) {
@@ -199,23 +194,23 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
             const result = await DoctorSubscription.find(match)
                 .populate({
                     path: "doctorId",
-                    select: "fullName email"
+                    select: "fullName email",
                 })
                 .populate({
                     path: "planId",
-                    select: "planName finalPrice"
+                    select: "planName finalPrice",
                 })
                 .sort({ createdAt: -1 })
                 .lean();
 
-
             return result as unknown as IDoctorSubscriptionPopulated[];
-
         } catch (error) {
-            throw new CustomError("report generation data error", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError(
+                "report generation data error",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
-
 
     async getDoctorAnalyticsSummary(): Promise<any[]> {
         try {
@@ -223,16 +218,16 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                 {
                     $match: {
                         status: "completed",
-                        paymentStatus: "paid"
-                    }
+                        paymentStatus: "paid",
+                    },
                 },
                 {
                     $lookup: {
                         from: "payments",
                         localField: "_id",
                         foreignField: "appointmentId",
-                        as: "paymentInfo"
-                    }
+                        as: "paymentInfo",
+                    },
                 },
                 { $unwind: "$paymentInfo" },
 
@@ -240,16 +235,16 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                     $group: {
                         _id: "$doctorId",
                         totalRevenue: { $sum: "$paymentInfo.amount" },
-                        completedAppointments: { $sum: 1 }
-                    }
+                        completedAppointments: { $sum: 1 },
+                    },
                 },
                 {
                     $lookup: {
                         from: "doctors",
                         localField: "_id",
                         foreignField: "_id",
-                        as: "doctor"
-                    }
+                        as: "doctor",
+                    },
                 },
                 { $unwind: "$doctor" },
                 {
@@ -257,8 +252,8 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         from: "services",
                         localField: "_id",
                         foreignField: "doctorId",
-                        as: "services"
-                    }
+                        as: "services",
+                    },
                 },
                 {
                     $addFields: {
@@ -266,16 +261,16 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                             $cond: [
                                 { $gt: [{ $size: "$services" }, 0] },
                                 { $avg: "$services.fee" },
-                                0
-                            ]
+                                0,
+                            ],
                         },
                         totalPatients: { $size: "$doctor.reviews" },
                         uniquePatients: {
                             $size: {
-                                $setUnion: ["$doctor.reviews.patientId", []]
-                            }
-                        }
-                    }
+                                $setUnion: ["$doctor.reviews.patientId", []],
+                            },
+                        },
+                    },
                 },
                 {
                     $project: {
@@ -288,51 +283,54 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                             $cond: [
                                 { $gt: ["$totalPatients", 0] },
                                 { $divide: ["$totalPatients", "$uniquePatients"] },
-                                0
-                            ]
-                        }
-                    }
-                }
-            ])
+                                0,
+                            ],
+                        },
+                    },
+                },
+            ]);
 
-            return result
+            return result;
         } catch (error) {
             console.error("DoctorAnalyticsRepository Error:", error);
-            throw error
+            throw error;
         }
     }
 
-
-
-    async getDoctorRevenueTrend(startDate: Date, endDate: Date, interval: "day" | "month"): Promise<any[]> {
+    async getDoctorRevenueTrend(
+        startDate: Date,
+        endDate: Date,
+        interval: "day" | "month"
+    ): Promise<any[]> {
         try {
-
             const dateFormat = interval === "day" ? "%Y-%m-%d" : "%Y-%m";
 
             const result = await PaymentModel.aggregate([
                 {
                     $match: {
                         status: "paid",
-                        createdAt: { $gte: startDate, $lte: endDate }
-                    }
+                        createdAt: { $gte: startDate, $lte: endDate },
+                    },
                 },
                 {
                     $lookup: {
                         from: "consultationappointments",
                         localField: "appointmentId",
                         foreignField: "_id",
-                        as: "appointment"
-                    }
+                        as: "appointment",
+                    },
                 },
                 { $unwind: "$appointment" },
                 {
                     $group: {
                         _id: {
-                            date: { $dateToString: { format: dateFormat, date: "$createdAt" } },
-                            doctorId: "$appointment.doctorId"
+                            date: {
+                                $dateToString: { format: dateFormat, date: "$createdAt" },
+                            },
+                            doctorId: "$appointment.doctorId",
                         },
-                        revenue: { $sum: "$amount" }
-                    }
+                        revenue: { $sum: "$amount" },
+                    },
                 },
 
                 {
@@ -340,8 +338,8 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         from: "doctors",
                         localField: "_id.doctorId",
                         foreignField: "_id",
-                        as: "doctor"
-                    }
+                        as: "doctor",
+                    },
                 },
                 { $unwind: "$doctor" },
                 {
@@ -350,36 +348,32 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         doctorId: "$_id.doctorId",
                         fullName: "$doctor.fullName",
                         revenue: 1,
-                        _id: 0
-                    }
+                        _id: 0,
+                    },
                 },
-                { $sort: { label: 1 } }
+                { $sort: { label: 1 } },
+            ]);
 
-            ])
-
-            return result
-
+            return result;
         } catch (error) {
             console.error("Revenue trend aggregation failed:", error);
             throw error;
         }
     }
 
-
     async getServiceRevenue(): Promise<any[]> {
         try {
-
             const result = await PaymentModel.aggregate([
                 {
-                    $match: { status: "paid" }
+                    $match: { status: "paid" },
                 },
                 {
                     $lookup: {
                         from: "consultationappointments",
                         localField: "appointmentId",
                         foreignField: "_id",
-                        as: "appointment"
-                    }
+                        as: "appointment",
+                    },
                 },
                 { $unwind: "$appointment" },
                 {
@@ -387,50 +381,46 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         from: "services",
                         localField: "appointment.serviceId",
                         foreignField: "_id",
-                        as: "service"
-                    }
+                        as: "service",
+                    },
                 },
                 { $unwind: "$service" },
                 {
                     $group: {
                         _id: "$service.name",
-                        revenue: { $sum: "$amount" }
-                    }
+                        revenue: { $sum: "$amount" },
+                    },
                 },
                 {
                     $project: {
                         serviceName: "$_id",
                         revenue: 1,
-                        _id: 0
-                    }
+                        _id: 0,
+                    },
                 },
-                { $sort: { revenue: -1 } }
+                { $sort: { revenue: -1 } },
+            ]);
 
-            ])
-
-            return result
+            return result;
         } catch (error) {
             console.error("Error in getServiceRevenue:", error);
             throw error;
         }
     }
 
-
     async getTopPerformingDoctors(limit: number = 10): Promise<any[]> {
         try {
-
-
             const result = await PaymentModel.aggregate([
                 {
-                    $match: { status: "paid" }
+                    $match: { status: "paid" },
                 },
                 {
                     $lookup: {
                         from: "consultationappointments",
                         localField: "appointmentId",
                         foreignField: "_id",
-                        as: "appointment"
-                    }
+                        as: "appointment",
+                    },
                 },
                 { $unwind: "$appointment" },
                 {
@@ -438,45 +428,41 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                         from: "doctors",
                         localField: "appointment.doctorId",
                         foreignField: "_id",
-                        as: "doctor"
-                    }
+                        as: "doctor",
+                    },
                 },
                 { $unwind: "$doctor" },
                 {
-                  $group: {
-                    _id: "$appointment.doctorId",
-                    fullName: { $first: "$doctor.fullName" },
-                    totalRevenue: { $sum: "$amount" },
-                    appointmentCount: { $sum: 1 }
-                  }
+                    $group: {
+                        _id: "$appointment.doctorId",
+                        fullName: { $first: "$doctor.fullName" },
+                        totalRevenue: { $sum: "$amount" },
+                        appointmentCount: { $sum: 1 },
+                    },
                 },
                 {
-                  $sort: { totalRevenue: -1, appointmentCount: -1 }
+                    $sort: { totalRevenue: -1, appointmentCount: -1 },
                 },
                 {
-                    $limit: limit
-                  },
-                  {
+                    $limit: limit,
+                },
+                {
                     $project: {
-                      doctorId: "$_id",
-                      fullName: 1,
-                      totalRevenue: 1,
-                      appointmentCount: 1,
-                      _id: 0
-                    }
-                  }
-            ])
+                        doctorId: "$_id",
+                        fullName: 1,
+                        totalRevenue: 1,
+                        appointmentCount: 1,
+                        _id: 0,
+                    },
+                },
+            ]);
 
-            return result
-
+            return result;
         } catch (error) {
             console.error("Error in getTopPerformingDoctors:", error);
             throw error;
         }
     }
-
-
-
 }
 
-export default AdminDashboardRepository
+export default AdminDashboardRepository;

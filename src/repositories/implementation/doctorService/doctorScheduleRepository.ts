@@ -1,113 +1,131 @@
 import mongoose, { mongo } from "mongoose";
-import DoctorSchedules, { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
+import DoctorSchedules, {
+    IDoctorAvailability,
+} from "../../../model/doctorService/doctorSchedule";
 import { BaseRepository } from "../../base/BaseRepository";
-import IDoctorScheduleRepository, { Pagination } from "../../interfaces/doctorService/IDoctorScheduleRepository";
+import IDoctorScheduleRepository, {
+    Pagination,
+} from "../../interfaces/doctorService/IDoctorScheduleRepository";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 
-
-
-class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> implements IDoctorScheduleRepository {
-
+class DoctorScheduleRepository
+    extends BaseRepository<IDoctorAvailability>
+    implements IDoctorScheduleRepository {
     constructor() {
-        super(DoctorSchedules)
+        super(DoctorSchedules);
     }
 
-
-
-
-
-    async findOverlappingSchedules(doctorId: string, serviceId: string, date: Date, startTime: Date, endTime: Date): Promise<IDoctorAvailability | null> {
+    async findOverlappingSchedules(
+        doctorId: string,
+        serviceId: string,
+        date: Date,
+        startTime: Date,
+        endTime: Date
+    ): Promise<IDoctorAvailability | null> {
         try {
-
-            console.log("==>repo", doctorId, "==", startTime, "==", endTime, "==", serviceId);
-
+            console.log(
+                "==>repo",
+                doctorId,
+                "==",
+                startTime,
+                "==",
+                endTime,
+                "==",
+                serviceId
+            );
 
             return await DoctorSchedules.findOne({
                 doctorId: new mongoose.Types.ObjectId(doctorId),
                 serviceId: new mongoose.Types.ObjectId(serviceId),
                 date: date,
-                $or: [
-                    { start_time: { $lt: endTime }, end_time: { $gt: startTime } }
-                ]
-            })
-
+                $or: [{ start_time: { $lt: endTime }, end_time: { $gt: startTime } }],
+            });
         } catch (error) {
             console.error("Error in findOverlappingSchedules:", error);
-            throw new CustomError("Database error while checking overlapping schedules.", StatusCode.INTERNAL_SERVER_ERROR);
+            throw new CustomError(
+                "Database error while checking overlapping schedules.",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
-
-    async markSlotAsPending(scheduleId: string, slotId: string): Promise<boolean> {
+    async markSlotAsPending(
+        scheduleId: string,
+        slotId: string
+    ): Promise<boolean> {
         try {
-
             const result = await DoctorSchedules.findByIdAndUpdate(
                 {
                     _id: scheduleId,
                     "availability.slot_id": slotId,
-                    "availability.status": "available"
+                    "availability.status": "available",
                 },
                 {
                     $set: {
                         "availability.$[elem].status": "pending",
-                        "availability.$[elem].pendingAt": new Date()
-                    }
+                        "availability.$[elem].pendingAt": new Date(),
+                    },
                 },
                 {
                     arrayFilters: [{ "elem.slot_id": slotId }],
-                    new: true
+                    new: true,
                 }
-            )
+            );
 
-            return !!result
-
+            return !!result;
         } catch (error) {
-            throw error
+            throw error;
         }
     }
 
-
-    async findConflictingSchedules(doctorId: mongoose.Types.ObjectId, serviceId: mongoose.Types.ObjectId, date: Date, start_time: Date, end_time: Date): Promise<IDoctorAvailability | null> {
+    async findConflictingSchedules(
+        doctorId: mongoose.Types.ObjectId,
+        serviceId: mongoose.Types.ObjectId,
+        date: Date,
+        start_time: Date,
+        end_time: Date
+    ): Promise<IDoctorAvailability | null> {
         try {
-
-
             return await DoctorSchedules.findOne({
                 doctorId,
                 date,
 
-                $or: [
-                    { start_time: { $lt: end_time }, end_time: { $gt: start_time } }
-                ],
-                serviceId
-            })
-
+                $or: [{ start_time: { $lt: end_time }, end_time: { $gt: start_time } }],
+                serviceId,
+            });
         } catch (error) {
-
-            throw new CustomError("Error while find Conflicting Schedules in database", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError(
+                "Error while find Conflicting Schedules in database",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
-    async createSchedule(scheduleData: Partial<IDoctorAvailability>): Promise<IDoctorAvailability> {
+    async createSchedule(
+        scheduleData: Partial<IDoctorAvailability>
+    ): Promise<IDoctorAvailability> {
         try {
-
-            const schedule = new DoctorSchedules(scheduleData)
-            return await schedule.save()
-
+            const schedule = new DoctorSchedules(scheduleData);
+            return await schedule.save();
         } catch (error) {
-            throw new CustomError("Failed to save schedule", StatusCode.INTERNAL_SERVER_ERROR);
+            throw new CustomError(
+                "Failed to save schedule",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
-
-
-    async fetchSchedules(doctorId: string, serviceId?: string, startDate?: Date, endDate?: Date, status?: "completed" | "upcoming", page: number = 1, limit: number = 10): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
-
-
+    async fetchSchedules(
+        doctorId: string,
+        serviceId?: string,
+        startDate?: Date,
+        endDate?: Date,
+        status?: "completed" | "upcoming",
+        page: number = 1,
+        limit: number = 10
+    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
         try {
-
-            const filter: any = { doctorId: new mongoose.Types.ObjectId(doctorId) }
+            const filter: any = { doctorId: new mongoose.Types.ObjectId(doctorId) };
 
             if (serviceId) {
                 filter.serviceId = new mongoose.Types.ObjectId(serviceId);
@@ -129,8 +147,6 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                 .limit(limit)
                 .exec();
 
-
-
             return {
                 schedules,
                 pagination: {
@@ -138,19 +154,21 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                     totalPages: Math.ceil(totalRecords / limit),
                     currentPage: page,
                 },
-            }
+            };
         } catch (error) {
+            console.log("Error in DoctorSchedule Repository", error);
 
-            console.log("Error in DoctorSchedule Repository", error)
-
-            throw new CustomError("Failed to fetch schedules: ", StatusCode.INTERNAL_SERVER_ERROR)
-
+            throw new CustomError(
+                "Failed to fetch schedules: ",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
-
     }
 
-
-    async getScheduleBySlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null> {
+    async getScheduleBySlot(
+        scheduleId: string,
+        slotId: string
+    ): Promise<IDoctorAvailability | null> {
         try {
             const schedule = await DoctorSchedules.findOne({
                 _id: scheduleId,
@@ -165,29 +183,29 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
             return schedule;
         } catch (error) {
             console.log("Error while getting schedule by slot:", error);
-            throw new CustomError("Failed to fetch schedule", StatusCode.INTERNAL_SERVER_ERROR);
+            throw new CustomError(
+                "Failed to fetch schedule",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
     async getScheduleById(scheduleId: string): Promise<IDoctorAvailability> {
         try {
+            const schedule = await DoctorSchedules.findById(scheduleId).populate(
+                "serviceId",
+                "name fee mode"
+            );
 
-            const schedule = await DoctorSchedules.findById(scheduleId).populate("serviceId", "name fee mode")
-
-            return schedule!
-
-
+            return schedule!;
         } catch (error) {
+            console.log("Error while get Schedule By I in repository : ", error);
 
-            console.log("Error while get Schedule By I in repository : ", error)
-
-            throw new CustomError("Failed to fetch schedule", StatusCode.INTERNAL_SERVER_ERROR)
-
-
+            throw new CustomError(
+                "Failed to fetch schedule",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
-
-
     }
 
     async findAvailableSlot(scheduleId: string, slotId: string) {
@@ -196,30 +214,29 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
         return await DoctorSchedules.findOne({
             _id: scheduleId,
             "availability.slot_id": slotId,
-            "availability.status": "available"
-        }).populate("serviceId", "name fee mode")
+            "availability.status": "available",
+        }).populate("serviceId", "name fee mode");
     }
 
-
-    findPendingSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null> {
+    findPendingSlot(
+        scheduleId: string,
+        slotId: string
+    ): Promise<IDoctorAvailability | null> {
         return DoctorSchedules.findOne({
             _id: scheduleId,
             "availability.slot_id": slotId,
-            "availability.status": "pending"
-        }).populate("serviceId", "name fee mode")
+            "availability.status": "pending",
+        }).populate("serviceId", "name fee mode");
     }
-
-
 
     async cancelSchedule(scheduleId: string, reason: string): Promise<boolean> {
         console.log("repository ill vannnu", scheduleId, "----", reason);
 
         try {
-
             const result = await DoctorSchedules.updateOne(
                 {
                     _id: new mongoose.Types.ObjectId(scheduleId),
-                    isCancelled: false
+                    isCancelled: false,
                 },
                 {
                     $set: {
@@ -227,70 +244,56 @@ class DoctorScheduleRepository extends BaseRepository<IDoctorAvailability> imple
                         cancellationReason: reason,
                         cancelledAt: new Date(),
                         "availability.$[].status": "cancelled",
-                    }
+                    },
                 }
-            )
-            return result.modifiedCount > 0
+            );
+            return result.modifiedCount > 0;
         } catch (error) {
-            throw new CustomError("Error while cancelling schema", StatusCode.INTERNAL_SERVER_ERROR)
+            throw new CustomError(
+                "Error while cancelling schema",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
-
-    async releaseExpiredPendingSlots(expirationMinutes: number = 10): Promise<mongoose.UpdateResult> {
-
+    async releaseExpiredPendingSlots(
+        expirationMinutes: number = 10
+    ): Promise<mongoose.UpdateResult> {
         try {
-
-            const cutoff = new Date(Date.now() - expirationMinutes * 60 * 1000)
+            const cutoff = new Date(Date.now() - expirationMinutes * 60 * 1000);
 
             const result = await DoctorSchedules.updateMany(
                 {
-                    "availability": {
+                    availability: {
                         $elemMatch: {
                             status: "pending",
-                            pendingAt: { $lt: cutoff }
-                        }
-                    }
+                            pendingAt: { $lt: cutoff },
+                        },
+                    },
                 },
                 {
-                    $set:{
-                        "availability.$[elem].status": "available"
+                    $set: {
+                        "availability.$[elem].status": "available",
                     },
-                    $unset:{
-                        "availability.$[elem].pendingAt": ""
-                    }
+                    $unset: {
+                        "availability.$[elem].pendingAt": "",
+                    },
                 },
                 {
                     arrayFilters: [
                         {
-                          "elem.status": "pending",
-                          "elem.pendingAt": { $lt: cutoff }
-                        }
-                      ]
+                            "elem.status": "pending",
+                            "elem.pendingAt": { $lt: cutoff },
+                        },
+                    ],
                 }
-            )
+            );
 
-            return result
-
+            return result;
         } catch (error) {
-            throw error
+            throw error;
         }
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
-
-export default DoctorScheduleRepository
+export default DoctorScheduleRepository;

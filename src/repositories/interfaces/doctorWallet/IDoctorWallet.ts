@@ -1,48 +1,37 @@
-import { IDoctorWallet, IDoctorWalletTransaction } from "../../../model/doctorWallet/doctorWallet";
+import {
+  IDoctorWallet,
+  IDoctorWalletTransaction,
+} from "../../../model/doctorWallet/doctorWallet";
 import { DoctorWalletSummaryDTO } from "../../../types/wallet";
 
+interface IDoctorWalletRepository {
+  getWalletByDoctorId(doctorId: string): Promise<IDoctorWallet | null>;
 
-interface IDoctorWalletRepository{
+  createWalletIfNotExists(doctorId: string): Promise<IDoctorWallet>;
 
-    getWalletByDoctorId(doctorId: string): Promise<IDoctorWallet | null>;
+  addTransaction(
+    doctorId: string,
+    amount: number,
+    type: "credit" | "debit",
+    reason: string,
+    relatedAppointmentId?: string,
+    status?: "success" | "pending" | "failed"
+  ): Promise<void>;
 
-    createWalletIfNotExists(doctorId: string): Promise<IDoctorWallet>;
+  getWalletSummary(doctorId: string): Promise<{
+    totalCredited: number;
+    totalWithdrawn: number;
+    balance: number;
+  }>;
 
-    addTransaction(
-        doctorId: string,
-        amount: number,
-        type: "credit" | "debit",
-        reason: string,
-        relatedAppointmentId?: string,
-        status?: "success" | "pending" | "failed"
-      ): Promise<void>;
+  getWalletOverview(
+    doctorId: string,
+    type?: "credit" | "debit",
+    page?: number,
+    limit?: number
+  ): Promise<DoctorWalletSummaryDTO>;
 
-
-      getWalletSummary(doctorId: string): Promise<{
-        totalCredited: number;
-        totalWithdrawn: number;
-        balance: number;
-      }>;
-
-
-      getWalletOverview(
-        doctorId: string,
-        type?: "credit" | "debit",
-        page?:number,
-        limit?:number,
-      ): Promise<DoctorWalletSummaryDTO>
-
-
-
-      requestWithdrawal(
-        doctorId: string,
-        amount: number
-      ): Promise<void> 
-
-
-
-
+  requestWithdrawal(doctorId: string, amount: number): Promise<void>;
 }
 
-
-export default IDoctorWalletRepository
+export default IDoctorWalletRepository;

@@ -1,48 +1,47 @@
-import { Types } from "mongoose"
-import { IWallet, IWalletTransaction } from "../../../model/userWallet/userWalletModal"
-import { PaginatedTransactionResponseDTO, WalletSummaryDTO } from "../../../types/wallet"
+import { Types } from "mongoose";
+import {
+  IWallet,
+  IWalletTransaction,
+} from "../../../model/userWallet/userWalletModal";
+import {
+  PaginatedTransactionResponseDTO,
+  WalletSummaryDTO,
+} from "../../../types/wallet";
 
+interface IWalletRepository {
+  findByUserId(userId: Types.ObjectId): Promise<IWallet | null>;
 
+  createWalletForUser(userId: Types.ObjectId): Promise<IWallet>;
 
-interface IWalletRepository{
+  addTransactionAndUpdateBalance(
+    userId: Types.ObjectId,
+    transaction: IWalletTransaction
+  ): Promise<IWallet>;
 
-    findByUserId(userId:Types.ObjectId):Promise<IWallet|null>
+  getWlletByUserId(userId: string): Promise<WalletSummaryDTO | null>;
 
-    createWalletForUser(userId:Types.ObjectId):Promise<IWallet>
+  getPaginatedTransactions(
+    userId: string,
+    page: number,
+    limit: number,
+    sortOrder?: "asc" | "desc"
+  ): Promise<PaginatedTransactionResponseDTO>;
 
-    addTransactionAndUpdateBalance(
-        userId:Types.ObjectId,
-        transaction:IWalletTransaction
-    ):Promise<IWallet>
-
-    getWlletByUserId(userId:string):Promise<WalletSummaryDTO|null>
-
-    getPaginatedTransactions(
-        userId: string,
-        page: number,
-        limit: number,
-        sortOrder?: "asc" | "desc"
-      ): Promise<PaginatedTransactionResponseDTO>;
-
-      addTransaction({
-        userId,
-        amount,
-        type,
-        reason,
-        relatedAppointmentId,
-        status
-      }: {
-        userId: string;
-        amount: number;
-        type: "credit" | "debit";
-        reason: string;
-        relatedAppointmentId?: string;
-        status?: "success" | "pending" | "failed";
-      }): Promise<void> 
-
-
-
+  addTransaction({
+    userId,
+    amount,
+    type,
+    reason,
+    relatedAppointmentId,
+    status,
+  }: {
+    userId: string;
+    amount: number;
+    type: "credit" | "debit";
+    reason: string;
+    relatedAppointmentId?: string;
+    status?: "success" | "pending" | "failed";
+  }): Promise<void>;
 }
 
-
-export default IWalletRepository
+export default IWalletRepository;

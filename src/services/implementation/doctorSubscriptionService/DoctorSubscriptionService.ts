@@ -4,7 +4,10 @@ import { IDoctorSubscriptionService } from "../../interfaces/doctorSubscriptionS
 import IDoctorSubscriptionsRepository from "../../../repositories/interfaces/doctorSubscriptions/IDoctorSubscriptions";
 import { RazorpayOrderResponse } from "../../../types/razorpayTypes";
 import ISubscriptionRepository from "../../../repositories/interfaces/subscription/ISubscription";
-import { generateErrorResponse, generateSuccessResponse } from "../../../utils/response";
+import {
+    generateErrorResponse,
+    generateSuccessResponse,
+} from "../../../utils/response";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import crypto from "crypto";
@@ -12,44 +15,54 @@ import { IDoctorSubscription } from "../../../model/subscription/doctorSubscript
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
 import DoctorSubscriptionRepository from "../../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
 
-
-
 class DoctorSubscriptionService implements IDoctorSubscriptionService {
-
     private _doctorSubscriptionRepo: IDoctorSubscriptionsRepository;
     private _razorpay: Razorpay;
     private _subscriptionRepo: ISubscriptionRepository;
-    private _doctorRepository: IDoctorRepository
+    private _doctorRepository: IDoctorRepository;
 
-
-    constructor(doctorSubscriptionRepo: IDoctorSubscriptionsRepository, subscriptionRepo: ISubscriptionRepository, doctorRepository: IDoctorRepository) {
+    constructor(
+        doctorSubscriptionRepo: IDoctorSubscriptionsRepository,
+        subscriptionRepo: ISubscriptionRepository,
+        doctorRepository: IDoctorRepository
+    ) {
         this._doctorSubscriptionRepo = doctorSubscriptionRepo;
         this._subscriptionRepo = subscriptionRepo;
-        this._doctorRepository = doctorRepository
+        this._doctorRepository = doctorRepository;
         this._razorpay = new Razorpay({
             key_id: process.env.RAZORPAY_KEY_ID!,
             key_secret: process.env.RAZORPAY_KEY_SECRET!,
         });
     }
-   
 
-
-    async createSubscriptionOrder(doctorId: string, planId: string): Promise<RazorpayOrderResponse> {
+    async createSubscriptionOrder(
+        doctorId: string,
+        planId: string
+    ): Promise<RazorpayOrderResponse> {
         try {
-
-            const activeSubscription = await this._doctorSubscriptionRepo.findActiveSubscription(doctorId)
+            const activeSubscription =
+                await this._doctorSubscriptionRepo.findActiveSubscription(doctorId);
 
             if (activeSubscription) {
-                const currentDate = new Date()
-                if (activeSubscription.endDate && activeSubscription.endDate > currentDate) {
-                    throw new CustomError("You already have an active plan. You can subscribe after expiry.", StatusCode.BAD_REQUEST)
+                const currentDate = new Date();
+                if (
+                    activeSubscription.endDate &&
+                    activeSubscription.endDate > currentDate
+                ) {
+                    throw new CustomError(
+                        "You already have an active plan. You can subscribe after expiry.",
+                        StatusCode.BAD_REQUEST
+                    );
                 }
             }
 
             const plan = await this._subscriptionRepo.findById(planId);
 
             if (!plan) {
-                throw new CustomError("Subscription plan not found", StatusCode.NOT_FOUND);
+                throw new CustomError(
+                    "Subscription plan not found",
+                    StatusCode.NOT_FOUND
+                );
             }
 
             const options = {
@@ -57,7 +70,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                 currency: "INR",
                 receipt: `order_rcptid_${doctorId}`,
                 payment_capture: 1,
-            }
+            };
 
             const order = await this._razorpay.orders.create(options);
 
@@ -68,8 +81,8 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                 endDate: null,
                 orderId: order.id,
                 status: "pending",
-                paymentStatus: "pending"
-            })
+                paymentStatus: "pending",
+            });
 
             return {
                 success: true,
@@ -85,13 +98,12 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                         finalPrice: plan.finalPrice,
                         duration: {
                             value: plan.duration.value,
-                            unit: plan.duration.unit
+                            unit: plan.duration.unit,
                         },
                         serviceLimit: plan.serviceLimit,
                     },
-                }
+                },
             };
-
         } catch (error) {
             console.error("Error creating Razorpay order:", error);
 
@@ -110,9 +122,9 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                             planName: "",
                             finalPrice: 0,
                             duration: { value: 0, unit: "month" },
-                            serviceLimit: 0
-                        }
-                    }
+                            serviceLimit: 0,
+                        },
+                    },
                 };
             }
 
@@ -129,39 +141,56 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                         planName: "",
                         finalPrice: 0,
                         duration: { value: 0, unit: "month" },
-                        serviceLimit: 0
-                    }
-                }
+                        serviceLimit: 0,
+                    },
+                },
             };
         }
     }
 
-    async verifyPayment(paymentData: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; }): Promise<{ success: boolean; message: string; data?: IDoctorSubscription; }> {
+    async verifyPayment(paymentData: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        data?: IDoctorSubscription;
+    }> {
         try {
-
             const expectedSignature = crypto
                 .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-                .update(paymentData.razorpay_order_id + "|" + paymentData.razorpay_payment_id)
+                .update(
+                    paymentData.razorpay_order_id + "|" + paymentData.razorpay_payment_id
+                )
                 .digest("hex");
 
             if (expectedSignature !== paymentData.razorpay_signature) {
                 throw new Error("Payment signature verification failed");
             }
 
-            const payment = await this._razorpay.payments.fetch(paymentData.razorpay_payment_id);
+            const payment = await this._razorpay.payments.fetch(
+                paymentData.razorpay_payment_id
+            );
 
             if (payment.status === "captured") {
-
-                const subscription = await this._doctorSubscriptionRepo.findByOrderId(paymentData.razorpay_order_id);
+                const subscription = await this._doctorSubscriptionRepo.findByOrderId(
+                    paymentData.razorpay_order_id
+                );
 
                 if (!subscription) {
                     throw new CustomError("Subscription not found", StatusCode.NOT_FOUND);
                 }
 
-                const plan = await this._subscriptionRepo.findById(subscription.planId.toString());
+                const plan = await this._subscriptionRepo.findById(
+                    subscription.planId.toString()
+                );
 
                 if (!plan) {
-                    throw new CustomError("Subscription plan not found", StatusCode.NOT_FOUND);
+                    throw new CustomError(
+                        "Subscription plan not found",
+                        StatusCode.NOT_FOUND
+                    );
                 }
 
                 const endDate = new Date();
@@ -173,88 +202,101 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                     endDate.setFullYear(endDate.getFullYear() + plan.duration.value);
                 }
 
-                console.log("Payment varunna daetails : ",payment);
-                
+                console.log("Payment varunna daetails : ", payment);
 
-
-                const updatedSubscription = await this._doctorSubscriptionRepo.updateByOrderId(paymentData.razorpay_order_id, {
-                    paymentStatus: "paid",
-                    status: "active",
-                    startDate: new Date(),
-                    endDate: endDate,
-                    paymentDetails:{
-                        paymentId:paymentData.razorpay_order_id,
-                        paymentMethod:payment.method,
-                        paymentAmount:plan.finalPrice
-                    }
-                });
+                const updatedSubscription =
+                    await this._doctorSubscriptionRepo.updateByOrderId(
+                        paymentData.razorpay_order_id,
+                        {
+                            paymentStatus: "paid",
+                            status: "active",
+                            startDate: new Date(),
+                            endDate: endDate,
+                            paymentDetails: {
+                                paymentId: paymentData.razorpay_order_id,
+                                paymentMethod: payment.method,
+                                paymentAmount: plan.finalPrice,
+                            },
+                        }
+                    );
 
                 if (!updatedSubscription) {
-                    throw new CustomError("Failed to update subscription", StatusCode.INTERNAL_SERVER_ERROR);
+                    throw new CustomError(
+                        "Failed to update subscription",
+                        StatusCode.INTERNAL_SERVER_ERROR
+                    );
                 }
 
-                const updateDoctorSubscription = await this._doctorRepository.update(subscription.doctorId.toString(), { currentSubscriptionId: updatedSubscription?._id, subscriptionExpiryDate: updatedSubscription?.endDate!, isSubscribed: true })
-
+                const updateDoctorSubscription = await this._doctorRepository.update(
+                    subscription.doctorId.toString(),
+                    {
+                        currentSubscriptionId: updatedSubscription?._id,
+                        subscriptionExpiryDate: updatedSubscription?.endDate!,
+                        isSubscribed: true,
+                    }
+                );
 
                 if (!updateDoctorSubscription) {
-                    throw new CustomError("Failed to update doctor subscription", StatusCode.INTERNAL_SERVER_ERROR);
-
+                    throw new CustomError(
+                        "Failed to update doctor subscription",
+                        StatusCode.INTERNAL_SERVER_ERROR
+                    );
                 }
 
-
-                return generateSuccessResponse("Payment verified and subscription activated", updatedSubscription);
+                return generateSuccessResponse(
+                    "Payment verified and subscription activated",
+                    updatedSubscription
+                );
             } else {
-
-                await this._doctorSubscriptionRepo.updateByOrderId(paymentData.razorpay_order_id, {
-                    paymentStatus: "failed",
-                    status: "canceled",
-                });
+                await this._doctorSubscriptionRepo.updateByOrderId(
+                    paymentData.razorpay_order_id,
+                    {
+                        paymentStatus: "failed",
+                        status: "canceled",
+                    }
+                );
 
                 return generateErrorResponse("Payment failed. Please try again.");
-
             }
-
         } catch (error) {
             console.error("Error verifying payment:", error);
             if (error instanceof CustomError) {
                 return generateErrorResponse(error.message, error.statusCode);
             }
-            return generateErrorResponse("Internal Server Error", StatusCode.INTERNAL_SERVER_ERROR);
-
+            return generateErrorResponse(
+                "Internal Server Error",
+                StatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
     //razropay order creation
 
-
-    async getDoctorSubscription(subscriptionId: string): Promise<IDoctorSubscription | null> {
+    async getDoctorSubscription(
+        subscriptionId: string
+    ): Promise<IDoctorSubscription | null> {
         try {
-
-            if(!subscriptionId){
-                throw new CustomError("Subscription ID is required",StatusCode.BAD_REQUEST)
+            if (!subscriptionId) {
+                throw new CustomError(
+                    "Subscription ID is required",
+                    StatusCode.BAD_REQUEST
+                );
             }
 
-            const mySubscription = await this._doctorSubscriptionRepo.findSubscriptionById(subscriptionId)
+            const mySubscription =
+                await this._doctorSubscriptionRepo.findSubscriptionById(subscriptionId);
 
-            if(!mySubscription){
-                throw new CustomError("Subscrition not found",StatusCode.NOT_FOUND)
+            if (!mySubscription) {
+                throw new CustomError("Subscrition not found", StatusCode.NOT_FOUND);
             }
 
-            return mySubscription
-            
+            return mySubscription;
         } catch (error) {
+            console.error("service : Error fethcing doctor subscription ", error);
 
-            console.error("service : Error fethcing doctor subscription ",error);
-
-            throw error
-            
+            throw error;
         }
     }
-
-
-
-
 }
 
-
-export default DoctorSubscriptionService
+export default DoctorSubscriptionService;

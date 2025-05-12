@@ -4,26 +4,32 @@ import { IBaseRepository } from "../../base/IBaseRepository";
 import { IScheduleResponse } from "../../../types/bookingTypes";
 import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 
-
 export interface Pagination {
-    totalRecords: number,
-    totalPages: number,
-    currentPage: number,
-
-
+    totalRecords: number;
+    totalPages: number;
+    currentPage: number;
 }
 
-export default interface IDoctorScheduleRepository extends IBaseRepository<IDoctorAvailability> {
-    findOverlappingSchedules(doctorId: string, serviceId: string, date: Date, startTime: Date, endTime: Date): Promise<IDoctorAvailability | null>
+export default interface IDoctorScheduleRepository
+    extends IBaseRepository<IDoctorAvailability> {
+    findOverlappingSchedules(
+        doctorId: string,
+        serviceId: string,
+        date: Date,
+        startTime: Date,
+        endTime: Date
+    ): Promise<IDoctorAvailability | null>;
     findConflictingSchedules(
         doctorId: mongoose.Types.ObjectId,
         serviceId: mongoose.Types.ObjectId,
         date: Date,
         start_time: Date,
         end_time: Date
-    ): Promise<IDoctorAvailability | null>
+    ): Promise<IDoctorAvailability | null>;
 
-    createSchedule(scheduleData: Partial<IDoctorAvailability>): Promise<IDoctorAvailability>;
+    createSchedule(
+        scheduleData: Partial<IDoctorAvailability>
+    ): Promise<IDoctorAvailability>;
 
     fetchSchedules(
         doctorId: string,
@@ -33,27 +39,28 @@ export default interface IDoctorScheduleRepository extends IBaseRepository<IDoct
         status?: "completed" | "upcoming",
         page?: number,
         limit?: number
-    ): Promise<{schedules:IDoctorAvailability[];pagination:Pagination}>
+    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }>;
 
-    markSlotAsPending(
+    markSlotAsPending(scheduleId: string, slotId: string): Promise<boolean>;
+
+    getScheduleBySlot(
         scheduleId: string,
         slotId: string
-      ): Promise<boolean>
+    ): Promise<IDoctorAvailability | null>;
 
+    getScheduleById(scheduleId: string): Promise<IDoctorAvailability | null>;
 
-    getScheduleBySlot(scheduleId:string,slotId:string):Promise<IDoctorAvailability|null>
-    
+    findAvailableSlot(
+        scheduleId: string,
+        slotId: string
+    ): Promise<IDoctorAvailability | null>;
 
-    getScheduleById(scheduleId: string):Promise<IDoctorAvailability|null>
-
-
-    findAvailableSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
-
-    findPendingSlot(scheduleId: string, slotId: string): Promise<IDoctorAvailability | null>;
-
+    findPendingSlot(
+        scheduleId: string,
+        slotId: string
+    ): Promise<IDoctorAvailability | null>;
 
     cancelSchedule(scheduleId: string, reason: string): Promise<boolean>;
 
-    releaseExpiredPendingSlots(expirationMinutes: number): Promise<UpdateResult>
-
+    releaseExpiredPendingSlots(expirationMinutes: number): Promise<UpdateResult>;
 }

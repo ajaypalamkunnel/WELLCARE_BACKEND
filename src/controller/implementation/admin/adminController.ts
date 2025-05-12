@@ -55,11 +55,9 @@ class AdminController implements IAdminController {
                 admin: { id: admin?._id, email: admin?.email },
             });
         } catch (error: unknown) {
-            res
-                .status(StatusCode.BAD_REQUEST)
-                .json({
-                    error: error instanceof Error ? error.message : "Login failed",
-                });
+            res.status(StatusCode.BAD_REQUEST).json({
+                error: error instanceof Error ? error.message : "Login failed",
+            });
         }
     }
 
@@ -92,10 +90,9 @@ class AdminController implements IAdminController {
     // Fetches all doctors
     async fetchAllDoctors(req: Request, res: Response): Promise<void> {
         try {
-
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 6;
-            const searchTerm = (req.query.search as string) || '';
+            const searchTerm = (req.query.search as string) || "";
 
             const filters = {
                 isVerified: req.query.isVerified as string,
@@ -107,14 +104,20 @@ class AdminController implements IAdminController {
                 maxExp: req.query.maxExp as string,
             };
 
-
-
-            const { data, total } = await this._adminService.fetchAllDoctors(page, limit, searchTerm, filters);
+            const { data, total } = await this._adminService.fetchAllDoctors(
+                page,
+                limit,
+                searchTerm,
+                filters
+            );
             res.status(StatusCode.OK).json({
                 success: true,
                 data,
                 total,
-                message: data.length === 0 ? "No doctors found" : "Doctors fetched successfully",
+                message:
+                    data.length === 0
+                        ? "No doctors found"
+                        : "Doctors fetched successfully",
             });
         } catch (error) {
             console.error("Error fetching doctors:", error);
@@ -125,19 +128,16 @@ class AdminController implements IAdminController {
     }
 
     async viewDoctorDocument(req: Request, res: Response): Promise<void> {
-
         try {
-
             const { doctorId, type } = req.params;
 
-            const doctor = await Doctor.findById(doctorId).lean()
+            const doctor = await Doctor.findById(doctorId).lean();
 
             if (!doctor) {
                 res.status(StatusCode.NOT_FOUND).send("Doctor not found");
                 return;
             }
             let documentUrl: string | undefined;
-
 
             if (type === "license") {
                 documentUrl = doctor.licenseDocument;
@@ -163,23 +163,20 @@ class AdminController implements IAdminController {
             );
 
             cloudinaryResp.data.pipe(res);
-
         } catch (error) {
             console.error("Failed to fetch doctor document:", error);
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).send("Internal Server Error");
+            res
+                .status(StatusCode.INTERNAL_SERVER_ERROR)
+                .send("Internal Server Error");
         }
-
     }
-
-
-
 
     // Retrieves all users with pagination
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;
-            const searchTerm = (req.query.search as string) || '';
+            const searchTerm = (req.query.search as string) || "";
             console.log("page===>", page);
             console.log("limit===>", limit);
             console.log("search===>", searchTerm);
@@ -192,7 +189,10 @@ class AdminController implements IAdminController {
 
             res.status(StatusCode.OK).json({
                 success: true,
-                message: users.length === 0 ? "No doctors found" : "Doctors fetched successfully",
+                message:
+                    users.length === 0
+                        ? "No doctors found"
+                        : "Doctors fetched successfully",
                 data: {
                     users,
                     totalUsers,
@@ -257,10 +257,6 @@ class AdminController implements IAdminController {
             });
         }
     }
-
-
-
-
 }
 
 export default AdminController;

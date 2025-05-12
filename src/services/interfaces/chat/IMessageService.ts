@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { IMessage, MediaType } from "../../../model/chat/message";
 import { ChatInboxItemDTO, firstChatDTO } from "../../../types/chat";
 
-
 export interface IChatService {
   sendMessage(
     senderId: Types.ObjectId,
@@ -20,13 +19,15 @@ export interface IChatService {
     userId2: Types.ObjectId
   ): Promise<IMessage[]>;
 
+  getInboxForUser(
+    userId: Types.ObjectId,
+    lookupModel: "User" | "Doctor"
+  ): Promise<ChatInboxItemDTO[]>;
 
-  getInboxForUser(userId: Types.ObjectId, lookupModel: "User" | "Doctor"): Promise<ChatInboxItemDTO[]>
+  markMessagesAsRead(
+    senderId: Types.ObjectId,
+    receiverId: Types.ObjectId
+  ): Promise<void>;
 
-  markMessagesAsRead(senderId: Types.ObjectId, receiverId: Types.ObjectId): Promise<void>
-
-
-  deleteMessage(messageId: Types.ObjectId): Promise<void>
-
+  deleteMessage(messageId: Types.ObjectId): Promise<void>;
 }
-

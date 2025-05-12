@@ -2,36 +2,39 @@ import { Types, UpdateWriteOpResult } from "mongoose";
 import { IPayment } from "../../../model/bookingPayment/bookingPayment";
 import { IConsultationAppointment } from "../../../model/consultationBooking/consultationBooking";
 import { SlotStatus } from "../../../model/doctorService/doctorSchedule";
-import { AppointmentDetailDTO, bookingFeeDTO, DoctorAppointmentDetailDTO, DoctorAppointmentListItemDTO, PaginatedAppointmentListDTO } from "../../../types/bookingTypes";
-
+import {
+  AppointmentDetailDTO,
+  bookingFeeDTO,
+  DoctorAppointmentDetailDTO,
+  DoctorAppointmentListItemDTO,
+  PaginatedAppointmentListDTO,
+} from "../../../types/bookingTypes";
 
 interface IConsultationBookingRepository {
-
   createBookingWithPayment(
     appointmentData: Partial<IConsultationAppointment>,
     paymentData: Partial<IPayment>
-  ): Promise<{ appointment: IConsultationAppointment; payment: IPayment }>
+  ): Promise<{ appointment: IConsultationAppointment; payment: IPayment }>;
 
+  storeInitialPayment(
+    paymentData: Partial<IPayment>
+  ): Promise<Partial<IPayment>>;
 
-  storeInitialPayment(paymentData: Partial<IPayment>): Promise<Partial<IPayment>>
-
-  markPaymentFailed(razorpayOrderId: string): Promise<UpdateWriteOpResult>
-
+  markPaymentFailed(razorpayOrderId: string): Promise<UpdateWriteOpResult>;
 
   getPaymentByOrderId(orderId: string): Promise<IPayment | null>;
 
- 
-
-
-
-  getABookingDetails(bookingId: string): Promise<IConsultationAppointment>
+  getABookingDetails(bookingId: string): Promise<IConsultationAppointment>;
 
   findAppointmentsByPatientAndStatus(
     patientId: string,
     statusList: SlotStatus[]
   ): Promise<any[]>;
 
-  findAppoinmentDetailById(appointmentId: Types.ObjectId, patientId: Types.ObjectId): Promise<AppointmentDetailDTO | null>
+  findAppoinmentDetailById(
+    appointmentId: Types.ObjectId,
+    patientId: Types.ObjectId
+  ): Promise<AppointmentDetailDTO | null>;
 
   findByIdAndPatient(
     appointmentId: Types.ObjectId,
@@ -43,11 +46,13 @@ interface IConsultationBookingRepository {
     updateData: Partial<IConsultationAppointment>
   ): Promise<IConsultationAppointment | null>;
 
-
   findAppointmentsForDoctor(
     doctorId: Types.ObjectId,
     filters: {
-      date?: string; mode?: string; status?: string; page?: number;
+      date?: string;
+      mode?: string;
+      status?: string;
+      page?: number;
       limit?: number;
     }
   ): Promise<PaginatedAppointmentListDTO>;
@@ -55,12 +60,9 @@ interface IConsultationBookingRepository {
   findAppointmentDetailForDoctor(
     appointmentId: Types.ObjectId,
     doctorId: Types.ObjectId
-  ): Promise<DoctorAppointmentDetailDTO | null>
+  ): Promise<DoctorAppointmentDetailDTO | null>;
 
-
-  getAppointmentFee(appointmentId:string):Promise<bookingFeeDTO>
-
-
+  getAppointmentFee(appointmentId: string): Promise<bookingFeeDTO>;
 }
 
-export default IConsultationBookingRepository
+export default IConsultationBookingRepository;

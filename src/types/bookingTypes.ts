@@ -55,6 +55,7 @@ export interface AppointmentDetailDTO {
     end_time: string;
   };
   doctor: {
+    _id:string
     fullName: string;
     specialization: string;
     experience: number;

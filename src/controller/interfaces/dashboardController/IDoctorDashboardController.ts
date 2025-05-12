@@ -1,5 +1,3 @@
-
-
 import { Request, Response } from "express";
 
 interface IDoctorDashboardController {
@@ -11,8 +9,7 @@ interface IDoctorDashboardController {
 
     getTopServices(req: Request, res: Response): Promise<Response>;
 
-    generateDoctorReport(req: Request, res: Response): Promise<Response>
+    generateDoctorReport(req: Request, res: Response): Promise<Response>;
 }
 
-
-export default IDoctorDashboardController
+export default IDoctorDashboardController;

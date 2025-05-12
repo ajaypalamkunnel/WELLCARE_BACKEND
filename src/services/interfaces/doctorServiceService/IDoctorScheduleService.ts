@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
-import { IScheduleValidationResponse, TempSlot } from "../../../types/schedules";
+import {
+    IScheduleValidationResponse,
+    TempSlot,
+} from "../../../types/schedules";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { Pagination } from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import { IScheduleResponse } from "../../../types/bookingTypes";
 
-
-interface IDoctorScheduleService{
+interface IDoctorScheduleService {
     validateSchedule(
         doctorId: string,
         serviceId: string,
@@ -22,7 +24,6 @@ interface IDoctorScheduleService{
         end_time: Date
     ): Promise<IDoctorAvailability | null>;
 
-
     validateAndGenerateSlots(
         doctorId: string,
         serviceId: string,
@@ -30,9 +31,11 @@ interface IDoctorScheduleService{
         start_time: string,
         end_time: string,
         duration: number
-    ): Promise<TempSlot[]|null>;
+    ): Promise<TempSlot[] | null>;
 
-    createSchedule(scheduleData: Partial<IDoctorAvailability>): Promise<IDoctorAvailability>;
+    createSchedule(
+        scheduleData: Partial<IDoctorAvailability>
+    ): Promise<IDoctorAvailability>;
 
     getDoctorSchedules(
         doctorId: string,
@@ -42,12 +45,13 @@ interface IDoctorScheduleService{
         status?: "completed" | "upcoming",
         page?: number,
         limit?: number
-    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }>
+    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }>;
 
-
-    cancelDoctorSchedule(scheduleId: string, reason: string, doctorId: string): Promise<void>;
-
+    cancelDoctorSchedule(
+        scheduleId: string,
+        reason: string,
+        doctorId: string
+    ): Promise<void>;
 }
 
-
-export default IDoctorScheduleService
+export default IDoctorScheduleService;
