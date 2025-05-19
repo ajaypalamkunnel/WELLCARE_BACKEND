@@ -1,4 +1,4 @@
-import mongoose, { PipelineStage, Types } from "mongoose";
+import mongoose, { FilterQuery, PipelineStage, Types } from "mongoose";
 import PaymentModel, {
     IPayment,
 } from "../../../model/bookingPayment/bookingPayment";
@@ -171,7 +171,7 @@ class ConsultationBookingRepository
                 filterWithFutureDate.includes(status)
             );
 
-            const matchStage: Record<string, any> = {
+            const matchStage: FilterQuery<IConsultationAppointment> = {
                 patientId: new Types.ObjectId(patientId),
                 status: { $in: statusList },
             };

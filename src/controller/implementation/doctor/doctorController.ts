@@ -299,7 +299,7 @@ class DoctorController implements IDoctorController {
                 licenseDocument,
                 IDProofDocument,
                 education,
-                v  // certifications,
+              // certifications,
             } = req.body;
 
             console.log("req : ",req.body)
