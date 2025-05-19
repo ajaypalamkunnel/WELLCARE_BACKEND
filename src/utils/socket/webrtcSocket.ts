@@ -103,7 +103,7 @@ export const registerWebRTCSocketHandlers = (io: Server, socket: Socket) => {
 
 
     socket.on("webrtc-candidate", ({ targetId, candidate }) => {
-        console.log("web===>c", candidate, "---", targetId);
+     
 
         const targetSockets = onlineUsers.get(targetId);
         targetSockets?.forEach((id) => {

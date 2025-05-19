@@ -25,7 +25,6 @@ class SubscriptionController implements ISubscriptionController {
                 throw new CustomError("Invalid request data", 400);
             }
 
-            console.log("Received Data --->>>", subscriptionData);
 
             //  Validate required fields
             const {
@@ -88,7 +87,6 @@ class SubscriptionController implements ISubscriptionController {
                 features: formattedFeatures,
             } as ISubscription;
 
-            console.log("Formatted Data --->>>", formattedData);
             const newSubscriptionPlan =
                 await this._subscriptionService.createsubscriptionPlan(formattedData);
             return res
@@ -100,10 +98,11 @@ class SubscriptionController implements ISubscriptionController {
                     )
                 );
         } catch (error: unknown) {
-            const errorMessage =
-                error instanceof CustomError ? error.message : "Internal Server Error";
-            const statusCode = error instanceof CustomError ? error.statusCode : 500;
-            return handleControllerError(res, error);
+          if(error instanceof CustomError){
+            throw error
+          }else{
+            throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+          }
         }
     }
 
@@ -164,7 +163,6 @@ class SubscriptionController implements ISubscriptionController {
         try {
             const { planId, updatedData } = req.body;
 
-            console.log("Received Data controller --->>>", planId, updatedData);
             if (!planId) {
                 throw new CustomError("Plan ID is required", 400);
             }

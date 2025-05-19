@@ -3,16 +3,12 @@ import IUserRepository from "../../../repositories/interfaces/user/IUser";
 import PasswordUtils from "../../../utils/passwordUtils";
 import { IUserService } from "../../interfaces/user/iuserServices";
 import { sendOTPEmail } from "../../../utils/emailUtils";
-import { userInfo } from "os";
 import JwtUtils from "../../../utils/jwtUtils";
 import { generteOTP } from "../../../utils/otpGenerator";
-import { IDepartment } from "../../../model/department/departmentModel";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import { isValidObjectId } from "mongoose";
 import { IScheduleResponse } from "../../../types/bookingTypes";
-import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
-import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import { firstChatDTO } from "../../../types/chat";
 import { INotification } from "../../../model/notification/notificationModel";
 
@@ -64,7 +60,7 @@ class UserService implements IUserService {
         });
 
         await sendOTPEmail(email, otp);
-        console.log("create new user: ", user);
+     
 
         return { user };
     }
@@ -164,7 +160,7 @@ class UserService implements IUserService {
         const user = await this._userRepository.findUserTokenById(
             decode.userId.toString()
         );
-        console.log("njan olla token---->", user?.refreshToken);
+       
 
         if (!user || user.refreshToken !== oldRefreshToken) {
             throw new Error("Invalid refresh token");
@@ -182,7 +178,7 @@ class UserService implements IUserService {
     }
 
     async forgotPassword(email: string): Promise<void> {
-        console.log(email);
+       
 
         try {
             const user = await this._userRepository.findUserByEmail(email);
@@ -214,7 +210,7 @@ class UserService implements IUserService {
                 otpExpires,
             });
 
-            console.log(`Forgot password OTP sent to ${email}.`);
+        
         } catch (error) {
             console.error("Error in forgotPassword service:", error);
 
@@ -244,7 +240,7 @@ class UserService implements IUserService {
                 password: hashedPassword,
             });
         } catch (error) {
-            console.error("Error in forgotPassword:", error);
+           
 
             if (error instanceof Error) {
                 throw new Error(error.message);
@@ -260,12 +256,12 @@ class UserService implements IUserService {
         email: string,
         name: string,
         avatar: string,
-        role: string
+        role: string // eslint-disable-line @typescript-eslint/no-unused-vars
     ): Promise<IUser | null> {
         let user = await this._userRepository.findUserByEmail(email);
 
         if (!user) {
-            console.log("hi Ima patient");
+            
             user = await this._userRepository.create({
                 fullName: name,
                 email,
@@ -523,17 +519,22 @@ class UserService implements IUserService {
 
             return notifications;
         } catch (error) {
-            throw new CustomError(
-                "Internal server error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+
+                throw new CustomError(
+                    "Internal server error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
     async addReviewToDoctor(doctorId: string, patientId: string, rating: number, reviewText: string): Promise<void> {
        try {
 
-            console.log("service : ",doctorId);
+         
             
 
             await this._userRepository.addReview(doctorId,patientId,rating,reviewText)

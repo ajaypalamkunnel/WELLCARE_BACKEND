@@ -1,6 +1,5 @@
 import {
   IDoctorWallet,
-  IDoctorWalletTransaction,
 } from "../../../model/doctorWallet/doctorWallet";
 import { DoctorWalletSummaryDTO } from "../../../types/wallet";
 

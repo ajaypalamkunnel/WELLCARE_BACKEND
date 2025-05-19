@@ -1,6 +1,4 @@
-import { end } from "pdfkit";
 import { StatusCode } from "../../../constants/statusCode";
-import DoctorSubscriptionRepository from "../../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
 import IAdminDashboardRepository from "../../../repositories/interfaces/adminDashboard/IAdminDashboard";
 import {
     PlanDistributionDTO,
@@ -123,10 +121,15 @@ class AdminDashboardService implements IAdminDashboardService {
 
             return { downloadUrl: url };
         } catch (error) {
-            throw new CustomError(
-                "Failed to generate and upload report",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Failed to generate and upload report",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 

@@ -1,9 +1,12 @@
 import PDFDocument from "pdfkit";
 import { IPrescription } from "../model/prescription/prescription Modal";
-import { Readable } from "stream";
+
 
 export const generatePrescriptionPDFBuffer = async (prescription: IPrescription): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
+        try {
+            
+        
         const doc = new PDFDocument();
         const buffers: Uint8Array[] = [];
 
@@ -32,5 +35,8 @@ export const generatePrescriptionPDFBuffer = async (prescription: IPrescription)
         });
 
         doc.end();
+        } catch (error) {
+            reject(error);
+        }
     });
 };

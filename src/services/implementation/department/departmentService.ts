@@ -14,8 +14,7 @@ class DepartmentService implements IDepartmentService {
         departmentDetails: IDepartment
     ): Promise<{ department: IDepartment }> {
         try {
-            console.log("dept service");
-            console.log(departmentDetails);
+           
 
             const { name, icon } = { ...departmentDetails };
 
@@ -40,8 +39,8 @@ class DepartmentService implements IDepartmentService {
 
             return { department };
         } catch (error) {
-            console.error("Error in department creation");
-            throw error;
+          
+            throw new Error(`failed to create department :${error}`);
         }
     }
 
@@ -54,7 +53,9 @@ class DepartmentService implements IDepartmentService {
             }
             return departments;
         } catch (error) {
-            console.error("Error in department department fetch");
+
+            console.error("Failed to fetch departments : ",error)
+          
             throw new Error("Failed to fetch departments");
         }
     }
@@ -103,8 +104,8 @@ class DepartmentService implements IDepartmentService {
             }
             return departments;
         } catch (error) {
-            console.error("Error in All active department department fetch");
-            throw new Error("Failed to fetch departments");
+          
+            throw new Error(`Failed to fetch departments : ${error}`);
         }
     }
 }

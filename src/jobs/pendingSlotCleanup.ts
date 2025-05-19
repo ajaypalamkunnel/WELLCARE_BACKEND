@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import DoctorScheduleRepository from '../repositories/implementation/doctorService/doctorScheduleRepository'
-import connectDB from '../config/dbConfig'
+
 
 
 

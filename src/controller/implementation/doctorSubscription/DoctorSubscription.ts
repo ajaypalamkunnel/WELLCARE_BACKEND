@@ -74,7 +74,6 @@ class DoctorSubscriptionController implements IDoctorSubscriptionController {
         try {
             const { subscriptionId } = req.params;
 
-            console.log("subs: ", subscriptionId);
 
             const mySubscription =
                 await this._doctorSubscriptionService.getDoctorSubscription(

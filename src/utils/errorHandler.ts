@@ -9,7 +9,7 @@ import {StatusCode} from "../constants/statusCode"; // Assuming you have a statu
  */
 
 export const handleErrorResponse = (res: Response, error: unknown, defaultStatusCode = StatusCode.BAD_REQUEST) => {
-    console.error("Error:", error);
+    // console.error("Error:", error);
 
     // Check if error is an instance of Error and has a message
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";

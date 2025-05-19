@@ -1,14 +1,12 @@
-import { promises } from "dns";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     ICertification,
     IDoctor,
     IEducation,
 } from "../../../model/doctor/doctorModel";
-import { BaseRepository } from "../../base/BaseRepository";
 import { IBaseRepository } from "../../base/IBaseRepository";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
-import { Certificate } from "tls";
 import { INotification } from "../../../model/notification/notificationModel";
 
 export default interface IDoctorRepository extends IBaseRepository<IDoctor> {

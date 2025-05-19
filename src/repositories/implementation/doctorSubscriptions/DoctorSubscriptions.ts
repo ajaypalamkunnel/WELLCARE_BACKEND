@@ -4,7 +4,7 @@ import DoctorSubscription, {
 import { ISubscription } from "../../../model/subscription/subscriptionModel";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorSubscriptionsRepository from "../../interfaces/doctorSubscriptions/IDoctorSubscriptions";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 class DoctorSubscriptionRepository
     extends BaseRepository<IDoctorSubscription>

@@ -106,12 +106,15 @@ class WalletService implements IWalletService {
                 limit,
             };
         } catch (error) {
-            console.error("transactions featching error");
-
-            throw new CustomError(
-                "transactions fetching error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            
+           if (error instanceof CustomError) {
+                throw error;
+            } else {
+                throw new CustomError(
+                    "Internal server error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 }

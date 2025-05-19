@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { IMessage, MediaType } from "../../../model/chat/message";
-import { ChatInboxItemDTO, firstChatDTO } from "../../../types/chat";
+import { ChatInboxItemDTO } from "../../../types/chat";
 
 export interface IChatService {
   sendMessage(

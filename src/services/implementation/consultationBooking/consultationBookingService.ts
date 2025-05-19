@@ -1,7 +1,7 @@
-import mongoose, { Types } from "mongoose";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Types } from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import { ISlot, SlotStatus } from "../../../model/doctorService/doctorSchedule";
-import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import IConsultationBookingRepository from "../../../repositories/interfaces/consultationBooking/IConsultationBookingRepository";
 import IDoctorScheduleRepository from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import {
@@ -15,10 +15,8 @@ import {
 } from "../../../types/bookingTypes";
 import { CustomError } from "../../../utils/CustomError";
 import IConsultationBookingService from "../../interfaces/consultationBooking/IConsultationBookingService";
-import DoctorServiceRepository from "../../../repositories/implementation/doctorService/doctorServiceRepository";
 import IDoctorServiceRepository from "../../../repositories/interfaces/doctorService/IDoctorServiceRepository";
 import { razorpayInstance } from "../../../utils/razorpayUtils";
-import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import crypto from "crypto";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import IWalletService from "../../interfaces/wallet/IWalletService";
@@ -26,6 +24,7 @@ import IDoctorWalletRepository from "../../../repositories/interfaces/doctorWall
 import { io } from "../../../index";
 import { sendNotificationToUser } from "../../../utils/notification/sendNotification";
 import dayjs from "dayjs";
+import { IConsultationAppointment } from "../../../model/consultationBooking/consultationBooking";
 
 class ConsultationBookingService implements IConsultationBookingService {
     private _consultationBookingRepository: IConsultationBookingRepository;
@@ -63,7 +62,7 @@ class ConsultationBookingService implements IConsultationBookingService {
                 throw new CustomError("Booking not found", StatusCode.NOT_FOUND);
             }
 
-            const schedule: any = booking.doctorScheduleId;
+            const schedule:any = booking.doctorScheduleId
 
             const selectdSlot = schedule.availability.find((slot: ISlot) => {
                 return slot.slot_id.toString() === slotId;
@@ -108,14 +107,13 @@ class ConsultationBookingService implements IConsultationBookingService {
         try {
             const { doctorScheduleId, slotId } = data;
 
-            console.log(doctorScheduleId, slotId);
+            
 
             const schedule = await this._doctorScheduleRepository.getScheduleBySlot(
                 doctorScheduleId,
                 slotId
             );
 
-            console.log("✅--->", schedule);
 
             if (!schedule) {
                 throw new CustomError(
@@ -151,7 +149,7 @@ class ConsultationBookingService implements IConsultationBookingService {
                 .fee;
 
             const amount = serviceFee;
-            console.log("paisa ithaatoo, ", amount);
+           
 
             const razorpayOrder = await razorpayInstance.orders.create({
                 amount: amount! * 100,
@@ -206,11 +204,10 @@ class ConsultationBookingService implements IConsultationBookingService {
                 departmentId,
                 doctorId,
                 serviceId,
-                appointmentDate,
+                // appointmentDate,
             } = data;
 
-            console.log("going to verify and booking==>", data);
-
+            
             const expectedSignature = crypto
                 .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
                 .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -245,7 +242,7 @@ class ConsultationBookingService implements IConsultationBookingService {
                 slotId
             );
 
-            console.log("ivade ille???", schedule);
+           
 
             if (!schedule) {
                 await this._consultationBookingRepository.markPaymentFailed(
@@ -260,8 +257,7 @@ class ConsultationBookingService implements IConsultationBookingService {
             const serviceFee = (schedule.serviceId as unknown as PopulatedServiceId)
                 .fee;
 
-            console.log("paisaa -->", serviceFee);
-
+            
             const result =
                 await this._consultationBookingRepository.createBookingWithPayment(
                     {
@@ -285,7 +281,7 @@ class ConsultationBookingService implements IConsultationBookingService {
                     }
                 );
 
-            const doctorObjectId = new Types.ObjectId(doctorId);
+            // const doctorObjectId = new Types.ObjectId(doctorId);
 
             await sendNotificationToUser(
                 io,
@@ -327,7 +323,7 @@ class ConsultationBookingService implements IConsultationBookingService {
     async getUserAppointments(
         patientId: string,
         statusKey: SlotStatus
-    ): Promise<any[]> {
+    ): Promise<IConsultationAppointment[]> {
         try {
             const statusMap: Record<string, SlotStatus[]> = {
                 upcoming: ["booked", "pending", "rescheduled"],
@@ -349,6 +345,8 @@ class ConsultationBookingService implements IConsultationBookingService {
                     patientId,
                     statusList
                 );
+               
+                
 
             return results;
         } catch (error) {

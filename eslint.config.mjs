@@ -1,16 +1,3 @@
-// import globals from "globals";
-// import pluginJs from "@eslint/js";
-// import tseslint from "typescript-eslint";
-
-
-// /** @type {import('eslint').Linter.Config[]} */
-// export default [
-//   {files: ["**/*.{js,mjs,cjs,ts}"]},
-//   {languageOptions: { globals: globals.browser }},
-//   pluginJs.configs.recommended,
-//   ...tseslint.configs.recommended,
-// ];
-
 
 import globals from "globals";
 import pluginJs from "@eslint/js";
@@ -19,8 +6,12 @@ import tseslint from "typescript-eslint";
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
   {
+    ignores: ["dist/**", "**/*.test.ts", "**/__mocks__/**","eslint.config.mjs","jest.config.js"],
+  },
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
     files: ["**/*.{js,mjs,cjs,ts}"],
-    ignores: ["dist/**"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -28,17 +19,21 @@ export default [
         sourceType: "module",
         ecmaVersion: "latest",
       },
-      globals: globals.node, // Set environment to Node.js
-    },
-    plugins: {
-      "@typescript-eslint": tseslint.plugin,
+      globals:{
+        ...globals.node,
+        ...globals.browser,
+      }, // Set environment to Node.js
     },
     rules: {
-      ...pluginJs.configs.recommended.rules,
-      ...tseslint.configs.recommended.rules,
-      "no-console": "warn", // Warn on console.log
-      "@typescript-eslint/no-unused-vars": ["error"], // Error on unused variables
-      "@typescript-eslint/no-explicit-any": "warn", // Warn on `any` type usage
+     "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-explicit-any": "error",
+      "no-console": "warn",
     },
   },
 ];

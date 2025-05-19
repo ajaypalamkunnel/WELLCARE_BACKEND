@@ -1,7 +1,6 @@
 // dtos/subscriptionAnalytics.dto.ts
 import { IDoctorSubscription } from "../../model/subscription/doctorSubscriptions"; 
-import { ISubscription } from "../../model/subscription/subscriptionModel"; 
-import { IDoctor } from "../../model/doctor/doctorModel"; 
+
 
 export interface TopPlanDTO {
     planName: string;

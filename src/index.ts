@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser';
 import cors from 'cors'
 import connectDB from './config/dbConfig';
-import morgan from 'morgan';
 import userRouter from './routes/user/userRoutes'
 import adminRouter from './routes/admin/adminRoutes'
 import chatRouter from './routes/chat/chatRoutes'
@@ -19,11 +18,9 @@ import morganMiddleware from './middleware/morganMiddleware';
 import MessageRepository from './repositories/implementation/chat/MessageRepository';
 import ChatService from './services/implementation/chat/messageService';
 import { Types } from 'mongoose';
-import DoctorRepository from './repositories/implementation/doctor/doctorRepository';
 import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
 import { registerNotificationSocketHandlers } from './utils/notification/notificationSocket';
 import { sendNotificationToUser } from './utils/notification/sendNotification';
-import { startPendingSlotCleanupJob } from './jobs/pendingSlotCleanup';
 
 connectDB()
 const app = express()
@@ -95,7 +92,7 @@ io.on("connection", (socket) => {
 
     socket.on("send-message", async ({ to, message, type = "text", from, fromRole, toRole,mediaUrl,mediaType  },callback) => {
         try {
-            console.log("===>",toRole)
+            
             let role: "Doctor" | "user"
             if(toRole === "User"){
                 role = "user"
@@ -103,14 +100,13 @@ io.on("connection", (socket) => {
                 role = "Doctor"
             }
             
-            console.log("***",mediaUrl);
+            
             
             if (!to || !from) {
                 return callback({ success: false, message: "Invalid message payload" });
             }
             
             if (!message?.trim() && !mediaUrl?.trim()) {
-                console.log(">>>",mediaUrl);
                 
                 return callback({ success: false, message: "Message must contain text or media" });
             
@@ -156,7 +152,7 @@ io.on("connection", (socket) => {
 
     socket.on("delete-message",async({messageId,userId})=>{
 
-        console.log("ivade vannuu ",messageId,"--",userId);
+        
         
 
         try {
@@ -169,7 +165,7 @@ io.on("connection", (socket) => {
 
             const message = await messageRepo.findById(messageId)
 
-            console.log("message :=",message);
+            
             
 
             if(!message){
@@ -178,7 +174,6 @@ io.on("connection", (socket) => {
             }
 
             if(message.senderId.toString() !== userId){
-                console.log("ninakku pattillaa");
                 
                 socket.emit("error",{message:"You can only delete your own message"})
                 return 

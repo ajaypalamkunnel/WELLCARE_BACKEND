@@ -1,3 +1,4 @@
+
 import { Types } from "mongoose";
 import {
   PaginatedTransactionResponseDTO,
@@ -15,10 +16,10 @@ interface IWalletService {
   getWalletSummary(userId: string): Promise<WalletSummaryDTO>;
 
   getWalletTransactions(
-    userId: string,
-    page: number,
-    limit: number,
-    sortOrder?: "asc" | "desc"
+    _userId: string,
+    _page: number,
+    _limit: number,
+    _sortOrder?: "asc" | "desc"
   ): Promise<PaginatedTransactionResponseDTO>;
 }
 

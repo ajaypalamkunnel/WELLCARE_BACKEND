@@ -1,4 +1,4 @@
-import { IDepartment } from "../../../model/department/departmentModel";
+
 import { INotification } from "../../../model/notification/notificationModel";
 import { IAddress, IUser } from "../../../model/user/userModel";
 import { IScheduleResponse } from "../../../types/bookingTypes";

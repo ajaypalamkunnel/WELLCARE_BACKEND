@@ -56,17 +56,22 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
                 const count = entry.count;
 
                 summary.total += count;
-                if (summary.hasOwnProperty(status)) {
+                if (Object.prototype.hasOwnProperty.call(summary, status)) {
                     summary[status as keyof AppointmentStatusSummary] = count;
                 }
             });
 
             return summary;
         } catch (error) {
-            throw new CustomError(
-                "Error fetching appointment summary: ",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+
+                throw new CustomError(
+                    "Error fetching appointment summary: ",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
@@ -211,7 +216,7 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
         doctorId: Types.ObjectId,
         startDate?: Date,
         endDate?: Date,
-        interval?: "day" | "week" | "month"
+        interval?: "day" | "week" | "month"  // eslint-disable-line @typescript-eslint/no-unused-vars
     ): Promise<TopServiceData[]> {
         try {
             const match: any = {
@@ -258,10 +263,15 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
 
             return result as TopServiceData[];
         } catch (error) {
-            throw new CustomError(
-                "Top Service fetching error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Top Service fetching error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 }

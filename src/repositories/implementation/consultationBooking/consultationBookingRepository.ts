@@ -16,7 +16,6 @@ import {
     AppointmentDetailDTO,
     bookingFeeDTO,
     DoctorAppointmentDetailDTO,
-    DoctorAppointmentListItemDTO,
     PaginatedAppointmentListDTO,
 } from "../../../types/bookingTypes";
 import { startOfDay, endOfDay, addDays } from "date-fns";
@@ -76,9 +75,6 @@ class ConsultationBookingRepository
         const session = await mongoose.startSession();
         session.startTransaction();
 
-        console.log(" Incoming appointment data:", appointmentData);
-        console.log(" Incoming payment data:", paymentData);
-
         try {
             const doctorSchedule = await DoctorSchedules.findOne({
                 _id: appointmentData.doctorScheduleId,
@@ -86,7 +82,6 @@ class ConsultationBookingRepository
                 "availability.status": "pending",
             }).session(session);
 
-            console.log(" DoctorSchedule updated:", doctorSchedule);
 
             if (!doctorSchedule) {
                 throw new CustomError(
@@ -111,19 +106,22 @@ class ConsultationBookingRepository
                 }
             );
 
-            console.log("DoctorSchedule updated:", updatedSchedule);
+            console.log("updated schedule: ",updatedSchedule);
+            
+
+            
 
             const [appointment] = await ConsultationAppointmentModal.create(
                 [appointmentData],
                 { session }
             );
 
-            console.log(" Appointment created:", appointment);
+
 
             paymentData.appointmentId = appointment._id;
             const [payment] = await PaymentModel.create([paymentData], { session });
 
-            console.log(" Payment created:", payment);
+           
 
             await session.commitTransaction();
             session.endSession();
@@ -162,16 +160,32 @@ class ConsultationBookingRepository
     async findAppointmentsByPatientAndStatus(
         patientId: string,
         statusList: SlotStatus[]
-    ): Promise<any[]> {
+    ): Promise<IConsultationAppointment[]> {
+        
+
         try {
+
+            const filterWithFutureDate = ["booked", "pending", "rescheduled"];
+
+            const shouldFilterByDate = statusList.every((status) =>
+                filterWithFutureDate.includes(status)
+            );
+
+            const matchStage: Record<string, any> = {
+                patientId: new Types.ObjectId(patientId),
+                status: { $in: statusList },
+            };
+
+            // Apply future date filter conditionally
+            if (shouldFilterByDate) {
+                matchStage.appointmentDate = { $gte: new Date() };
+            }
+
+
             const pipeline: PipelineStage[] = [
-                {
-                    $match: {
-                        patientId: new Types.ObjectId(patientId),
-                        status: { $in: statusList },
-                        appointmentDate: { $gte: new Date() }, // Filter only upcoming/future appointments
-                    },
-                },
+
+                { $match: matchStage }
+                ,
                 {
                     $lookup: {
                         from: "doctorschedules",
@@ -229,12 +243,19 @@ class ConsultationBookingRepository
             ];
 
             const results = await ConsultationAppointmentModal.aggregate(pipeline);
+            
+
             return results;
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch appointments",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Failed to fetch appointments",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -243,8 +264,6 @@ class ConsultationBookingRepository
         patientId: Types.ObjectId
     ): Promise<AppointmentDetailDTO | null> {
         try {
-            console.log("appoinmentId : ", appointmentId);
-            console.log("patientId : ", patientId);
 
             const pipeline: PipelineStage[] = [
                 {
@@ -320,7 +339,7 @@ class ConsultationBookingRepository
                             end_time: 1,
                         },
                         doctor: {
-                            _id:1,
+                            _id: 1,
                             fullName: 1,
                             specialization: 1,
                             experience: 1,
@@ -353,11 +372,16 @@ class ConsultationBookingRepository
                     pipeline
                 );
 
-            console.log("akathhhh--->", results);
+            
 
             return results.length > 0 ? results[0] : null;
         } catch (error) {
-            throw error;
+            if(error instanceof CustomError){
+                throw error
+            }else{
+
+                throw new CustomError("appointemen fetching error",StatusCode.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -406,19 +430,20 @@ class ConsultationBookingRepository
                     };
 
                     break;
-                case "tomorrow":
+                case "tomorrow":{
                     const tomorrow = addDays(today, 1);
                     matchStage.appointmentDate = {
                         $gte: startOfDay(tomorrow),
                         $lte: endOfDay(tomorrow),
                     };
                     break;
+                }
                 case "upcoming":
                     matchStage.appointmentDate = {
                         $gt: endOfDay(today),
                     };
                     break;
-
+                
                 case "past":
                     matchStage.appointmentDate = {
                         $lt: startOfDay(today),
@@ -436,7 +461,7 @@ class ConsultationBookingRepository
                 let normalizedMode = filters.mode.toLowerCase();
 
                 // Capitalize each word (handles "in-person", "online", etc.)
-                normalizedMode = normalizedMode
+                normalizedMode = normalizedMode  // eslint-disable-line @typescript-eslint/no-unused-vars
                     .split("-")
                     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                     .join("-");

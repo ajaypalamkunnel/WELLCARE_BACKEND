@@ -24,7 +24,7 @@ export const saveNotification = async ({
     link,
     type,
   });
-  console.log("✅ Notification created:", notification);
+  // console.log("✅ Notification created:", notification);
 
   return notification
 

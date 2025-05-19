@@ -1,7 +1,7 @@
 import { NextFunction,Request,Response } from "express";
 import Doctor from "../model/doctor/doctorModel";
 import { StatusCode } from "../constants/statusCode";
-import { error } from "console";
+
 
 const checkDoctorBlocked = async (req:Request,res:Response,next:NextFunction) : Promise<void> =>{
 

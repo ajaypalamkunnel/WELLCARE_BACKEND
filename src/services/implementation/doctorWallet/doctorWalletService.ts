@@ -82,16 +82,18 @@ class DoctorWalletService implements IDoctorWalletService {
                 undefined, // no appointment associated
                 "success" // default to pending, can be set to 'success' if auto-processed
             );
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (error instanceof CustomError) {
                 throw error;
+            } else {
+                throw new CustomError(
+                    "Failed to process withdrawal",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
             }
 
-            console.error("Withdraw error:", error);
-            throw new CustomError(
-                "Failed to process withdrawal",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+
         }
     }
 }

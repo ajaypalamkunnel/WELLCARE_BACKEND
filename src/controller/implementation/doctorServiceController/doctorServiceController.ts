@@ -7,7 +7,7 @@ import {
     generateErrorResponse,
     generateSuccessResponse,
 } from "../../../utils/response";
-import { error } from "console";
+
 
 class DoctorServiceController implements IDoctorServiceController {
     private _doctorServiceService: IDoctorServiceService;

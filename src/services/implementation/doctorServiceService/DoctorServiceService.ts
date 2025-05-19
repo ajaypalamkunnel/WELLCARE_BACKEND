@@ -5,7 +5,7 @@ import { CustomError } from "../../../utils/CustomError";
 import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import { IDoctorServiceService } from "../../interfaces/doctorServiceService/IDoctorServiceService";
 import IDoctorSubscriptionsRepository from "../../../repositories/interfaces/doctorSubscriptions/IDoctorSubscriptions";
-import { threadId } from "worker_threads";
+
 
 class DoctorServiceService implements IDoctorServiceService {
     private _doctorServiceRepository: IDoctorServiceRepository;
@@ -23,12 +23,11 @@ class DoctorServiceService implements IDoctorServiceService {
 
     async createService(data: IDoctorService): Promise<IDoctorService> {
         try {
-            console.log("hi createService");
 
-            const { name, mode, fee, description, doctorId } = data;
+            const { doctorId } = data;
 
             const doctor = await this._doctorRepository.findById(doctorId.toString());
-            console.log(doctor);
+           
 
             if (!doctor) {
                 throw new CustomError("Doctor not found", StatusCode.NOT_FOUND);
@@ -69,7 +68,7 @@ class DoctorServiceService implements IDoctorServiceService {
 
             return await this._doctorServiceRepository.create(serviceData);
         } catch (error) {
-            console.error("Error in createService serive  payment:", error);
+         
 
             if (error instanceof CustomError) {
                 throw error;
@@ -122,7 +121,7 @@ class DoctorServiceService implements IDoctorServiceService {
                 throw new CustomError("Doctor not Found", StatusCode.NOT_FOUND);
             }
 
-            console.log(">>>--->", serviceId);
+            
             const service = await this._doctorServiceRepository.findById(serviceId);
 
             if (!service) {

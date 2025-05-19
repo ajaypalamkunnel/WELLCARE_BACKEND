@@ -1,4 +1,4 @@
-import AdminModel, { IAdmin } from "../../../model/admin/AdminModel";
+import { IAdmin } from "../../../model/admin/AdminModel";
 import { IDoctor } from "../../../model/doctor/doctorModel";
 import { IUser } from "../../../model/user/userModel";
 import { DoctorFilter } from "../../../types/bookingTypes";

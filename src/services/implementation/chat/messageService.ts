@@ -4,8 +4,7 @@ import { IMessageRepository } from "../../../repositories/interfaces/chat/IMessa
 import { IChatService } from "../../interfaces/chat/IMessageService";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
-import { ChatInboxItemDTO, firstChatDTO } from "../../../types/chat";
-import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
+import { ChatInboxItemDTO } from "../../../types/chat";
 
 class ChatService implements IChatService {
     private _messageRepository: IMessageRepository;
@@ -31,8 +30,6 @@ class ChatService implements IChatService {
                     StatusCode.BAD_REQUEST
                 );
             }
-
-            console.log("service ==>", mediaUrl);
 
             return await this._messageRepository.saveMessage(
                 senderId,
@@ -95,8 +92,6 @@ class ChatService implements IChatService {
     }
 
     async deleteMessage(messageId: Types.ObjectId): Promise<void> {
-        console.log("serviecee=-", messageId);
-
         return this._messageRepository.markMessageAsDeleted(messageId);
     }
 }

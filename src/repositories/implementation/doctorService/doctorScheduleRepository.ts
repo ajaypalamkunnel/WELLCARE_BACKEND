@@ -1,4 +1,5 @@
-import mongoose, { mongo } from "mongoose";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import mongoose from "mongoose";
 import DoctorSchedules, {
     IDoctorAvailability,
 } from "../../../model/doctorService/doctorSchedule";
@@ -24,16 +25,6 @@ class DoctorScheduleRepository
         endTime: Date
     ): Promise<IDoctorAvailability | null> {
         try {
-            console.log(
-                "==>repo",
-                doctorId,
-                "==",
-                startTime,
-                "==",
-                endTime,
-                "==",
-                serviceId
-            );
 
             return await DoctorSchedules.findOne({
                 doctorId: new mongoose.Types.ObjectId(doctorId),
@@ -75,7 +66,8 @@ class DoctorScheduleRepository
 
             return !!result;
         } catch (error) {
-            throw error;
+            console.error("Failed to mark slot as pending:", error);
+            throw new Error("Slot update failed. Please try again.");
         }
     }
 
@@ -95,10 +87,15 @@ class DoctorScheduleRepository
                 serviceId,
             });
         } catch (error) {
-            throw new CustomError(
-                "Error while find Conflicting Schedules in database",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Error while find Conflicting Schedules in database",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
+
         }
     }
     async createSchedule(
@@ -108,10 +105,14 @@ class DoctorScheduleRepository
             const schedule = new DoctorSchedules(scheduleData);
             return await schedule.save();
         } catch (error) {
-            throw new CustomError(
-                "Failed to save schedule",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Failed to save schedule",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
@@ -209,7 +210,6 @@ class DoctorScheduleRepository
     }
 
     async findAvailableSlot(scheduleId: string, slotId: string) {
-        console.log("akath findAvailableSlot==", slotId);
 
         return await DoctorSchedules.findOne({
             _id: scheduleId,
@@ -230,7 +230,6 @@ class DoctorScheduleRepository
     }
 
     async cancelSchedule(scheduleId: string, reason: string): Promise<boolean> {
-        console.log("repository ill vannnu", scheduleId, "----", reason);
 
         try {
             const result = await DoctorSchedules.updateOne(
@@ -249,10 +248,15 @@ class DoctorScheduleRepository
             );
             return result.modifiedCount > 0;
         } catch (error) {
-            throw new CustomError(
-                "Error while cancelling schema",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Error while cancelling schema",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -291,7 +295,8 @@ class DoctorScheduleRepository
 
             return result;
         } catch (error) {
-            throw error;
+            console.error("Failed to release expired pending slots:", error);
+            throw new Error("Slot release failed");
         }
     }
 }

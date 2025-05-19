@@ -81,6 +81,8 @@ class AdminController implements IAdminController {
                 message: "Logout successfull",
             });
         } catch (error: unknown) {
+            console.error("admin logout error : ",error);
+            
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "logout failed" });
@@ -177,9 +179,7 @@ class AdminController implements IAdminController {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;
             const searchTerm = (req.query.search as string) || "";
-            console.log("page===>", page);
-            console.log("limit===>", limit);
-            console.log("search===>", searchTerm);
+           
 
             const { users, totalUsers } = await this._adminService.getAllUsers(
                 page,
@@ -217,11 +217,9 @@ class AdminController implements IAdminController {
 
     // Updates the status of a doctor
     async updateDoctorStatus(req: Request, res: Response): Promise<void> {
-        console.log("updated conrtoller");
         try {
             const { doctorId, status } = req.body;
 
-            console.log("==>", doctorId, "==>,", status);
 
             if (!doctorId || (status !== 1 && status !== -1)) {
                 res.status(StatusCode.BAD_REQUEST).json({

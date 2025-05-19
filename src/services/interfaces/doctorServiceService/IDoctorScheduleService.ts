@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
 import {
     IScheduleValidationResponse,
     TempSlot,
 } from "../../../types/schedules";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { Pagination } from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
-import { IScheduleResponse } from "../../../types/bookingTypes";
+
 
 interface IDoctorScheduleService {
     validateSchedule(
@@ -16,13 +15,13 @@ interface IDoctorScheduleService {
         endTime: Date
     ): Promise<IScheduleValidationResponse>;
 
-    findConflictingSchedules(
-        doctorId: mongoose.Types.ObjectId,
-        serviceId: mongoose.Types.ObjectId,
-        date: Date,
-        start_time: Date,
-        end_time: Date
-    ): Promise<IDoctorAvailability | null>;
+    // findConflictingSchedules(
+    //     doctorId: mongoose.Types.ObjectId,
+    //     serviceId: mongoose.Types.ObjectId,
+    //     date: Date,
+    //     start_time: Date,
+    //     end_time: Date
+    // ): Promise<IDoctorAvailability | null>;
 
     validateAndGenerateSlots(
         doctorId: string,

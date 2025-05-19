@@ -1,11 +1,11 @@
-import { log } from "winston";
+import { FilterQuery } from "mongoose";
 import Admin, { IAdmin } from "../../../model/admin/AdminModel";
 import Doctor, { IDoctor } from "../../../model/doctor/doctorModel";
 import { IUser, User } from "../../../model/user/userModel";
 import { DoctorFilter } from "../../../types/bookingTypes";
 import { BaseRepository } from "../../base/BaseRepository";
 import IAdminRepository from "../../interfaces/admin/IAdminRepository";
-import { Query } from "mongoose";
+
 
 class AdminRepository
     extends BaseRepository<IAdmin>
@@ -24,8 +24,10 @@ class AdminRepository
         searchTerm?: string,
         filters?: DoctorFilter
     ): Promise<{ data: IDoctor[]; total: number }> {
-        const query: any = {};
+        const query: FilterQuery<IDoctor> = {};
 
+        
+    
         if (searchTerm) {
             query.fullName = { $regex: searchTerm, $options: "i" };
         }
@@ -63,7 +65,6 @@ class AdminRepository
             }
         }
 
-        console.log("***", query);
         const skip = (page - 1) * limit;
 
         const [data, total] = await Promise.all([
@@ -84,7 +85,7 @@ class AdminRepository
         searchTerm?: string
     ): Promise<{ users: IUser[]; totalUsers?: number | null }> {
         try {
-            const query: any = {};
+            const query: FilterQuery<IDoctor> = {};
 
             if (searchTerm) {
                 query.fullName = { $regex: searchTerm, $options: "i" };

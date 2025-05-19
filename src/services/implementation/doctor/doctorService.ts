@@ -13,9 +13,8 @@ import {
     sendOTPEmail,
 } from "../../../utils/emailUtils";
 import JwtUtils from "../../../utils/jwtUtils";
-import UserRepository from "../../../repositories/implementation/user/userRepository";
 import { CustomError } from "../../../utils/CustomError";
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
@@ -148,7 +147,7 @@ class DoctorService implements IDoctorService {
     }
 
     renewAuthToken(
-        token: string
+        // token: string
     ): Promise<{ accessToken: string; refreshToken: string }> {
         throw new Error("Method not implemented.");
     }
@@ -175,18 +174,22 @@ class DoctorService implements IDoctorService {
             try {
                 await sendOTPEmail(email, otp);
             } catch (emailError) {
-                console.error("Failed to send OTP email:", emailError);
-                throw new Error("Failed to send OTP email. Please try again.");
+               
+                throw new Error(`Failed to send OTP email. Please try again. ${emailError}`);
             }
             await this._doctorRepository.update(doctor._id.toString(), {
                 otp,
                 otpExpires,
             });
         } catch (error) {
-            console.error("Error in forgotPassword service:", error);
-            throw new Error(
-                error instanceof Error ? error.message : "An unexpected error occurred."
-            );
+            if (error instanceof Error) {
+                throw error
+            } else {
+                throw new Error(
+                    error instanceof Error ? error.message : "An unexpected error occurred."
+                );
+
+            }
         }
     }
     async updatePasswordDoctor(
@@ -212,7 +215,6 @@ class DoctorService implements IDoctorService {
                 password: hashedPassword,
             });
         } catch (error) {
-            console.error("Error in forgot Password:", error);
 
             if (error instanceof Error) {
                 throw new Error(error.message);
@@ -228,7 +230,7 @@ class DoctorService implements IDoctorService {
         email: string,
         name: string,
         avatar: string,
-        role: string
+        role: string // eslint-disable-line @typescript-eslint/no-unused-vars
     ): Promise<IDoctor | null> {
         let doctor = await this._doctorRepository.findDoctorByEmail(email);
 
@@ -276,7 +278,7 @@ class DoctorService implements IDoctorService {
     ): Promise<{ doctor: IDoctor }> {
         try {
             const {
-                fullName,
+                // fullName,
                 email,
                 mobile,
                 departmentId,
@@ -376,14 +378,20 @@ class DoctorService implements IDoctorService {
                     isVerified,
                     1
                 );
-                sendApplicationApprovalEmail(updatedDoctor?.email!);
+                if(!updatedDoctor?.email){
+                    throw new Error("updated doctor email not found")
+                }
+                sendApplicationApprovalEmail(updatedDoctor.email!);
             } else {
                 updatedDoctor = await this._doctorRepository.updateDoctorVerification(
                     doctorId,
                     isVerified,
                     -2
                 );
-                sendApplicationRejectionEmail(updatedDoctor?.email!, reason);
+                if(!updatedDoctor?.email){
+                    throw new Error("updated doctor email not found")
+                }
+                sendApplicationRejectionEmail(updatedDoctor.email!, reason);
             }
 
             if (!updatedDoctor) {
@@ -505,7 +513,7 @@ class DoctorService implements IDoctorService {
         limit: number = 10
     ): Promise<{ doctors: IDoctor[]; total: number; totalPages: number }> {
         try {
-            let filters: any = { isSubscribed: true };
+            const filters: FilterQuery<IDoctor> = { isSubscribed: true };
 
             if (search) {
                 filters.fullName = { $regex: search, $options: "i" };
@@ -533,7 +541,7 @@ class DoctorService implements IDoctorService {
                 filters.availability = availability;
             }
 
-            let sortOption: any = {};
+            const sortOption: Record<string, 1 | -1> = {};
             if (sortBy === "experience") {
                 sortOption.experience = -1;
             } else if (sortBy === "rating") {
@@ -556,7 +564,7 @@ class DoctorService implements IDoctorService {
                 totalPages: Math.ceil(total / limit),
             };
         } catch (error) {
-            console.error("Error fetching doctors:", error);
+           console.error("Failed to fetch doctors : ",error)
             throw new Error("Failed to fetch doctors");
         }
     }
@@ -744,7 +752,7 @@ class DoctorService implements IDoctorService {
 
             return result;
         } catch (error) {
-            console.error("Update certification error", error);
+           
 
             if (error instanceof CustomError) {
                 throw error;
@@ -765,10 +773,14 @@ class DoctorService implements IDoctorService {
 
             return notifications;
         } catch (error) {
-            throw new CustomError(
-                "Internal server error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Internal server error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 }

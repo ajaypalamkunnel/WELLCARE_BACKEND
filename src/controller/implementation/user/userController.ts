@@ -1,22 +1,13 @@
 import { Request, Response } from "express";
 import IUserController from "../../interfaces/user/IUserController";
-import IUserRepository from "../../../repositories/interfaces/user/IUser";
-import UserRepository from "../../../repositories/implementation/user/userRepository";
-import PasswordUtils from "../../../utils/passwordUtils";
-import { sendOTPEmail } from "../../../utils/emailUtils";
 import { IUserService } from "../../../services/interfaces/user/iuserServices";
-import { error } from "console";
 import passport from "passport";
-import { IUser } from "../../../model/user/userModel";
-import { IUserType } from "../../../types/user";
 import { ERROR_MESSAGES, StatusCode } from "../../../constants/statusCode";
-import { threadId } from "worker_threads";
 import { CustomError } from "../../../utils/CustomError";
 import {
     generateErrorResponse,
     generateSuccessResponse,
 } from "../../../utils/response";
-import { add } from "winston";
 import { ChatUser } from "../../../types/chat";
 import IWalletService from "../../../services/interfaces/wallet/IWalletService";
 import axios from "axios";
@@ -149,7 +140,6 @@ class UserController implements IUserController {
         try {
             const oldRefreshToken = req.cookies.refreshToken;
 
-            console.log("njan ivade vannu ", oldRefreshToken);
 
             if (!oldRefreshToken) {
                 res
@@ -234,7 +224,6 @@ class UserController implements IUserController {
     }
 
     async googleAuthCallback(req: Request, res: Response): Promise<void> {
-        console.log("Iam googleAuthCallback");
         try {
             const user = req.user;
 
@@ -269,6 +258,8 @@ class UserController implements IUserController {
                 )}&accesstoken=${accessToken}`
             );
         } catch (error) {
+            console.error("Google auth error",error)
+            
             res.redirect(
                 `${process.env.FRONTEND_URL}/login?error=InternalServerError`
             );
@@ -318,6 +309,8 @@ class UserController implements IUserController {
                 .status(StatusCode.OK)
                 .json({ success: true, message: "Logout successful" });
         } catch (error) {
+            console.error("Logout failed",error);
+            
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Logout failed" });
@@ -340,6 +333,8 @@ class UserController implements IUserController {
 
             res.status(StatusCode.OK).json({ success: true, user });
         } catch (error) {
+            console.error("Failed to featch user Profile",error);
+            
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Failed to featch user Profile" });
@@ -351,7 +346,6 @@ class UserController implements IUserController {
     async UpdateUserStatus(req: Request, res: Response): Promise<void> {
         try {
             const { userId, status } = req.body;
-            console.log(">>>>", userId, ">>>", status);
 
             if (!userId || (status !== 1 && status !== -1)) {
                 res.status(StatusCode.BAD_REQUEST).json({
@@ -389,7 +383,6 @@ class UserController implements IUserController {
         try {
             const { userId, oldPassword, newPassword } = req.body;
 
-            console.log("---", userId, oldPassword, newPassword);
 
             if (!userId || !oldPassword || !newPassword) {
                 throw new CustomError(
@@ -423,8 +416,6 @@ class UserController implements IUserController {
         res: Response
     ): Promise<Response> {
         try {
-            const data = req.body;
-            console.log("contorller>>>>", data);
 
             const { email, fullName, mobile, personalInfo, address } = req.body;
 
@@ -470,7 +461,6 @@ class UserController implements IUserController {
 
     async getDoctorSchedules(req: Request, res: Response): Promise<Response> {
         try {
-            console.log("Ivade vannu");
 
             const { doctorId, date } = req.query;
 
@@ -626,8 +616,6 @@ class UserController implements IUserController {
         try {
             const userId = req.user?.userId;
 
-            console.log("user id : ", userId);
-
             if (!userId) {
                 throw new CustomError("Unauthorized", StatusCode.BAD_REQUEST);
             }
@@ -655,7 +643,6 @@ class UserController implements IUserController {
     async downloadPrescription(req: Request, res: Response): Promise<void> {
         const { filename } = req.query;
 
-        console.log("Hello ==>", filename);
 
         const cloudinaryUrl = `https://res.cloudinary.com/dy3yrxbmg/raw/upload/prescriptions/${filename}`;
 
@@ -673,6 +660,7 @@ class UserController implements IUserController {
 
             fileResponse.data.pipe(res);
         } catch (error) {
+            console.error("Failed to download file",error)
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ message: "Failed to download file" });
@@ -684,7 +672,7 @@ class UserController implements IUserController {
             const { doctorId } = req.params;
             const patientId = req.user?.userId;
             const { rating, reviewText } = req.body;
-            console.log("Param : ",doctorId);
+            
             
 
             if (!doctorId || !patientId || !rating || !reviewText) {

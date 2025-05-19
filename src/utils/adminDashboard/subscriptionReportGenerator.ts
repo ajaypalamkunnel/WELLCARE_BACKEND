@@ -1,7 +1,6 @@
 
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
-import { IDoctorSubscription } from "../../model/subscription/doctorSubscriptions";
 import { IDoctorSubscriptionPopulated } from "../../types/admin/adminDashboardDto";
 
 export const generateSubscriptionReport = async (

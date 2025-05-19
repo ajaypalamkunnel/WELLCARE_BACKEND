@@ -1,9 +1,9 @@
-import { IDoctorSubscription } from "../../../model/subscription/doctorSubscriptions";
 import {
     IDoctorSubscriptionPopulated,
     PlanDistributionDTO,
     RevenueTrendDTO,
 } from "../../../types/admin/adminDashboardDto";
+import { DoctorAnalyticsSummaryDTO, RevenueDoctorTrendDTO, ServiceRevenueDTO, TopDoctorDTO } from "../../../types/admin/doctorAnalytics";
 
 interface IAdminDashboardRepository {
     getTotalRevenue(): Promise<number>;
@@ -27,15 +27,15 @@ interface IAdminDashboardRepository {
         endDate?: Date
     ): Promise<IDoctorSubscriptionPopulated[]>;
 
-    getDoctorAnalyticsSummary(): Promise<any[]>;
+    getDoctorAnalyticsSummary(): Promise<DoctorAnalyticsSummaryDTO[]>;
     getDoctorRevenueTrend(
         startDate: Date,
         endDate: Date,
         interval: "day" | "month"
-    ): Promise<any[]>;
+    ): Promise<RevenueDoctorTrendDTO[]>;
 
-    getServiceRevenue(): Promise<any[]>;
-    getTopPerformingDoctors(limit?: number): Promise<any[]>;
+    getServiceRevenue(): Promise<ServiceRevenueDTO[]>;
+    getTopPerformingDoctors(limit?: number): Promise<TopDoctorDTO[]>;
 }
 
 export default IAdminDashboardRepository;

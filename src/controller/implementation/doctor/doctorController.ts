@@ -1,4 +1,4 @@
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import IDoctorController from "../../interfaces/doctor/IDoctorController";
 import { IDoctorService } from "../../../services/interfaces/doctor/iDoctorServices";
 import { error } from "console";
@@ -10,10 +10,7 @@ import {
     generateSuccessResponse,
 } from "../../../utils/response";
 import { ChatUser } from "../../../types/chat";
-import DoctorService from "../../../services/implementation/doctor/doctorService";
-import { json } from "body-parser";
 import IDoctorWalletService from "../../../services/interfaces/doctorWallet/IDoctorWalletService";
-import { Types } from "mongoose";
 
 class DoctorController implements IDoctorController {
     private _doctorService: IDoctorService;
@@ -62,15 +59,13 @@ class DoctorController implements IDoctorController {
                 .status(StatusCode.OK)
                 .json({ success: true, message: "New OTP sent to email" });
         } catch (error) {
-            return res
-                .status(StatusCode.BAD_REQUEST)
-                .json({
-                    success: false,
-                    error:
-                        error instanceof Error
-                            ? error.message
-                            : "An unexpected error occurred",
-                });
+            return res.status(StatusCode.BAD_REQUEST).json({
+                success: false,
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "An unexpected error occurred",
+            });
         }
     }
     async verifyOtp(req: Request, res: Response): Promise<void> {
@@ -84,18 +79,14 @@ class DoctorController implements IDoctorController {
                 return;
             }
             await this._doctorService.verifyOtp(email, otp);
-            res
-                .status(StatusCode.OK)
-                .json({
-                    message: "OTP verified successfully, Your account is now activated.",
-                });
+            res.status(StatusCode.OK).json({
+                message: "OTP verified successfully, Your account is now activated.",
+            });
         } catch (error) {
-            res
-                .status(StatusCode.BAD_REQUEST)
-                .json({
-                    error:
-                        error instanceof Error ? error.message : "OTP verification failed",
-                });
+            res.status(StatusCode.BAD_REQUEST).json({
+                error:
+                    error instanceof Error ? error.message : "OTP verification failed",
+            });
         }
     }
 
@@ -141,11 +132,9 @@ class DoctorController implements IDoctorController {
                 },
             });
         } catch (error) {
-            res
-                .status(StatusCode.BAD_REQUEST)
-                .json({
-                    error: error instanceof Error ? error.message : "Login failed",
-                });
+            res.status(StatusCode.BAD_REQUEST).json({
+                error: error instanceof Error ? error.message : "Login failed",
+            });
         }
     }
 
@@ -190,21 +179,19 @@ class DoctorController implements IDoctorController {
                 .status(StatusCode.OK)
                 .json({ success: true, error: "Password Updated Successfully" });
         } catch (error) {
-            res
-                .status(StatusCode.BAD_REQUEST)
-                .json({
-                    success: false,
-                    error:
-                        error instanceof Error
-                            ? error.message
-                            : "An unexpected error occurred",
-                });
+            res.status(StatusCode.BAD_REQUEST).json({
+                success: false,
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : "An unexpected error occurred",
+            });
         }
     }
 
-    renewAuthTokens(req: Request, res: Response): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
+    // renewAuthTokens(req: Request, res: Response): Promise<void> {
+    //     throw new Error("Method not implemented.");
+    // }
 
     async googleAuthCallback(req: Request, res: Response): Promise<void> {
         try {
@@ -215,7 +202,7 @@ class DoctorController implements IDoctorController {
                 );
                 return;
             }
-            const { accessToken, refreshToken } =
+            const { accessToken, refreshToken } =           // eslint-disable-line @typescript-eslint/no-unused-vars
                 await this._doctorService.generateTokens(doctor);
 
             res.cookie("refreshToken", refreshToken, {
@@ -227,6 +214,8 @@ class DoctorController implements IDoctorController {
 
             res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=doctor`);
         } catch (error) {
+            console.error("google auth callback error",error);
+            
             res.redirect(
                 `${process.env.FRONTEND_URL}/login?error=InternalServerError`
             );
@@ -263,6 +252,8 @@ class DoctorController implements IDoctorController {
                 .status(StatusCode.OK)
                 .json({ success: true, message: "Logout successfull" });
         } catch (error) {
+            console.error("Logout failed",error);
+            
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Logout failed" });
@@ -283,6 +274,8 @@ class DoctorController implements IDoctorController {
 
             res.status(StatusCode.OK).json({ success: true, user });
         } catch (error) {
+            console.error("Failed to fetch user profile",error);
+            
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Failed to fetch user profile" });
@@ -297,17 +290,19 @@ class DoctorController implements IDoctorController {
                 mobile,
                 departmentId,
                 gender,
-                specialization,
+                // specialization,
                 experience,
                 licenseNumber,
                 availability,
-                clinicAddress,
+                // clinicAddress,
                 profileImage,
                 licenseDocument,
                 IDProofDocument,
                 education,
-                certifications,
+                v  // certifications,
             } = req.body;
+
+            console.log("req : ",req.body)
 
             if (
                 !fullName ||
@@ -321,7 +316,7 @@ class DoctorController implements IDoctorController {
                 !licenseDocument ||
                 !IDProofDocument ||
                 !education ||
-                !certifications
+                !gender
             ) {
                 res
                     .status(StatusCode.BAD_REQUEST)
@@ -331,15 +326,15 @@ class DoctorController implements IDoctorController {
 
             const { doctor } = await this._doctorService.registerDoctor(req.body);
 
-            res
-                .status(StatusCode.CREATED)
-                .json({
-                    success: true,
-                    message:
-                        "Doctor registered successfully Your Application will verified by Administrative team",
-                    doctor,
-                });
+            res.status(StatusCode.CREATED).json({
+                success: true,
+                message:
+                    "Doctor registered successfully Your Application will verified by Administrative team",
+                doctor,
+            });
         } catch (error) {
+            console.log("reg error",error);
+            
             handleErrorResponse(res, error);
         }
     }

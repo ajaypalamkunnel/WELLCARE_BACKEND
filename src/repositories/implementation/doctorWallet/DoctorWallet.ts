@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import DoctorWallet, {
     IDoctorWallet,
-    IDoctorWalletTransaction,
 } from "../../../model/doctorWallet/doctorWallet";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorWalletRepository from "../../interfaces/doctorWallet/IDoctorWallet";
@@ -62,10 +61,15 @@ class DoctorWalletRepository
 
             await wallet.save();
         } catch (error) {
-            throw new CustomError(
-                "Transaction processing error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "Transaction processing error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -95,10 +99,15 @@ class DoctorWalletRepository
                 balance: wallet.balance,
             };
         } catch (error) {
-            throw new CustomError(
-                "getting wallet summary error: ",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "getting wallet summary error: ",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -154,10 +163,15 @@ class DoctorWalletRepository
                 totalTransactions: filteredTx.length,
             };
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch wallet overview",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "Failed to fetch wallet overview",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 

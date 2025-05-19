@@ -1,10 +1,9 @@
-import Razorpay from "razorpay";
+
 import { StatusCode } from "../../../constants/statusCode";
-import Subscription, {
+import {
     ISubscription,
 } from "../../../model/subscription/subscriptionModel";
 import ISubscriptionRepository from "../../../repositories/interfaces/subscription/ISubscription";
-import { RazorpayOrderResponse } from "../../../types/razorpayTypes";
 import { CustomError } from "../../../utils/CustomError";
 import { ISubscriptionService } from "../../interfaces/Subscription/ISubscription";
 
@@ -70,13 +69,15 @@ class SubscriptionService implements ISubscriptionService {
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error; // Re-throw known custom errors
-            }
-            console.error(error);
+            } else {
+                throw new CustomError(
+                    "Internal Server Error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
 
-            throw new CustomError(
-                "Internal Server Error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            }
+
+
         }
     }
     async getSubscriptionPlans(): Promise<ISubscription[]> {
@@ -90,7 +91,7 @@ class SubscriptionService implements ISubscriptionService {
                 );
             }
 
-            console.log("----->", subscriptionPlans);
+            
 
             return subscriptionPlans;
         } catch (error) {
@@ -127,9 +128,7 @@ class SubscriptionService implements ISubscriptionService {
             );
             return plan;
         } catch (error) {
-            console.error(
-                `Error updating subscription plan status: ${(error as Error).message}`
-            );
+           
             if (error instanceof CustomError) {
                 throw error;
             }
@@ -144,8 +143,7 @@ class SubscriptionService implements ISubscriptionService {
         planId: string,
         updatedData: Partial<ISubscription>
     ): Promise<ISubscription> {
-        console.log("Plan ID service:", planId);
-        console.log("Updated Data service:", updatedData);
+
 
         try {
             const existingPlan = await this._subscriptionRepository.findById(planId);
@@ -210,8 +208,13 @@ class SubscriptionService implements ISubscriptionService {
 
             return plans;
         } catch (error) {
-            console.error("Error fetching all subscription plans:", error);
-            throw new CustomError("Failed to fetch subscription plans", 500);
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+
+                throw new CustomError("Failed to fetch subscription plans", 500);
+            }
+
         }
     }
 }

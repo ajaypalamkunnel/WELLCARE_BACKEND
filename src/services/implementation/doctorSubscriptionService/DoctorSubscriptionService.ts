@@ -13,7 +13,6 @@ import { StatusCode } from "../../../constants/statusCode";
 import crypto from "crypto";
 import { IDoctorSubscription } from "../../../model/subscription/doctorSubscriptions";
 import IDoctorRepository from "../../../repositories/interfaces/doctor/IDoctor";
-import DoctorSubscriptionRepository from "../../../repositories/implementation/doctorSubscriptions/DoctorSubscriptions";
 
 class DoctorSubscriptionService implements IDoctorSubscriptionService {
     private _doctorSubscriptionRepo: IDoctorSubscriptionsRepository;
@@ -105,7 +104,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                 },
             };
         } catch (error) {
-            console.error("Error creating Razorpay order:", error);
+          
 
             // Handle errors by returning a valid RazorpayOrderResponse
             if (error instanceof CustomError) {
@@ -202,7 +201,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                     endDate.setFullYear(endDate.getFullYear() + plan.duration.value);
                 }
 
-                console.log("Payment varunna daetails : ", payment);
+               
 
                 const updatedSubscription =
                     await this._doctorSubscriptionRepo.updateByOrderId(
@@ -231,7 +230,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                     subscription.doctorId.toString(),
                     {
                         currentSubscriptionId: updatedSubscription?._id,
-                        subscriptionExpiryDate: updatedSubscription?.endDate!,
+                        subscriptionExpiryDate: updatedSubscription.endDate!,
                         isSubscribed: true,
                     }
                 );
@@ -259,7 +258,7 @@ class DoctorSubscriptionService implements IDoctorSubscriptionService {
                 return generateErrorResponse("Payment failed. Please try again.");
             }
         } catch (error) {
-            console.error("Error verifying payment:", error);
+          
             if (error instanceof CustomError) {
                 return generateErrorResponse(error.message, error.statusCode);
             }

@@ -24,3 +24,7 @@ export interface AppointmentStatusSummary {
     totalAppointments: number;
     totalRevenue: number;
   }
+
+
+
+  

@@ -65,7 +65,6 @@ class MessageController implements IMessageController {
         try {
             const userId = req.user?.userId;
 
-            console.log("get indbox controller", userId);
 
             if (!userId) {
                 throw new CustomError("Unauthorized", StatusCode.UNAUTHORIZED);
@@ -150,6 +149,8 @@ class MessageController implements IMessageController {
                 .status(StatusCode.OK)
                 .json(generateSuccessResponse("Messages marked as read"));
         } catch (error) {
+            console.log("mark message as readed error : ",error);
+            
             return res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json(generateErrorResponse("Internal Server Error"));

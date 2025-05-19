@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import mongoose from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import Doctor, {
@@ -22,7 +24,6 @@ class DoctorRepository
     }
 
     async findDoctorByEmail(email: string): Promise<IDoctor | null> {
-        console.log(email);
 
         return await Doctor.findOne({ email });
     }
@@ -93,6 +94,8 @@ class DoctorRepository
         page: number,
         limit: number
     ): Promise<{ doctors: IDoctor[]; total: number }> {
+       
+        
         try {
             const skip = (page - 1) * limit;
 
@@ -171,10 +174,15 @@ class DoctorRepository
 
             return updatedDoctor.education;
         } catch (error) {
-            throw new CustomError(
-                "Internal server error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "Internal server error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -223,7 +231,7 @@ class DoctorRepository
         updateEducation: IEducation
     ): Promise<IEducation> {
         try {
-            console.log("repo", updateEducation);
+           
 
             const { _id, degree, institution, yearOfCompletion } = updateEducation;
 
@@ -255,7 +263,7 @@ class DoctorRepository
                 (edu) => edu?._id?.toString() === _id
             );
 
-            console.log(":----", updatedEducation);
+          
             if (!updatedEducation) {
                 throw new CustomError(
                     "Updated education not found",
@@ -283,7 +291,6 @@ class DoctorRepository
         updateCertification: ICertification
     ): Promise<ICertification> {
         try {
-            console.log("repo---", updateCertification);
 
             const { _id, name, issuedBy, yearOfIssue } = updateCertification;
 

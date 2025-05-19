@@ -50,8 +50,6 @@ class DepartmentController implements IDepartmentController {
         try {
             const { deptId, status } = req.body;
 
-            console.log(">>>>>>", deptId, ">>>>", status);
-
             if (!deptId || (!status && typeof status !== "boolean")) {
                 res.status(StatusCode.BAD_REQUEST).json({
                     success: false,

@@ -1,8 +1,6 @@
 import mongoose, { UpdateResult } from "mongoose";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { IBaseRepository } from "../../base/IBaseRepository";
-import { IScheduleResponse } from "../../../types/bookingTypes";
-import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 
 export interface Pagination {
     totalRecords: number;

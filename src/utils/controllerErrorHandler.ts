@@ -1,7 +1,6 @@
 import { Response } from "express"; 
 import { CustomError } from "./CustomError";
 import { generateErrorResponse } from "./response";
-import { StatusCode } from "../constants/statusCode";
 
 
 export const handleControllerError = (res: Response, error: unknown) => {

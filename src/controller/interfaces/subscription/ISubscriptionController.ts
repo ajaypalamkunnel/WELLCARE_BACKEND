@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ISubscription } from "../../../model/subscription/subscriptionModel";
 
 export interface ISubscriptionController {
     createsubscriptionPlan(req: Request, res: Response): Promise<Response>;

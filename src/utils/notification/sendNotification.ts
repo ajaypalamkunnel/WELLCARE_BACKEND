@@ -12,7 +12,6 @@ export const sendNotificationToUser = async(
   link?: string
 )=>{
 
-    console.log("ivade vannuuu");
     
 
     const saved = await saveNotification(
@@ -27,13 +26,12 @@ export const sendNotificationToUser = async(
 
     const socketSet = onlineUsers.get(userId)
 
-    console.log("Before emiting =>",socketSet);
 
     if(socketSet){
         for(const socketId of socketSet){
             io.to(socketId).emit("receive-notification", saved);
         }
-        console.log("emited = >",saved);
+        
     }
 
     return saved

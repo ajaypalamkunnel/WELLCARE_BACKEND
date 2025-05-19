@@ -153,8 +153,6 @@ class DoctorScheduleController implements IDoctorScheduleController {
                 slots,
             } = req.body;
 
-            console.log("create schedule controller ===> ", req.body);
-
             if (
                 !doctorId ||
                 !serviceId ||
@@ -187,9 +185,6 @@ class DoctorScheduleController implements IDoctorScheduleController {
                 endDateTime.getMinutes() + 30
             ); // Convert to IST
 
-            console.log("Final Start Time in IST:", startDateTime);
-            console.log("Final End Time in IST:", endDateTime);
-
             if (startDateTime >= endDateTime) {
                 throw new CustomError("End time must be greater than start time.", 400);
             }
@@ -218,8 +213,6 @@ class DoctorScheduleController implements IDoctorScheduleController {
                 availability: formattedSlots,
             });
 
-            console.log("Njan aatto angottu varunne, ==>", newSchedule);
-
             return res.status(201).json({ success: true, schedule: newSchedule });
         } catch (error) {
             console.error("Error while schedule creation");
@@ -242,7 +235,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
 
     async listSchedules(req: Request, res: Response): Promise<Response> {
         try {
-            const { doctorId, serviceId, startDate, endDate, status, page, limit } =
+            const { doctorId, service, startDate, endDate, status, page, limit } =
                 req.query;
 
             if (!doctorId) {
@@ -253,7 +246,7 @@ class DoctorScheduleController implements IDoctorScheduleController {
 
             const schedules = await this._doctorScheduleService.getDoctorSchedules(
                 doctorId as string,
-                serviceId as string,
+                service as string,
                 startDate as string,
                 endDate as string,
                 status as "completed" | "upcoming",
@@ -286,8 +279,6 @@ class DoctorScheduleController implements IDoctorScheduleController {
             const scheduleId = req.params.scheduleId;
             const reason = req.body.reason;
             const doctorId = req.user?.userId;
-
-            console.log(reason, "==>", scheduleId, "==>", doctorId);
 
             if (!doctorId) {
                 throw new CustomError("Unauthorized access", StatusCode.UNAUTHORIZED);

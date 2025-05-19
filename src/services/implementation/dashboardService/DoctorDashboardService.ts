@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import {
     AppointmentStatusSummary,
-    AppointmentTrendData,
     RevenueTrendData,
     TopServiceData,
 } from "../../../types/dashboardDto";
@@ -9,11 +8,8 @@ import IDoctorDashboardService from "../../interfaces/dashboardService/IDoctorDa
 import IDoctorDashboardRepository from "../../../repositories/interfaces/dashboard/IDoctorDashboardRepository";
 import { StatusCode } from "../../../constants/statusCode";
 import { CustomError } from "../../../utils/CustomError";
-import path from "path";
-import fs from "fs";
 import { generateDoctorReport } from "../../../utils/reportGenerator/generateDoctorReport";
 import { subDays } from "date-fns";
-import { end } from "pdfkit";
 import { uploadBufferTOCloudinary } from "../../../utils/reportGenerator/reportUploadCloudinary";
 
 class DoctorDashboardService implements IDoctorDashboardService {
@@ -35,10 +31,17 @@ class DoctorDashboardService implements IDoctorDashboardService {
                 endDate
             );
         } catch (error) {
-            throw new CustomError(
-                "Failed to get appointment summary",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Failed to get appointment summary",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
+
         }
     }
 
@@ -89,10 +92,15 @@ class DoctorDashboardService implements IDoctorDashboardService {
                 interval
             );
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch revenue trend",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+
+                throw new CustomError(
+                    "Failed to fetch revenue trend",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
@@ -161,10 +169,15 @@ class DoctorDashboardService implements IDoctorDashboardService {
                 endDate
             );
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch top services",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+                throw new CustomError(
+                    "Failed to fetch top services",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 }

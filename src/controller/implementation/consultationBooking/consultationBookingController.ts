@@ -64,7 +64,6 @@ class ConsultationBookingController implements IConsultationBookingController {
 
     async initiateAppointment(req: Request, res: Response): Promise<Response> {
         try {
-            console.log("initiate --->", req.body);
 
             const result = await this._consultationBookingController.initiateBooking(
                 req.body
@@ -175,7 +174,6 @@ class ConsultationBookingController implements IConsultationBookingController {
 
             const appointmentIdParam = req.params.id;
 
-            console.log("----->", appointmentIdParam);
 
             if (!Types.ObjectId.isValid(appointmentIdParam)) {
                 throw new CustomError("Invalid appointment ID", StatusCode.BAD_REQUEST);

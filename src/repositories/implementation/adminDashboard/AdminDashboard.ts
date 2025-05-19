@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCode } from "../../../constants/statusCode";
 import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
 import DoctorSubscription, {
-    IDoctorSubscription,
 } from "../../../model/subscription/doctorSubscriptions";
 import {
     IDoctorSubscriptionPopulated,
     PlanDistributionDTO,
     RevenueTrendDTO,
 } from "../../../types/admin/adminDashboardDto";
+import { DoctorAnalyticsSummaryDTO, RevenueDoctorTrendDTO, ServiceRevenueDTO, TopDoctorDTO } from "../../../types/admin/doctorAnalytics";
+
 import { CustomError } from "../../../utils/CustomError";
 import IAdminDashboardRepository from "../../interfaces/adminDashboard/IAdminDashboard";
 
@@ -83,8 +85,6 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
         interval: "day" | "week" | "month"
     ): Promise<RevenueTrendDTO[]> {
         try {
-            console.log("Start Date:", startDate);
-            console.log("End Date:", endDate);
 
             const dateFormat = {
                 day: "%Y-%m-%d",
@@ -118,14 +118,19 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
                 },
             ]);
 
-            console.log("Reveneue trend : ", result);
+           
 
             return result;
         } catch (error) {
-            throw new CustomError(
-                "revenue summary fethching error :",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+
+                throw new CustomError(
+                    "revenue summary fethching error :",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
@@ -171,10 +176,15 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
 
             return result;
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch plan distribution",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "Failed to fetch plan distribution",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
@@ -205,14 +215,19 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
 
             return result as unknown as IDoctorSubscriptionPopulated[];
         } catch (error) {
-            throw new CustomError(
-                "report generation data error",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "report generation data error",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+
+            }
         }
     }
 
-    async getDoctorAnalyticsSummary(): Promise<any[]> {
+    async getDoctorAnalyticsSummary(): Promise<DoctorAnalyticsSummaryDTO[]> {
         try {
             const result = await ConsultationAppointmentModal.aggregate([
                 {
@@ -301,7 +316,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
         startDate: Date,
         endDate: Date,
         interval: "day" | "month"
-    ): Promise<any[]> {
+    ): Promise<RevenueDoctorTrendDTO[]> {
         try {
             const dateFormat = interval === "day" ? "%Y-%m-%d" : "%Y-%m";
 
@@ -361,7 +376,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
         }
     }
 
-    async getServiceRevenue(): Promise<any[]> {
+    async getServiceRevenue(): Promise<ServiceRevenueDTO[]> {
         try {
             const result = await PaymentModel.aggregate([
                 {
@@ -408,7 +423,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
         }
     }
 
-    async getTopPerformingDoctors(limit: number = 10): Promise<any[]> {
+    async getTopPerformingDoctors(limit: number = 10): Promise<TopDoctorDTO[]> {
         try {
             const result = await PaymentModel.aggregate([
                 {

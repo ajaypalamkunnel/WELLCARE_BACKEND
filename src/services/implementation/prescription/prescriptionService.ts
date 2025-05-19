@@ -1,6 +1,7 @@
-import { threadId } from "worker_threads";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCode } from "../../../constants/statusCode";
-import ConsultationAppointmentModal, {
+import {
     IConsultationAppointment,
 } from "../../../model/consultationBooking/consultationBooking";
 import { IPrescription } from "../../../model/prescription/prescription Modal";
@@ -14,7 +15,7 @@ import streamifier from "streamifier";
 import { generatePrescriptionPDFBuffer } from "../../../utils/pdfGenerator";
 import IDoctorWalletRepository from "../../../repositories/interfaces/doctorWallet/IDoctorWallet";
 import IConsultationBookingRepository from "../../../repositories/interfaces/consultationBooking/IConsultationBookingRepository";
-import { bookingFeeDTO, Reason } from "../../../types/bookingTypes";
+import { Reason } from "../../../types/bookingTypes";
 import { sendNotificationToUser } from "../../../utils/notification/sendNotification";
 import { io } from "../../..";
 
@@ -35,13 +36,6 @@ class PrescriptionService implements IPrescriptionService {
         data: Partial<IPrescription>
     ): Promise<IPrescription> {
         try {
-            console.log(
-                "==>",
-                data.doctorId,
-                data.patientId,
-                data.appointmentId,
-                data.medicines?.length
-            );
 
             if (
                 !data.doctorId ||
@@ -79,7 +73,7 @@ class PrescriptionService implements IPrescriptionService {
                 }
             );
 
-            console.log("urll===>", cloudinaryResult.secure_url);
+
 
             await this._prescriptionRepo.attachPrescriptionToAppointment(
                 data.appointmentId.toString(),
@@ -138,11 +132,9 @@ class PrescriptionService implements IPrescriptionService {
     async getPrescriptionByAppointment(
         appointmentId: string
     ): Promise<IPrescription | null> {
-        try {
-            return await this._prescriptionRepo.findByAppointmentId(appointmentId);
-        } catch (error) {
-            throw error;
-        }
+
+        return await this._prescriptionRepo.findByAppointmentId(appointmentId);
+
     }
 }
 

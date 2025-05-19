@@ -16,8 +16,7 @@ class PrescriptionController implements IPrescriptionController {
     }
     async submitPrescription(req: Request, res: Response): Promise<Response> {
         try {
-            console.log("prescription : ", req.body);
-
+            
             const prescription = await this._prescriptionService.submitPrescription(
                 req.body
             );

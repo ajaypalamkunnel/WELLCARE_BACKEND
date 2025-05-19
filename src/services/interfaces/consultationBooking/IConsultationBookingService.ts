@@ -7,6 +7,7 @@ import {
   PaginatedAppointmentListDTO,
   VerifyAndBookResponse,
 } from "../../../types/bookingTypes";
+import { IConsultationAppointment } from "../../../model/consultationBooking/consultationBooking";
 
 interface IConsultationBookingService {
   initiateBooking(data: {
@@ -33,7 +34,7 @@ interface IConsultationBookingService {
     slotId: string
   ): Promise<IConsultationBookingService & ISlot>;
 
-  getUserAppointments(patientId: string, statusKey: SlotStatus): Promise<any[]>;
+  getUserAppointments(patientId: string, statusKey: SlotStatus): Promise<IConsultationAppointment[]>;
 
   getAppoinmentDetailsById(
     appoinmentId: Types.ObjectId,

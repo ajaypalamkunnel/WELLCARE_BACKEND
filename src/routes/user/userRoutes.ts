@@ -14,8 +14,6 @@ import DoctorService from "../../services/implementation/doctor/doctorService";
 import { checkRole } from "../../middleware/checkRole";
 import { Roles } from "../../types/roles";
 import DoctorScheduleRepository from "../../repositories/implementation/doctorService/doctorScheduleRepository";
-import DoctorScheduleService from "../../services/implementation/doctorServiceService/DoctorScheduleService";
-import DoctorScheduleController from "../../controller/implementation/doctorServiceController/doctorScheduleController";
 import ConsultationBookingRepository from "../../repositories/implementation/consultationBooking/consultationBookingRepository";
 import ConsultationBookingService from "../../services/implementation/consultationBooking/consultationBookingService";
 import DoctorServiceRepository from "../../repositories/implementation/doctorService/doctorServiceRepository";
@@ -36,13 +34,7 @@ const walletRepository = new WalletRepository();
 const walletService = new WalletService(walletRepository);
 
 const doctorScheduleRepository = new DoctorScheduleRepository();
-const doctorScheduleService = new DoctorScheduleService(
-    doctorScheduleRepository,
-    walletRepository
-);
-const doctorScheduleController = new DoctorScheduleController(
-    doctorScheduleService
-);
+
 
 const userRepository = new UserRepository();
 const userService = new UserService(userRepository);

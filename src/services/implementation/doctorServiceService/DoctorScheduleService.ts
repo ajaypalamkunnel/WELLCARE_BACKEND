@@ -1,4 +1,5 @@
-import mongoose, { isValidObjectId } from "mongoose";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import mongoose from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import IDoctorScheduleRepository, {
     Pagination,
@@ -10,9 +11,7 @@ import {
 import { CustomError } from "../../../utils/CustomError";
 import IDoctorScheduleService from "../../interfaces/doctorServiceService/IDoctorScheduleService";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
-import { IScheduleResponse } from "../../../types/bookingTypes";
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
-import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import { sendAppointmentCancellationEmail } from "../../../utils/emailUtils";
 
@@ -24,8 +23,8 @@ class DoctorScheduleService implements IDoctorScheduleService {
         doctorScheduleRepository: IDoctorScheduleRepository,
         walletRepository: IWalletRepository
     ) {
-        (this._doctorScheduleRepository = doctorScheduleRepository),
-            (this._walletRepository = walletRepository);
+        this._doctorScheduleRepository = doctorScheduleRepository;
+        this._walletRepository = walletRepository;
     }
 
     async validateSchedule(
@@ -54,7 +53,6 @@ class DoctorScheduleService implements IDoctorScheduleService {
 
             return { success: true, message: "Schedule is valid." };
         } catch (error) {
-            console.error("Error in validateSchedule:", error);
             if (error instanceof CustomError) {
                 throw new CustomError(error.message, error.statusCode);
             } else {
@@ -63,15 +61,15 @@ class DoctorScheduleService implements IDoctorScheduleService {
         }
     }
 
-    findConflictingSchedules(
-        doctorId: mongoose.Types.ObjectId,
-        serviceId: mongoose.Types.ObjectId,
-        date: Date,
-        start_time: Date,
-        end_time: Date
-    ): Promise<IDoctorAvailability | null> {
-        throw new Error("Method not implemented.");
-    }
+    // findConflictingSchedules(
+    //     doctorId: mongoose.Types.ObjectId,
+    //     serviceId: mongoose.Types.ObjectId,
+    //     date: Date,
+    //     start_time: Date,
+    //     end_time: Date
+    // ): Promise<IDoctorAvailability | null> {
+    //     throw new Error("Method not implemented.");
+    // }
     // Generate dynamic slots based on start_time, end_time, and duration
 
     generateSlots(start_time: Date, end_time: Date, duration: number) {
@@ -80,7 +78,7 @@ class DoctorScheduleService implements IDoctorScheduleService {
         let currentTime = new Date(start_time);
 
         while (currentTime < end_time) {
-            let nextTime = new Date(currentTime.getTime() + duration * 60000);
+            const nextTime = new Date(currentTime.getTime() + duration * 60000);
 
             if (nextTime > end_time) break;
 
@@ -187,8 +185,6 @@ class DoctorScheduleService implements IDoctorScheduleService {
             );
             return schedule;
         } catch (error) {
-            console.error("Error in createSchedule:", error);
-
             if (error instanceof CustomError) {
                 throw new CustomError(error.message, error.statusCode);
             } else {
@@ -221,10 +217,14 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 limit
             );
         } catch (error) {
-            throw new CustomError(
-                "Error in fetching schedules:",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if (error instanceof CustomError) {
+                throw error;
+            } else {
+                throw new CustomError(
+                    "Error in fetching schedules:",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 
@@ -263,6 +263,8 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 .populate("patientId", "email fullName")
                 .populate("serviceId", "fee");
 
+            
+
             for (const appointment of appointments) {
                 appointment.status = "cancelled";
                 await appointment.save();
@@ -297,8 +299,6 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 );
             }
         } catch (error) {
-            console.error("===> service error", error);
-
             if (error instanceof CustomError) {
                 throw error;
             } else {

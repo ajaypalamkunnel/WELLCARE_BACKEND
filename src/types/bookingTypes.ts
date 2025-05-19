@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Types } from "mongoose";
+import mongoose, {Types } from "mongoose";
 import { IDoctorAvailability, ISlot } from "../model/doctorService/doctorSchedule";
 
 export interface IScheduleResponse {

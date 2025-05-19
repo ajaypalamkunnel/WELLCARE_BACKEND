@@ -18,6 +18,7 @@ class PrescriptionRepository
             const prescription = await Prescription.create(data);
             return prescription;
         } catch (error) {
+            console.error('Failed to create prescription:', error);
             throw error;
         }
     }
@@ -27,6 +28,7 @@ class PrescriptionRepository
         try {
             return await Prescription.findOne({ appoinmentId: appointmentId });
         } catch (error) {
+            console.error('Failed to find appointment:', error);
             throw error;
         }
     }
@@ -43,7 +45,9 @@ class PrescriptionRepository
                 prescriptionUrl: prescriptionUrl,
             });
         } catch (error) {
-            throw error;
+            console.error("Failed to attach prescription:", error);
+            throw new Error("Internal Server Error: Could not update appointment.");
+
         }
     }
 }

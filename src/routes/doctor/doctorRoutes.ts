@@ -31,7 +31,6 @@ import MessageController from "../../controller/implementation/chat/MessageContr
 import PrescriptionRepository from "../../repositories/implementation/prescription/Prescription";
 import PrescriptionService from "../../services/implementation/prescription/prescriptionService";
 import PrescriptionController from "../../controller/implementation/prescription/PrescriptionController";
-import DoctorWallet from "../../model/doctorWallet/doctorWallet";
 import DoctorWalletRepository from "../../repositories/implementation/doctorWallet/DoctorWallet";
 import DoctorWalletService from "../../services/implementation/doctorWallet/doctorWalletService";
 import DoctorDashboardService from "../../services/implementation/dashboardService/DoctorDashboardService";
@@ -140,9 +139,9 @@ router.post("/forgot-password", (req, res) =>
 router.post("/update-password", (req, res) =>
     doctorController.updatePasswordDoctor(req, res)
 );
-router.post("/refresh-token", (req, res) =>
-    doctorController.renewAuthTokens(req, res)
-);
+// router.post("/refresh-token", (req, res) =>
+//     doctorController.renewAuthTokens(req, res)
+// );
 
 router.get(
     "/auth/google",

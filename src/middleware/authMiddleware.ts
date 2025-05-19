@@ -1,6 +1,6 @@
 import { Request,Response,NextFunction } from "express";
 import JwtUtils from "../utils/jwtUtils";
-import { error } from "console";
+
 
 interface UserPayload {
     userId: string;
@@ -34,6 +34,8 @@ const authMiddleWare = (req:Request,res:Response,next:NextFunction):void=>{
         
         next()
     } catch (error) {
+      
+        console.error("Invalid token",error);
          res.status(403).json({ error: "Invalid token" })
          return
     }

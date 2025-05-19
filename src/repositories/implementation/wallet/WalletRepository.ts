@@ -1,4 +1,4 @@
-import mongoose, { mongo, Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Wallet, {
     IWallet,
     IWalletTransaction,
@@ -63,10 +63,14 @@ class WalletRepository
             }).select("balance currency");
             return wallet;
         } catch (error) {
-            throw new CustomError(
-                "Failed to fetch wallet for user",
-                StatusCode.INTERNAL_SERVER_ERROR
-            );
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError(
+                    "Failed to fetch wallet for user",
+                    StatusCode.INTERNAL_SERVER_ERROR
+                );
+            }
         }
     }
 

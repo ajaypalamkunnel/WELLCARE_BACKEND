@@ -12,11 +12,11 @@ class DoctorServiceRepository
         super(Services);
     }
 
-    createDoctorService(
-        serviceData: Partial<IDoctorService>
-    ): Promise<IDoctorService> {
-        throw new Error("Method not implemented.");
-    }
+    // createDoctorService(
+    //     serviceData: Partial<IDoctorService>
+    // ): Promise<IDoctorService> {
+    //     throw new Error("Method not implemented.");
+    // }
     async countDoctorServices(doctorId: string): Promise<number> {
         return await Services.countDocuments({ doctorId });
     }
@@ -25,6 +25,7 @@ class DoctorServiceRepository
         try {
             return await Services.find({ doctorId }).sort({ createdAt: -1 });
         } catch (error) {
+             console.error("Error fetching doctor services:", error);
             throw new Error("Failed to fetch doctor service");
         }
     }
@@ -40,6 +41,7 @@ class DoctorServiceRepository
                 { new: true, runValidators: true }
             );
         } catch (error) {
+            console.error("update service error : ",error)
             throw new Error("Failed to update doctor service");
         }
     }

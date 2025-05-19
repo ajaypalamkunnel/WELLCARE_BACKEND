@@ -1,4 +1,3 @@
-import { userInfo } from "os";
 import { IAdmin } from "../../../model/admin/AdminModel";
 import AdminRepository from "../../../repositories/implementation/admin/adminRepository";
 import JwtUtils from "../../../utils/jwtUtils";
@@ -132,7 +131,6 @@ export class AdminService implements IAdminService {
         searchTerm?: string
     ): Promise<{ users: IUser[]; totalUsers: number | null }> {
         try {
-            console.log(" getAllUsers serveie");
 
             const result = await this._adminRepository.getAllUsers(
                 page,

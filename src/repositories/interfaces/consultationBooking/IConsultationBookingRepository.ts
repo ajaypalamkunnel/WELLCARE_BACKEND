@@ -6,7 +6,6 @@ import {
   AppointmentDetailDTO,
   bookingFeeDTO,
   DoctorAppointmentDetailDTO,
-  DoctorAppointmentListItemDTO,
   PaginatedAppointmentListDTO,
 } from "../../../types/bookingTypes";
 
@@ -29,7 +28,7 @@ interface IConsultationBookingRepository {
   findAppointmentsByPatientAndStatus(
     patientId: string,
     statusList: SlotStatus[]
-  ): Promise<any[]>;
+  ): Promise<IConsultationAppointment[]>;
 
   findAppoinmentDetailById(
     appointmentId: Types.ObjectId,
