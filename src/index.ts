@@ -21,6 +21,7 @@ import { Types } from 'mongoose';
 import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
 import { registerNotificationSocketHandlers } from './utils/notification/notificationSocket';
 import { sendNotificationToUser } from './utils/notification/sendNotification';
+import agoraRouter from './routes/agora/agoraTokenRoute';
 
 connectDB()
 const app = express()
@@ -234,6 +235,7 @@ app.use("/", userRouter)
 app.use("/api/doctor", doctorRouter)
 app.use("/api/admin", adminRouter)
 app.use("/api/chat",chatRouter)
+app.use("/api/agora",agoraRouter)
 app.get('/', (req, res) => {
     res.send("Welcome to Wellcare")
 })
