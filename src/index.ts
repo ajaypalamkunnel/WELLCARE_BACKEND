@@ -22,6 +22,7 @@ import { registerWebRTCSocketHandlers } from './utils/socket/webrtcSocket';
 import { registerNotificationSocketHandlers } from './utils/notification/notificationSocket';
 import { sendNotificationToUser } from './utils/notification/sendNotification';
 import agoraRouter from './routes/agora/agoraTokenRoute';
+import { startPendingSlotCleanupJob } from './jobs/pendingSlotCleanup';
 
 connectDB()
 const app = express()
@@ -240,8 +241,8 @@ app.get('/', (req, res) => {
     res.send("Welcome to Wellcare")
 })
 
-// startPendingSlotCleanupJob().then(()=>{
-//     console.log("🕒 Pending slot cleanup cron initialized");
-// })
+startPendingSlotCleanupJob().then(()=>{
+    console.log("🕒 Pending slot cleanup cron initialized");
+})
 
 server.listen(PORT, () => console.log(`Server connected on port ${PORT}`));
