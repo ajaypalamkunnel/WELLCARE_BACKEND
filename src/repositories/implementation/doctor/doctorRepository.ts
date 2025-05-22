@@ -22,6 +22,7 @@ class DoctorRepository
     constructor() {
         super(Doctor);
     }
+    
 
     async findDoctorByEmail(email: string): Promise<IDoctor | null> {
 
@@ -58,6 +59,11 @@ class DoctorRepository
             { status },
             { new: true }
         ).select("-password -refreshToken");
+    }
+
+
+    async findDoctorTokenById(doctorId: string): Promise<IDoctor | null> {
+        return await Doctor.findById(doctorId).select("-password")
     }
 
     async updateDoctorVerification(

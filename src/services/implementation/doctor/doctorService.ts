@@ -19,6 +19,8 @@ import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
 import { INotification } from "../../../model/notification/notificationModel";
+import { emit } from "process";
+import { Roles } from "../../../types/roles";
 
 class DoctorService implements IDoctorService {
     private _doctorRepository: IDoctorRepository;
@@ -146,10 +148,41 @@ class DoctorService implements IDoctorService {
         return { doctorAccessToken, doctorRefreshToken, doctor };
     }
 
-    renewAuthToken(
-        // token: string
-    ): Promise<{ accessToken: string; refreshToken: string }> {
-        throw new Error("Method not implemented.");
+    async renewAuthToken(
+        token: string
+    ): Promise<{ accessToken: string }> {
+        const decode = JwtUtils.verifyToken(token,true)
+
+        console.log("ith decoded : ",decode);
+        
+
+        if(!decode || typeof decode === "string" || !decode.userId){
+            throw new Error("Invalid refresh token")
+        }
+
+        const doctor = await this._doctorRepository.findDoctorTokenById(
+            decode.userId.toString()
+        )
+
+        console.log("ith db nnu fetch : ",doctor);
+        
+
+        if(!doctor || doctor.refreshToken !== token){
+            throw new Error("Invalid refresh token");
+        }
+
+        const newAccessToken = JwtUtils.generateAccesToken({
+            userId:doctor._id,
+            emit:doctor.email,
+            role:"doctor"
+        })
+
+        console.log("new acces token from service : ",newAccessToken);
+        
+
+        return {accessToken:newAccessToken}
+
+
     }
 
     async forgotPassword(email: string): Promise<void> {

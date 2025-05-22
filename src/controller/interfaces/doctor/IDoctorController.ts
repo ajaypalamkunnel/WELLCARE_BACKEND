@@ -5,7 +5,7 @@ interface IDoctorController {
     resendOtp(req: Request, res: Response): Promise<Response>;
     verifyOtp(req: Request, res: Response): Promise<void>;
     postLogin(req: Request, res: Response): Promise<void>;
-    // renewAuthTokens(req: Request, res: Response): Promise<void>;
+    renewAuthTokens(req: Request, res: Response): Promise<void>;
     forgotPasswordDoctor(req: Request, res: Response): Promise<void>;
     updatePasswordDoctor(req: Request, res: Response): Promise<void>;
     googleAuthCallback(req: Request, res: Response): Promise<void>;

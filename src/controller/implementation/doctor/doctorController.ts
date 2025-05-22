@@ -189,9 +189,41 @@ class DoctorController implements IDoctorController {
         }
     }
 
-    // renewAuthTokens(req: Request, res: Response): Promise<void> {
-    //     throw new Error("Method not implemented.");
-    // }
+    async renewAuthTokens(req: Request, res: Response): Promise<void> {
+        try {
+
+            const oldRefreshToken = req.cookies.doctorRefreshToken
+
+            console.log("ith najan frontennuu : ",oldRefreshToken)
+
+            if (!oldRefreshToken) {
+                res.status(StatusCode.UNAUTHORIZED)
+                    .json({ error: "Refresh token not found" })
+            }
+
+            const { accessToken } = await this._doctorService.renewAuthToken(oldRefreshToken)
+
+
+            console.log("ith nte puthiyath : ",accessToken)
+
+            res.cookie("doctorAccessToken", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 2 * 60 * 60 * 1000
+            })
+
+
+            res.status(StatusCode.OK).json({ success: true, accessToken })
+        } catch (error) {
+            console.log("==>",error);
+            
+            res.status(StatusCode.BAD_REQUEST).json({
+                error:
+                    error instanceof Error ? error.message : "Failed to refresh token",
+            });
+        }
+    }
 
     async googleAuthCallback(req: Request, res: Response): Promise<void> {
         try {
@@ -214,8 +246,8 @@ class DoctorController implements IDoctorController {
 
             res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=doctor`);
         } catch (error) {
-            console.error("google auth callback error",error);
-            
+            console.error("google auth callback error", error);
+
             res.redirect(
                 `${process.env.FRONTEND_URL}/login?error=InternalServerError`
             );
@@ -252,8 +284,8 @@ class DoctorController implements IDoctorController {
                 .status(StatusCode.OK)
                 .json({ success: true, message: "Logout successfull" });
         } catch (error) {
-            console.error("Logout failed",error);
-            
+            console.error("Logout failed", error);
+
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Logout failed" });
@@ -274,8 +306,8 @@ class DoctorController implements IDoctorController {
 
             res.status(StatusCode.OK).json({ success: true, user });
         } catch (error) {
-            console.error("Failed to fetch user profile",error);
-            
+            console.error("Failed to fetch user profile", error);
+
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "Failed to fetch user profile" });
@@ -299,10 +331,10 @@ class DoctorController implements IDoctorController {
                 licenseDocument,
                 IDProofDocument,
                 education,
-              // certifications,
+                // certifications,
             } = req.body;
 
-            console.log("req : ",req.body)
+            console.log("req : ", req.body)
 
             if (
                 !fullName ||
@@ -333,8 +365,8 @@ class DoctorController implements IDoctorController {
                 doctor,
             });
         } catch (error) {
-            console.log("reg error",error);
-            
+            console.log("reg error", error);
+
             handleErrorResponse(res, error);
         }
     }

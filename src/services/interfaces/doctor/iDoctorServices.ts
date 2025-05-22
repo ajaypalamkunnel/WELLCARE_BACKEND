@@ -23,7 +23,7 @@ export interface IDoctorService {
     }>;
     renewAuthToken(
         token: string
-    ): Promise<{ accessToken: string; refreshToken: string }>;
+    ): Promise<{ accessToken: string;}>;
     forgotPassword(email: string): Promise<void>;
     updatePasswordDoctor(email: string, newPassword: string): Promise<void>;
 

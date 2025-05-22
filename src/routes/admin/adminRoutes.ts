@@ -79,6 +79,12 @@ router.put(
     checkRole(Roles.Admin),
     (req, res) => userController.UpdateUserStatus(req, res)
 );
+
+router.post("/refresh-token", (req, res) => {
+    adminController.renewAuthTokens(req, res)
+})
+
+
 router.put(
     "/update-department-status",
     authMiddleWare,

@@ -6,6 +6,8 @@ interface IAdminController {
     getAllUsers(req: Request, res: Response): Promise<void>;
     updateDoctorStatus(req: Request, res: Response): Promise<void>;
     viewDoctorDocument(req: Request, res: Response): Promise<void>;
+    renewAuthTokens(req: Request, res: Response): Promise<void>;
+
 }
 
 export default IAdminController;

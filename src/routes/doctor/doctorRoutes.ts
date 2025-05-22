@@ -139,9 +139,9 @@ router.post("/forgot-password", (req, res) =>
 router.post("/update-password", (req, res) =>
     doctorController.updatePasswordDoctor(req, res)
 );
-// router.post("/refresh-token", (req, res) =>
-//     doctorController.renewAuthTokens(req, res)
-// );
+router.post("/refresh-token", (req, res) =>
+    doctorController.renewAuthTokens(req, res)
+);
 
 router.get(
     "/auth/google",

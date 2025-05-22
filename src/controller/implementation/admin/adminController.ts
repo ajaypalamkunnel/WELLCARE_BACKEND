@@ -6,6 +6,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import Doctor from "../../../model/doctor/doctorModel";
 import axios from "axios";
 import { lookup } from "mime-types";
+import JwtUtils from "../../../utils/jwtUtils";
 
 /**
  * The `AdminController` class implements the `IAdminController` interface and provides
@@ -81,8 +82,8 @@ class AdminController implements IAdminController {
                 message: "Logout successfull",
             });
         } catch (error: unknown) {
-            console.error("admin logout error : ",error);
-            
+            console.error("admin logout error : ", error);
+
             res
                 .status(StatusCode.INTERNAL_SERVER_ERROR)
                 .json({ error: "logout failed" });
@@ -179,7 +180,6 @@ class AdminController implements IAdminController {
             const page = Number(req.query.page) || 1;
             const limit = Number(req.query.limit) || 10;
             const searchTerm = (req.query.search as string) || "";
-           
 
             const { users, totalUsers } = await this._adminService.getAllUsers(
                 page,
@@ -220,7 +220,6 @@ class AdminController implements IAdminController {
         try {
             const { doctorId, status } = req.body;
 
-
             if (!doctorId || (status !== 1 && status !== -1)) {
                 res.status(StatusCode.BAD_REQUEST).json({
                     success: false,
@@ -252,6 +251,45 @@ class AdminController implements IAdminController {
                     error instanceof Error
                         ? error.message
                         : "An unexpected error occurred",
+            });
+        }
+    }
+
+    async renewAuthTokens(req: Request, res: Response): Promise<void> {
+        try {
+            const oldRefreshToken = req.cookies.refreshTokenAdmin;
+
+            if (!oldRefreshToken) {
+                res
+                    .status(StatusCode.UNAUTHORIZED)
+                    .json({ error: "Refresh token not found" });
+                return;
+            }
+
+            const decode = JwtUtils.verifyToken(oldRefreshToken, true);
+
+            if (!decode || typeof decode === "string" || !decode.userId) {
+                throw new Error("Invalid refresh token");
+            }
+
+            const accessToken = JwtUtils.generateAccesToken({
+                userId: decode?.userId,
+                email: decode?.email,
+                role: "admin",
+            });
+
+            res.cookie("accessTokenAdmin", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 2 * 60 * 60 * 1000,
+            });
+
+            res.status(StatusCode.OK).json({ success: true, accessToken });
+        } catch (error) {
+            res.status(StatusCode.BAD_REQUEST).json({
+                error:
+                    error instanceof Error ? error.message : "Failed to refresh token",
             });
         }
     }
