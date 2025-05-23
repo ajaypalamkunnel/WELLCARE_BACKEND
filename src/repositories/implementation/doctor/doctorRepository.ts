@@ -315,7 +315,6 @@ class DoctorRepository
                 { new: true, projection: { certifications: 1 } }
             );
 
-            console.log("....", updated);
 
             if (!updated) {
                 throw new CustomError(

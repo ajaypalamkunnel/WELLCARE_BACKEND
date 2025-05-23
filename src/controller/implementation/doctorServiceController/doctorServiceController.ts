@@ -66,7 +66,7 @@ class DoctorServiceController implements IDoctorServiceController {
             const services = await this._doctorServiceService.getServicesByDoctor(
                 doctorId as string
             );
-            // console.log(">>>>>>>>",services);
+         
 
             return res
                 .status(StatusCode.OK)
@@ -99,7 +99,6 @@ class DoctorServiceController implements IDoctorServiceController {
         try {
             const updateData = req.body;
 
-            console.log("--->", updateData);
 
             if (!updateData.doctorId) {
                 return res

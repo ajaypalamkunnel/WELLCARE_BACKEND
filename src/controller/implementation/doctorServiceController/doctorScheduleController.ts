@@ -19,13 +19,13 @@ class DoctorScheduleController implements IDoctorScheduleController {
 
     async validateSchedule(req: Request, res: Response): Promise<Response> {
         try {
-            console.log("hi validateSchedule controller", req.body);
+            
 
             const { doctorId, service, date, start_time, end_time } = req.body;
-            console.log("---->controller", start_time, "---", end_time);
+           
 
             if (!doctorId || !service || !date || !start_time || !end_time) {
-                console.log("wrong-----");
+                
 
                 return res
                     .status(StatusCode.BAD_REQUEST)
@@ -36,8 +36,6 @@ class DoctorScheduleController implements IDoctorScheduleController {
             const startDateTime = new Date(`${date}T${start_time}:00Z`); // ISO format
             const endDateTime = new Date(`${date}T${end_time}:00Z`);
 
-            console.log("Converted start time:", startDateTime);
-            console.log("Converted end time:", endDateTime);
 
             if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
                 return res

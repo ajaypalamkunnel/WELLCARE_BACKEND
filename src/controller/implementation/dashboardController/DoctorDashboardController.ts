@@ -154,7 +154,7 @@ class DoctorDashboardController implements IDoctorDashboardController {
             const doctorId = req.user?.userId;
             const { startDate, endDate, format } = req.query;
 
-            console.log("===>", doctorId, startDate, endDate, format);
+          
 
             if (!doctorId || !startDate || !endDate || !format) {
                 throw new CustomError(
@@ -170,7 +170,7 @@ class DoctorDashboardController implements IDoctorDashboardController {
                 format as "pdf" | "excel"
             );
 
-            console.log("linik==>", url);
+           
 
             return res
                 .status(StatusCode.OK)

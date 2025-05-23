@@ -194,7 +194,7 @@ class DoctorController implements IDoctorController {
 
             const oldRefreshToken = req.cookies.doctorRefreshToken
 
-            console.log("ith najan frontennuu : ",oldRefreshToken)
+           
 
             if (!oldRefreshToken) {
                 res.status(StatusCode.UNAUTHORIZED)

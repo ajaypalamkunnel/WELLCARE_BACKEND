@@ -18,7 +18,6 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     }
 
     async findUserByEmail(email: string): Promise<IUser | null> {
-        // console.log("Iam from findUserByEmail==>",email);
 
         return await User.findOne({ email });
     }
@@ -190,7 +189,7 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     async addReview(doctorId: string,patientId: string,  rating: number, reviewText: string): Promise<void> {
         try {
 
-            console.log("===>",patientId);
+          
             
 
             const doctor = await Doctor.findById(doctorId)

@@ -29,14 +29,12 @@ export const registerNotificationSocketHandlers = (io: Server, socket: Socket) =
 
             const socketIds = onlineUsers.get(userId)
 
-            console.log("ns Before emiting =>",socketIds);
             
 
             if (socketIds) {
                 for (const id of socketIds) {
                     io.to(id).emit("receive-notification", notification)
                 }
-                console.log("ns emited = >",notification);
                 
             }
 

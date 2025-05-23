@@ -153,8 +153,7 @@ class DoctorService implements IDoctorService {
     ): Promise<{ accessToken: string }> {
         const decode = JwtUtils.verifyToken(token,true)
 
-        console.log("ith decoded : ",decode);
-        
+       
 
         if(!decode || typeof decode === "string" || !decode.userId){
             throw new Error("Invalid refresh token")
@@ -164,7 +163,7 @@ class DoctorService implements IDoctorService {
             decode.userId.toString()
         )
 
-        console.log("ith db nnu fetch : ",doctor);
+       
         
 
         if(!doctor || doctor.refreshToken !== token){

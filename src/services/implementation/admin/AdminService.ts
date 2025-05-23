@@ -137,7 +137,7 @@ export class AdminService implements IAdminService {
                 limit,
                 searchTerm
             );
-            // console.log(">>>>>>>>>",result)
+          
             return {
                 users: result.users,
                 totalUsers: result.totalUsers ?? null,

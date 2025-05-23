@@ -19,8 +19,7 @@ export const registerWebRTCSocketHandlers = (io: Server, socket: Socket) => {
 
         if (receiverSockets) {
             receiverSockets.forEach((id) => {
-                console.log(">>>", id, callerName);
-
+               
                 io.to(id).emit("call-request", { callerId, callerName })
             })
         } else {
@@ -83,7 +82,6 @@ export const registerWebRTCSocketHandlers = (io: Server, socket: Socket) => {
 
         const targetSockets = onlineUsers.get(targetId);
 
-        console.log("target socket =========>", targetSockets);
 
 
         if (!targetSockets || targetSockets.size === 0) {
