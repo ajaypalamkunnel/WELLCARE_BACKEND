@@ -108,14 +108,14 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 100,
+                maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
             res.cookie("doctorAccessToken", doctorAccessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 2 * 60 * 60 * 1000, // 2 hours
+                maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             });
 
             res.status(StatusCode.OK).json({
@@ -204,13 +204,12 @@ class DoctorController implements IDoctorController {
             const { accessToken } = await this._doctorService.renewAuthToken(oldRefreshToken)
 
 
-            console.log("ith nte puthiyath : ",accessToken)
 
             res.cookie("doctorAccessToken", accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 2 * 60 * 60 * 1000
+                maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             })
 
 
@@ -241,7 +240,7 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
             res.redirect(`${process.env.FRONTEND_URL}/auth-success?role=doctor`);

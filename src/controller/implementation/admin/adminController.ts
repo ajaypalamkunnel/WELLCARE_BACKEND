@@ -39,14 +39,14 @@ class AdminController implements IAdminController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
             res.cookie("accessTokenAdmin", accessTokenAdmin, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
-                maxAge: 2 * 60 * 60 * 1000, // 2 hours
+                maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             });
 
             res.status(StatusCode.OK).json({
