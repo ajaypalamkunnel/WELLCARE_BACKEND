@@ -24,10 +24,10 @@ class DoctorServiceService implements IDoctorServiceService {
     async createService(data: IDoctorService): Promise<IDoctorService> {
         try {
 
-            const { doctorId } = data;
+            const { doctorId, name, mode } = data;
 
             const doctor = await this._doctorRepository.findById(doctorId.toString());
-           
+
 
             if (!doctor) {
                 throw new CustomError("Doctor not found", StatusCode.NOT_FOUND);
@@ -37,6 +37,15 @@ class DoctorServiceService implements IDoctorServiceService {
                 throw new CustomError(
                     "Doctor is not subscribed to a plan",
                     StatusCode.FORBIDDEN
+                );
+            }
+
+            const exists = await this._doctorServiceRepository.isServiceAlreadyExist(doctorId.toString(), name, mode)
+
+            if (exists) {
+                throw new CustomError(
+                    "Doctor already offers a service with the same name and mode",
+                    StatusCode.CONFLICT
                 );
             }
 
@@ -68,7 +77,7 @@ class DoctorServiceService implements IDoctorServiceService {
 
             return await this._doctorServiceRepository.create(serviceData);
         } catch (error) {
-         
+
 
             if (error instanceof CustomError) {
                 throw error;
@@ -121,7 +130,7 @@ class DoctorServiceService implements IDoctorServiceService {
                 throw new CustomError("Doctor not Found", StatusCode.NOT_FOUND);
             }
 
-            
+
             const service = await this._doctorServiceRepository.findById(serviceId);
 
             if (!service) {
@@ -132,6 +141,15 @@ class DoctorServiceService implements IDoctorServiceService {
                 throw new CustomError(
                     "Unauthorized to update this service",
                     StatusCode.UNAUTHORIZED
+                );
+            }
+
+             const exists = await this._doctorServiceRepository.isServiceAlreadyExist(doctorId.toString(),updateData.name!, updateData.mode!)
+
+            if (exists) {
+                throw new CustomError(
+                    "Doctor already offers a service with the same name and mode",
+                    StatusCode.CONFLICT
                 );
             }
 

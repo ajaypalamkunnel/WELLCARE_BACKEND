@@ -4,6 +4,8 @@ import Services, {
 } from "../../../model/doctorService/doctorServicesModal";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorServiceRepository from "../../interfaces/doctorService/IDoctorServiceRepository";
+import { CustomError } from "../../../utils/CustomError";
+import { StatusCode } from "../../../constants/statusCode";
 
 class DoctorServiceRepository
     extends BaseRepository<IDoctorService>
@@ -11,6 +13,7 @@ class DoctorServiceRepository
     constructor() {
         super(Services);
     }
+    
 
     // createDoctorService(
     //     serviceData: Partial<IDoctorService>
@@ -43,6 +46,26 @@ class DoctorServiceRepository
         } catch (error) {
             console.error("update service error : ",error)
             throw new Error("Failed to update doctor service");
+        }
+    }
+
+    
+   async isServiceAlreadyExist(doctorId: string, name: string, mode: "Online" | "In-Person" | "Both"): Promise<boolean> {
+        try {
+            
+            const existing = await Services.findOne({
+                doctorId,
+                name:{$regex: new RegExp(`^${name}$`, 'i')},
+                mode
+            })
+
+            return !!existing
+
+        } catch (error) {
+            
+            console.error("error in alreday exisitign service checking");
+            throw new CustomError("error in alreday exisitign service checking",StatusCode.INTERNAL_SERVER_ERROR)
+            
         }
     }
 }
