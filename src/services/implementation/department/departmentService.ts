@@ -9,12 +9,12 @@ class DepartmentService implements IDepartmentService {
     constructor(departmentRepository: IDepartmentRepository) {
         this._departmentRepository = departmentRepository;
     }
-
+   
     async createDeparment(
         departmentDetails: IDepartment
     ): Promise<{ department: IDepartment }> {
         try {
-           
+
 
             const { name, icon } = { ...departmentDetails };
 
@@ -39,8 +39,14 @@ class DepartmentService implements IDepartmentService {
 
             return { department };
         } catch (error) {
-          
-            throw new Error(`failed to create department :${error}`);
+
+
+            if (error instanceof Error) {
+                throw error
+            } else {
+
+                throw new Error(`failed to create department :${error}`);
+            }
         }
     }
 
@@ -54,8 +60,8 @@ class DepartmentService implements IDepartmentService {
             return departments;
         } catch (error) {
 
-            console.error("Failed to fetch departments : ",error)
-          
+            console.error("Failed to fetch departments : ", error)
+
             throw new Error("Failed to fetch departments");
         }
     }
@@ -104,10 +110,16 @@ class DepartmentService implements IDepartmentService {
             }
             return departments;
         } catch (error) {
-          
+
             throw new Error(`Failed to fetch departments : ${error}`);
         }
     }
+
+
+     getAllPaginatedDepartments(page: number, limit: number): Promise<IDepartment[]> {
+        return this._departmentRepository.getAllPaginatedDepartments(page,limit)
+    }
+
 }
 
 export default DepartmentService;

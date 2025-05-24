@@ -19,6 +19,10 @@ class SubscriptionRepositroy
     async getAllActivePlans(): Promise<ISubscription[]> {
         return await Subscription.find({ status: true }).sort({ finalPrice: 1 });
     }
+    async getAllSubscriptionsPaginated(page: number, limit: number): Promise<ISubscription[]> {
+        const skip = (page-1) * limit
+       return await Subscription.find().skip(skip).limit(limit)
+    }
 }
 
 export default SubscriptionRepositroy;

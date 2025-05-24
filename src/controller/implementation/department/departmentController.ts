@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { IDepartmentController } from "../../interfaces/department/IDepartmentController";
 import { IDepartmentService } from "../../../services/interfaces/department/iDepartmentService";
-import { StatusCode } from "../../../constants/statusCode";
+import { ERROR_MESSAGES, StatusCode } from "../../../constants/statusCode";
 import { handleErrorResponse } from "../../../utils/errorHandler";
 import { generateSuccessResponse } from "../../../utils/response";
 import { handleControllerError } from "../../../utils/controllerErrorHandler";
@@ -12,10 +12,11 @@ class DepartmentController implements IDepartmentController {
     constructor(departmentService: IDepartmentService) {
         this._departmentService = departmentService;
     }
+    
 
     async createDepartment(req: Request, res: Response): Promise<void> {
         try {
-            console.log("create dept controller");
+            
 
             console.log(req.body);
 
@@ -32,6 +33,8 @@ class DepartmentController implements IDepartmentController {
             handleErrorResponse(res, error);
         }
     }
+
+    
     async getAllDepatments(req: Request, res: Response): Promise<void> {
         try {
             const departments = await this._departmentService.getAllDepartments();
@@ -102,6 +105,25 @@ class DepartmentController implements IDepartmentController {
                 );
         } catch (error: unknown) {
             return handleControllerError(res, error);
+        }
+    }
+
+    async getAllPaginatedDepatments(req: Request, res: Response): Promise<void> {
+        try {
+
+            const page = parseInt(req.query.page as string) || 1
+            const limit = parseInt(req.query.limit as string) || 10
+
+
+            const departments = await this._departmentService.getAllPaginatedDepartments(page,limit)
+
+             res.status(StatusCode.OK)
+              .json(generateSuccessResponse("All active departments featched successfully",departments))
+            
+        } catch (error) {
+
+             res.status(StatusCode.INTERNAL_SERVER_ERROR).json(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+            
         }
     }
 }

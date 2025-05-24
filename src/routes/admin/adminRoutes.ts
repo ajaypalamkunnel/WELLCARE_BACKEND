@@ -70,6 +70,7 @@ router.post(
 router.get("/getalldepartments", authMiddleWare, (req, res) =>
     departmentController.getAllDepatments(req, res)
 );
+
 router.get("/users", authMiddleWare, checkRole(Roles.Admin), (req, res) =>
     adminController.getAllUsers(req, res)
 );
@@ -212,4 +213,7 @@ router.get(
     (req, res) => adminController.viewDoctorDocument(req, res)
 );
 
+router.get("/getallPaginateddepartments", authMiddleWare, (req, res) =>
+  departmentController.getAllPaginatedDepatments(req, res)
+);
 export default router;

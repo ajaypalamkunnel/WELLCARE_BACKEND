@@ -14,6 +14,7 @@ class SubscriptionService implements ISubscriptionService {
         this._subscriptionRepository = subscriptionRepository;
     }
 
+
     async createsubscriptionPlan(data: ISubscription): Promise<ISubscription> {
         try {
             const {
@@ -80,7 +81,7 @@ class SubscriptionService implements ISubscriptionService {
 
         }
     }
-    async getSubscriptionPlans(): Promise<ISubscription[]> {
+    async getSubscriptionPlans(page: number = 1, limit: number = 10): Promise<ISubscription[]> {
         try {
             const subscriptionPlans = await this._subscriptionRepository.findAll();
 
@@ -91,7 +92,7 @@ class SubscriptionService implements ISubscriptionService {
                 );
             }
 
-            
+
 
             return subscriptionPlans;
         } catch (error) {
@@ -128,7 +129,7 @@ class SubscriptionService implements ISubscriptionService {
             );
             return plan;
         } catch (error) {
-           
+
             if (error instanceof CustomError) {
                 throw error;
             }
@@ -215,6 +216,24 @@ class SubscriptionService implements ISubscriptionService {
                 throw new CustomError("Failed to fetch subscription plans", 500);
             }
 
+        }
+    }
+
+
+    async getAllSubscriptionPlansPaginated(page: number, limit: number): Promise<ISubscription[]> {
+        try {
+
+            const plans = await this._subscriptionRepository.getAllSubscriptionsPaginated(page, limit)
+
+            return plans
+
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error
+            } else {
+
+                throw new CustomError("Failed to fetch subscription plans", 500);
+            }
         }
     }
 }

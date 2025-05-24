@@ -108,8 +108,13 @@ class SubscriptionController implements ISubscriptionController {
 
     async getSubscriptionPlans(req: Request, res: Response): Promise<Response> {
         try {
+
+            const page = parseInt(req.query.page as string) || 1
+            const limit = parseInt(req.query.limt as string) || 10
+
+
             const subscriptionPlans =
-                await this._subscriptionService.getSubscriptionPlans();
+                await this._subscriptionService.getAllSubscriptionPlansPaginated(page,limit);
 
             return res
                 .status(StatusCode.OK)
