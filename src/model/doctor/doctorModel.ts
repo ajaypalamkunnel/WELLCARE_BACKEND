@@ -69,6 +69,7 @@ export interface IDoctor extends Document {
     isVerified: boolean;
     otp?: string | null;
     otpExpires?: Date | null
+    rejectReason?:string;
     status: number;// -1 => blocked 0 => not verified 1 => verified
     createdAt: Date;
     updatedAt: Date;
@@ -135,6 +136,7 @@ const DoctorSchema = new Schema<IDoctor>(
         isVerified: { type: Boolean, default: false },
         otp: { type: String,  },
         otpExpires: { type: Date, required: false, expires: 300 },
+        rejectReason:{type:String},
         status: {
             type: Number,
             enum: [-2,-1, 0, 1,2],// -1 => blocked 0 => not verified 1 => verified -2 => rejected ====> 2 for application submitted

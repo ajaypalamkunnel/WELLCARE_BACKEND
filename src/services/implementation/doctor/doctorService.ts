@@ -397,6 +397,10 @@ class DoctorService implements IDoctorService {
         isVerified: boolean,
         reason: string
     ): Promise<IDoctor> {
+
+        
+        
+
         try {
             const existingDoctor = await this._doctorRepository.findById(doctorId);
 
@@ -423,6 +427,11 @@ class DoctorService implements IDoctorService {
                 if(!updatedDoctor?.email){
                     throw new Error("updated doctor email not found")
                 }
+
+                let updatedRes = await this._doctorRepository.update(doctorId,{rejectReason:reason})
+
+
+
                 sendApplicationRejectionEmail(updatedDoctor.email!, reason);
             }
 
