@@ -15,3 +15,8 @@ export const handleControllerError = (res: Response, error: unknown) => {
     
 
 }
+
+export function fromISTToUTC(year: number, month: number, day: number, hour: number, minute: number): Date {
+  const istDate = new Date(year, month, day, hour, minute);
+  return new Date(istDate.getTime() - 5.5 * 60 * 60 * 1000);
+}

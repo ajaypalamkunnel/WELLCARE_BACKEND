@@ -14,6 +14,8 @@ import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import { sendAppointmentCancellationEmail } from "../../../utils/emailUtils";
+import { RecurringSlotRequest, GeneratedScheduleBlock, GeneratedSlot, CreateMultiDayScheduleRequest } from "../../../types/bookingTypes";
+import { fromISTToUTC } from "../../../utils/controllerErrorHandler";
 
 class DoctorScheduleService implements IDoctorScheduleService {
     private _doctorScheduleRepository: IDoctorScheduleRepository;
@@ -26,6 +28,8 @@ class DoctorScheduleService implements IDoctorScheduleService {
         this._doctorScheduleRepository = doctorScheduleRepository;
         this._walletRepository = walletRepository;
     }
+
+
 
     async validateSchedule(
         doctorId: string,
@@ -61,16 +65,6 @@ class DoctorScheduleService implements IDoctorScheduleService {
         }
     }
 
-    // findConflictingSchedules(
-    //     doctorId: mongoose.Types.ObjectId,
-    //     serviceId: mongoose.Types.ObjectId,
-    //     date: Date,
-    //     start_time: Date,
-    //     end_time: Date
-    // ): Promise<IDoctorAvailability | null> {
-    //     throw new Error("Method not implemented.");
-    // }
-    // Generate dynamic slots based on start_time, end_time, and duration
 
     generateSlots(start_time: Date, end_time: Date, duration: number) {
         const slots: TempSlot[] = [];
@@ -263,7 +257,7 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 .populate("patientId", "email fullName")
                 .populate("serviceId", "fee");
 
-            
+
 
             for (const appointment of appointments) {
                 appointment.status = "cancelled";
@@ -309,6 +303,180 @@ class DoctorScheduleService implements IDoctorScheduleService {
             }
         }
     }
+
+
+    async generateRecurringSlots(input: RecurringSlotRequest): Promise<GeneratedScheduleBlock[]> {
+        try {
+            const { doctorId, serviceId, startDate, endDate, duration, timeBlocks } = input;
+
+            if (!doctorId || !serviceId || !startDate || !endDate || !duration || !Array.isArray(timeBlocks)) {
+                throw new CustomError("Missing or invalid input", StatusCode.BAD_REQUEST);
+            }
+
+            const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
+            const serviceObjectId = new mongoose.Types.ObjectId(serviceId);
+
+            const slotsToCreate: any[] = [];
+
+            const currentDate = new Date(startDate);
+            const lastDate = new Date(endDate);
+            currentDate.setUTCHours(0, 0, 0, 0);
+            lastDate.setUTCHours(0, 0, 0, 0);
+
+            while (currentDate <= lastDate) {
+                for (const block of timeBlocks) {
+                    const [startHour, startMinute] = block.start_time.split(":").map(Number);
+                    const [endHour, endMinute] = block.end_time.split(":").map(Number);
+
+                    // ✅ Construct dates as local time (no UTC or offset subtraction)
+                    const start = new Date(Date.UTC(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate(),
+                        startHour,
+                        startMinute,
+                        0
+                    ));
+
+                    const end = new Date(Date.UTC(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate(),
+                        endHour,
+                        endMinute,
+                        0
+                    ));
+                    if (start >= end) {
+                        throw new CustomError(`Invalid time block on ${currentDate.toDateString()}`, StatusCode.BAD_REQUEST);
+                    }
+
+                    const conflict = await this._doctorScheduleRepository.findConflictingSchedules(
+                        doctorObjectId,
+                        serviceObjectId,
+                        new Date(currentDate),
+                        start,
+                        end
+                    );
+
+                    if (conflict) {
+                        slotsToCreate.push({
+                            date: new Date(currentDate),
+                            start_time: start,
+                            end_time: end,
+                            conflict: true,
+                            slots: [],
+                        });
+                        continue;
+                    }
+
+                    const slots = this.generateSlots(start, end, duration);
+
+                    slotsToCreate.push({
+                        date: new Date(currentDate),
+                        start_time: start,
+                        end_time: end,
+                        conflict: false,
+                        slots: slots.map((slot) => ({
+                            slot_id: slot.slot_id,
+                            start_time: slot.start_time,
+                            end_time: slot.end_time,
+                            is_break: slot.is_break,
+                            status: slot.status,
+                        })),
+                    });
+                }
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return slotsToCreate;
+        } catch (error) {
+            if (error instanceof CustomError) throw error;
+            throw new CustomError("Generate recurring slot generation error", StatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    async createMultiDaySchedule(input: CreateMultiDayScheduleRequest): Promise<IDoctorAvailability[]> {
+        try {
+            const { doctorId, serviceId, startDate, endDate, duration, timeBlocks } = input;
+
+            if (!doctorId || !serviceId || !startDate || !duration || !Array.isArray(timeBlocks)) {
+                throw new CustomError("Missing or invalid fields", StatusCode.BAD_REQUEST);
+            }
+
+            const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
+            const serviceObjectId = new mongoose.Types.ObjectId(serviceId);
+
+            const schedulesToSave: IDoctorAvailability[] = [];
+
+            const currentDate = new Date(startDate);
+            const limitDate = endDate ?? new Date(new Date(startDate).setDate(startDate.getDate() + 30));
+            currentDate.setUTCHours(0, 0, 0, 0);
+            limitDate.setUTCHours(0, 0, 0, 0);
+
+            while (currentDate <= limitDate) {
+                for (const block of timeBlocks) {
+                    const [startHour, startMinute] = block.start_time.split(":").map(Number);
+                    const [endHour, endMinute] = block.end_time.split(":").map(Number);
+
+                    // ✅ NEW: Use local date directly (no offset conversion)
+                    const blockStart = new Date(Date.UTC(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate(),
+                        startHour,
+                        startMinute,
+                        0
+                    ));
+
+                    const blockEnd = new Date(Date.UTC(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate(),
+                        endHour,
+                        endMinute,
+                        0
+                    ));
+                    if (blockStart >= blockEnd) continue;
+
+                    const hasConflict = await this._doctorScheduleRepository.findConflictingSchedules(
+                        doctorObjectId,
+                        serviceObjectId,
+                        new Date(currentDate),
+                        blockStart,
+                        blockEnd
+                    );
+
+                    if (hasConflict) continue;
+
+                    const slots = this.generateSlots(blockStart, blockEnd, duration);
+
+                    const scheduleData: Partial<IDoctorAvailability> = {
+                        doctorId: doctorObjectId,
+                        serviceId: serviceObjectId,
+                        date: new Date(currentDate),
+                        start_time: blockStart,
+                        end_time: blockEnd,
+                        duration,
+                        availability: slots,
+                    };
+
+                    const saved = await this._doctorScheduleRepository.createSchedule(scheduleData);
+                    schedulesToSave.push(saved);
+                }
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return schedulesToSave;
+        } catch (error) {
+            if (error instanceof CustomError) throw error;
+            throw new CustomError("multiple slot creation error", StatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }
 
 export default DoctorScheduleService;

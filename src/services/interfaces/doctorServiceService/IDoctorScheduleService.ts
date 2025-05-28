@@ -4,6 +4,7 @@ import {
 } from "../../../types/schedules";
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { Pagination } from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
+import { CreateMultiDayScheduleRequest, GeneratedScheduleBlock, RecurringSlotRequest } from "../../../types/bookingTypes";
 
 
 interface IDoctorScheduleService {
@@ -51,6 +52,11 @@ interface IDoctorScheduleService {
         reason: string,
         doctorId: string
     ): Promise<void>;
+
+
+    generateRecurringSlots(input: RecurringSlotRequest): Promise<GeneratedScheduleBlock[]>
+
+    createMultiDaySchedule(input: CreateMultiDayScheduleRequest): Promise<IDoctorAvailability[]>
 }
 
 export default IDoctorScheduleService;

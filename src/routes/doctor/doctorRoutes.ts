@@ -473,4 +473,27 @@ router.get(
     }
 );
 
+
+router.post(
+  "/generate-recurring-slots",
+  authMiddleWare,
+  checkDoctorBlocked,
+  checkRole(Roles.DOCTOR),
+  async (req, res) => {
+    await doctorScheduleController.generateRecurringSlots(req, res);
+  }
+);
+
+
+router.post(
+  "/create-multi-day-schedule",
+  authMiddleWare,
+  checkDoctorBlocked,
+  checkRole(Roles.DOCTOR),
+  async (req, res) => {
+    await doctorScheduleController.createMultiDaySchedule(req, res);
+  }
+);
+
+
 export default router;

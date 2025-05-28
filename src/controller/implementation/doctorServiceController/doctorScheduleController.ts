@@ -19,13 +19,13 @@ class DoctorScheduleController implements IDoctorScheduleController {
 
     async validateSchedule(req: Request, res: Response): Promise<Response> {
         try {
-            
+
 
             const { doctorId, service, date, start_time, end_time } = req.body;
-           
+
 
             if (!doctorId || !service || !date || !start_time || !end_time) {
-                
+
 
                 return res
                     .status(StatusCode.BAD_REQUEST)
@@ -318,6 +318,105 @@ class DoctorScheduleController implements IDoctorScheduleController {
                             : "Internal server error"
                     )
                 );
+        }
+    }
+
+
+    async generateRecurringSlots(req: Request, res: Response): Promise<Response> {
+
+        console.log("---generateRecurringSlots");
+
+
+        try {
+            const { doctorId, service, startDate, endDate, duration, timeBlocks } = req.body;
+
+            console.log("==>time blocke : ",timeBlocks);
+            
+
+            // Validate input
+            if (!doctorId || !service || !startDate || !duration || !Array.isArray(timeBlocks)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Missing required fields or invalid format.",
+                });
+            }
+
+            if (timeBlocks.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "At least one time block is required.",
+                });
+            }
+
+            // Convert string dates to Date objects
+            const start = new Date(startDate);
+            const end = endDate ? new Date(endDate) : new Date();
+            if (!endDate) end.setDate(start.getDate() + 30); // default 30 days
+
+            console.log("formatted : ",start, " --- ",end);
+            
+
+            const slots = await this._doctorScheduleService.generateRecurringSlots({
+                doctorId,
+                serviceId: service,
+                startDate: start,
+                endDate: end,
+                duration,
+                timeBlocks,
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Recurring slots generated successfully.",
+                data: slots,
+            });
+        } catch (error) {
+            console.error("Error generating recurring slots:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error while generating recurring slots.",
+            });
+        }
+    }
+
+    async createMultiDaySchedule(req: Request, res: Response): Promise<Response> {
+        console.log("--- createMultiDaySchedule");
+
+        try {
+
+            const { doctorId, service, startDate, endDate, duration, timeBlocks } = req.body;
+
+            if (!doctorId || !service || !startDate || !duration || !Array.isArray(timeBlocks)) {
+                throw new CustomError("Missing required fields", StatusCode.BAD_REQUEST);
+            }
+
+
+            const schedules = await this._doctorScheduleService.createMultiDaySchedule({
+                doctorId,
+                serviceId: service,
+                startDate: new Date(startDate),
+                endDate: endDate ? new Date(endDate) : undefined,
+                duration,
+                timeBlocks,
+            });
+
+
+
+            return res.status(StatusCode.OK).json({
+                success: true,
+                message: "Recurring schedules created successfully",
+                schedules,
+            })
+
+        } catch (error) {
+            console.error("Error creating recurring schedules:", error);
+
+            return res.status(
+                error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR
+            ).json({
+                success: false,
+                message: error instanceof CustomError ? error.message : "Internal server error",
+            });
         }
     }
 }

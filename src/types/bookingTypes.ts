@@ -196,3 +196,47 @@ export interface DoctorFilter {
   minExp?: string;           // number as string
   maxExp?: string;           // number as string
 }
+
+
+
+export interface TimeBlock {
+  start_time: string; // e.g. "10:00"
+  end_time: string;   // e.g. "13:00"
+}
+
+
+export interface GeneratedSlot {
+  slot_id: mongoose.Types.ObjectId;
+  start_time: Date;
+  end_time: Date;
+  status: "available";
+  is_break: boolean;
+}
+
+
+export interface GeneratedScheduleBlock {
+  date: Date;
+  start_time: Date;
+  end_time: Date;
+  conflict: boolean;
+  slots: GeneratedSlot[];
+}
+
+export interface RecurringSlotRequest {
+  doctorId: string;
+  serviceId: string;
+  startDate: Date;
+  endDate: Date;
+  duration: number;
+  timeBlocks: { start_time: string; end_time: string }[];
+}
+
+
+export interface CreateMultiDayScheduleRequest {
+  doctorId: string;
+  serviceId: string;
+  startDate: Date;
+  endDate?: Date;
+  duration: number;
+  timeBlocks: TimeBlock[];
+}
