@@ -28,6 +28,7 @@ class DoctorService implements IDoctorService {
     constructor(userRepository: IDoctorRepository) {
         this._doctorRepository = userRepository;
     }
+    
 
     async registerBasicDetails(
         doctorDetails: Partial<IDoctor>
@@ -145,6 +146,8 @@ class DoctorService implements IDoctorService {
             doctor._id.toString(),
             doctorRefreshToken
         );
+        console.log("this : ",doctor);
+        
         return { doctorAccessToken, doctorRefreshToken, doctor };
     }
 
@@ -824,6 +827,31 @@ class DoctorService implements IDoctorService {
             }
         }
     }
+
+     async getRegistrationData(doctorId: string): Promise<Partial<IDoctor | null>> {
+        try {
+
+            const doctor = await this._doctorRepository.findById(doctorId)
+
+            if(!doctor || doctor.status !== -2){
+                throw new CustomError("No rejected doctor record found",StatusCode.NOT_FOUND)
+            }
+
+            return doctor
+            
+        } catch (error) {
+
+            if(error instanceof CustomError){
+                throw error
+            }else{
+                throw new CustomError("Error fetching rejected doctor",StatusCode.INTERNAL_SERVER_ERROR)
+            }
+            
+        }
+    }
+
+
+    
 }
 
 export default DoctorService;

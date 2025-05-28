@@ -96,4 +96,6 @@ export interface IDoctorService {
     ): Promise<ICertification>;
 
     fetchNotifications(userId: string): Promise<INotification[]>;
+
+    getRegistrationData(doctorId:string):Promise<Partial<IDoctor|null>>
 }

@@ -24,6 +24,7 @@ class DoctorController implements IDoctorController {
         this._walletService = walletService;
     }
 
+
     //------------------ Docotor basic registration at signup-----------------------------
 
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
@@ -128,6 +129,7 @@ class DoctorController implements IDoctorController {
                     fullName: doctor?.fullName,
                     isVerified: doctor?.isVerified,
                     isSubscribed: doctor?.isSubscribed,
+                    status:doctor?.status,
                     subscriptionExpiryDate: doctor?.subscriptionExpiryDate,
                 },
             });
@@ -194,7 +196,7 @@ class DoctorController implements IDoctorController {
 
             const oldRefreshToken = req.cookies.doctorRefreshToken
 
-           
+
 
             if (!oldRefreshToken) {
                 res.status(StatusCode.UNAUTHORIZED)
@@ -215,8 +217,8 @@ class DoctorController implements IDoctorController {
 
             res.status(StatusCode.OK).json({ success: true, accessToken })
         } catch (error) {
-            console.log("==>",error);
-            
+            console.log("==>", error);
+
             res.status(StatusCode.BAD_REQUEST).json({
                 error:
                     error instanceof Error ? error.message : "Failed to refresh token",
@@ -888,6 +890,27 @@ class DoctorController implements IDoctorController {
                         ? error.message
                         : ERROR_MESSAGES.INTERNAL_SERVER_ERROR
                 );
+        }
+    }
+
+    async getRegistrationData(req: Request, res: Response): Promise<Response> {
+        try {
+
+            let doctorId = req.user?.userId
+
+            if (!doctorId) {
+                throw new CustomError("DoctorId is required", StatusCode.BAD_REQUEST)
+            }
+
+            let doctor = await this._doctorService.getRegistrationData(doctorId)
+
+            return res.status(StatusCode.OK).json(generateSuccessResponse("registration data fetched successfully", doctor))
+
+        } catch (error) {
+
+            return res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR)
+                .json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+
         }
     }
 }

@@ -38,9 +38,9 @@ const userController = new UserController(userService, walletService);
 
 const adminRepository = new AdminRepository();
 const adminService = new AdminService(
-    adminRepository,
-    doctorRepository,
-    userRepository
+  adminRepository,
+  doctorRepository,
+  userRepository
 );
 const adminController = new AdminController(adminService);
 
@@ -50,170 +50,170 @@ const subscriptionController = new SubscriptionController(subscriptionService);
 
 const adminDashboardRepository = new AdminDashboardRepository();
 const adminDashboardService = new AdminDashboardService(
-    adminDashboardRepository
+  adminDashboardRepository
 );
 const adminDashboardController = new AdminDashboardController(
-    adminDashboardService
+  adminDashboardService
 );
 
 router.post("/login", (req, res) => adminController.login(req, res));
 router.post("/logout", (req, res) => adminController.logout(req, res));
 router.get("/doctors", authMiddleWare, checkRole(Roles.Admin), (req, res) =>
-    adminController.fetchAllDoctors(req, res)
+  adminController.fetchAllDoctors(req, res)
 );
 router.post(
-    "/adddepartment",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    (req, res) => departmentController.createDepartment(req, res)
+  "/adddepartment",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  (req, res) => departmentController.createDepartment(req, res)
 );
 router.get("/getalldepartments", authMiddleWare, (req, res) =>
-    departmentController.getAllDepatments(req, res)
+  departmentController.getAllDepatments(req, res)
 );
 
 router.get("/users", authMiddleWare, checkRole(Roles.Admin), (req, res) =>
-    adminController.getAllUsers(req, res)
+  adminController.getAllUsers(req, res)
 );
 router.put(
-    "/updateStatus",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    (req, res) => userController.UpdateUserStatus(req, res)
+  "/updateStatus",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  (req, res) => userController.UpdateUserStatus(req, res)
 );
 
 router.post("/refresh-token", (req, res) => {
-    adminController.renewAuthTokens(req, res)
-})
-
+  adminController.renewAuthTokens(req, res);
+});
 
 router.put(
-    "/update-department-status",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    (req, res) => departmentController.updateDepartmentStatus(req, res)
+  "/update-department-status",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  (req, res) => departmentController.updateDepartmentStatus(req, res)
 );
 router.put(
-    "/update-doctor-status",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    (req, res) => adminController.updateDoctorStatus(req, res)
+  "/update-doctor-status",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  (req, res) => adminController.updateDoctorStatus(req, res)
 );
 router.post(
-    "/create-subscription-plan",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await subscriptionController.createsubscriptionPlan(req, res);
-    }
+  "/create-subscription-plan",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await subscriptionController.createsubscriptionPlan(req, res);
+  }
 );
 router.get(
-    "/get-subscription-plans",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await subscriptionController.getSubscriptionPlans(req, res);
-    }
+  "/get-subscription-plans",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await subscriptionController.getSubscriptionPlans(req, res);
+  }
 );
 
 router.put(
-    "/toggle-subscription-status",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await subscriptionController.toggleSubscriptionStatus(req, res);
-    }
+  "/toggle-subscription-status",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await subscriptionController.toggleSubscriptionStatus(req, res);
+  }
 );
 
 router.get(
-    "/update-plan",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await subscriptionController.updateSubscriptionPlan(req, res);
-    }
+  "/update-plan",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await subscriptionController.updateSubscriptionPlan(req, res);
+  }
 );
 
 // Returns total revenue, active subscriptions, top plans
 router.get(
-    "/subscription/overview",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getOverView(req, res);
-    }
+  "/subscription/overview",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getOverView(req, res);
+  }
 );
 
 // Monthly revenue (chart data)
 router.get(
-    "/subscription/revenue-trend",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getRevenueTrend(req, res);
-    }
+  "/subscription/revenue-trend",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getRevenueTrend(req, res);
+  }
 );
 
 // Plan-wise subscription count (for pie chart)
 router.get(
-    "/subscription/plan-distribution",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getPlanDistribution(req, res);
-    }
+  "/subscription/plan-distribution",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getPlanDistribution(req, res);
+  }
 );
 
 //report download
 router.get(
-    "/subscription/report/download",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.downloadSubscriptionReport(req, res);
-    }
+  "/subscription/report/download",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.downloadSubscriptionReport(req, res);
+  }
 );
 
 router.get(
-    "/doctor-analytics/summary",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getDoctorAnalyticsSummary(req, res);
-    }
+  "/doctor-analytics/summary",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getDoctorAnalyticsSummary(req, res);
+  }
 );
 router.get(
-    "/doctor-analytics/revenue-trend",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getDoctorRevenueTrend(req, res);
-    }
+  "/doctor-analytics/revenue-trend",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getDoctorRevenueTrend(req, res);
+  }
 );
 router.get(
-    "/doctor-analytics/service-revenue",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getServiceRevenue(req, res);
-    }
+  "/doctor-analytics/service-revenue",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getServiceRevenue(req, res);
+  }
 );
 router.get(
-    "/doctor-analytics/top-performing",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    async (req, res) => {
-        await adminDashboardController.getTopPerformingDoctors(req, res);
-    }
+  "/doctor-analytics/top-performing",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  async (req, res) => {
+    await adminDashboardController.getTopPerformingDoctors(req, res);
+  }
 );
 
 router.get(
-    "/view-document/:type/:doctorId",
-    authMiddleWare,
-    checkRole(Roles.Admin),
-    (req, res) => adminController.viewDoctorDocument(req, res)
+  "/view-document/:type/:doctorId",
+  authMiddleWare,
+  checkRole(Roles.Admin),
+  (req, res) => adminController.viewDoctorDocument(req, res)
 );
 
 router.get("/getallPaginateddepartments", authMiddleWare, (req, res) =>
   departmentController.getAllPaginatedDepatments(req, res)
 );
+
 export default router;

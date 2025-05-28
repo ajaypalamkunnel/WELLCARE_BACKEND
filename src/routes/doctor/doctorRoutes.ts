@@ -496,4 +496,14 @@ router.post(
 );
 
 
+router.get(
+  "/registration-data",
+  authMiddleWare,
+  checkRole(Roles.DOCTOR),
+  async (req, res) => {
+    await doctorController.getRegistrationData(req, res);
+  }
+);
+
+
 export default router;

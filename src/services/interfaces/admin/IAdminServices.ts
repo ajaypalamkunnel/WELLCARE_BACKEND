@@ -25,4 +25,6 @@ export interface IAdminService {
       searchTerm?: string
    ): Promise<{ users: IUser[]; totalUsers: number | null }>;
    updateDoctorStatus(doctorId: string, status: number): Promise<IDoctor>;
+
+   
 }

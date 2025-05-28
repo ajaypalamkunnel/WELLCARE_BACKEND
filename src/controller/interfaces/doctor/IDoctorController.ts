@@ -26,6 +26,7 @@ interface IDoctorController {
     getWalletSummary(req: Request, res: Response): Promise<Response>;
     witdraw(req: Request, res: Response): Promise<Response>;
     listNotifications(req: Request, res: Response): Promise<Response>;
+    getRegistrationData(req: Request, res: Response):Promise<Response>
 }
 
 export default IDoctorController;

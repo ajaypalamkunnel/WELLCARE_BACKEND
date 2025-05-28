@@ -8,6 +8,7 @@ import axios from "axios";
 import { lookup } from "mime-types";
 import JwtUtils from "../../../utils/jwtUtils";
 
+
 /**
  * The `AdminController` class implements the `IAdminController` interface and provides
  * methods for handling administrative operations such as login, logout, fetching doctors,
@@ -293,6 +294,8 @@ class AdminController implements IAdminController {
             });
         }
     }
+
+    
 }
 
 export default AdminController;

@@ -7,6 +7,7 @@ interface IAdminController {
     updateDoctorStatus(req: Request, res: Response): Promise<void>;
     viewDoctorDocument(req: Request, res: Response): Promise<void>;
     renewAuthTokens(req: Request, res: Response): Promise<void>;
+    
 
 }
 
