@@ -29,13 +29,6 @@ const app = express()
 const server = http.createServer(app)
 const PORT = process.env.PORT || 5000
 
-// Middleware
-app.use(cookieParser())
-app.use(express.json({ limit: '100mb' }))
-app.use(express.urlencoded({ limit: '100mb', extended: true }))
-app.use(bodyParser.json())
-app.use(morganMiddleware);
-
 // CORS
 app.use(cors({
     origin: process.env.FRONTEND_URL || "https://wellcare.space",
@@ -45,10 +38,18 @@ app.use(cors({
     exposedHeaders: ["set-cookie"],
 }))
 
+// Middleware
+app.use(cookieParser())
+app.use(express.json({ limit: '100mb' }))
+app.use(express.urlencoded({ limit: '100mb', extended: true }))
+app.use(bodyParser.json())
+app.use(morganMiddleware);
+
+
 // Session
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "default_session",
+        secret: "wellcare",
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false, httpOnly: true }
