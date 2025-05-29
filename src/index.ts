@@ -30,13 +30,34 @@ const server = http.createServer(app)
 const PORT = process.env.PORT || 5000
 
 // CORS
+// app.use(cors({
+//     origin: process.env.FRONTEND_URL || "https://wellcare.space",
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     exposedHeaders: ["set-cookie"],
+// }))
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "https://wellcare.space",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["set-cookie"],
-}))
+  origin: function (origin, callback) {
+    console.log("CORS origin:", origin);
+
+    const allowedOrigins = [
+      "https://www.wellcare.space",
+      "https://wellcare.space"
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["set-cookie"],
+}));
 
 // Middleware
 app.use(cookieParser())
