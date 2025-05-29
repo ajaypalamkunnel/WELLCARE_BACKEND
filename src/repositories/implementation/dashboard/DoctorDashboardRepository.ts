@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import {
     AppointmentStatusSummary,
     AppointmentTrendData,
@@ -24,7 +24,7 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
         endDate?: Date
     ): Promise<AppointmentStatusSummary> {
         try {
-            const match: any = { doctorId };
+            const match: FilterQuery<AppointmentStatusSummary> = { doctorId };
 
             if (startDate && endDate) {
                 match.appointmentDate = {
@@ -219,7 +219,7 @@ class DoctorDashboardRepository implements IDoctorDashboardRepository {
         interval?: "day" | "week" | "month"  // eslint-disable-line @typescript-eslint/no-unused-vars
     ): Promise<TopServiceData[]> {
         try {
-            const match: any = {
+            const match: FilterQuery<TopServiceData> = {
                 doctorId,
                 status: { $in: ["completed"] },
                 paymentStatus: "paid",

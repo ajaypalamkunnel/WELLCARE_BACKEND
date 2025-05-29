@@ -416,7 +416,7 @@ class ConsultationBookingRepository
         }
     ): Promise<PaginatedAppointmentListDTO> {
         try {
-            const matchStage: any = {
+            const matchStage: FilterQuery<PaginatedAppointmentListDTO> = {
                 doctorId: doctorId,
             };
 
@@ -743,7 +743,7 @@ class ConsultationBookingRepository
             if (!bookingFee || !bookingFee.serviceId) {
                 throw new CustomError("Booking fetching error", StatusCode.BAD_REQUEST);
             }
-
+            /* eslint-disable @typescript-eslint/no-explicit-any */
             const fee = (bookingFee.serviceId as any).fee; // Use `as any` if TS doesn't infer populated type
 
             return { fee };

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import DoctorSchedules, {
     IDoctorAvailability,
 } from "../../../model/doctorService/doctorSchedule";
@@ -126,7 +126,7 @@ class DoctorScheduleRepository
         limit: number = 10
     ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
         try {
-            const filter: any = { doctorId: new mongoose.Types.ObjectId(doctorId) };
+            const filter: FilterQuery<IDoctorAvailability> = { doctorId: new mongoose.Types.ObjectId(doctorId) };
 
             if (serviceId) {
                 filter.serviceId = new mongoose.Types.ObjectId(serviceId);

@@ -8,8 +8,6 @@ import { IUser } from "../../../model/user/userModel";
 import DoctorRepository from "../../../repositories/implementation/doctor/doctorRepository";
 import UserRepository from "../../../repositories/implementation/user/userRepository";
 import { DoctorFilter } from "../../../types/bookingTypes";
-import { CustomError } from "../../../utils/CustomError";
-import { StatusCode } from "../../../constants/statusCode";
 
 export class AdminService implements IAdminService {
     private _adminRepository: AdminRepository;

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { FilterQuery } from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import PaymentModel from "../../../model/bookingPayment/bookingPayment";
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
@@ -139,7 +140,7 @@ class AdminDashboardRepository implements IAdminDashboardRepository {
         endDate?: Date
     ): Promise<PlanDistributionDTO[]> {
         try {
-            const match: any = {
+            const match: FilterQuery<PlanDistributionDTO> = {
                 paymentStatus: "paid",
             };
 

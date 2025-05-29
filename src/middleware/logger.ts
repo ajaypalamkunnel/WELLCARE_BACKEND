@@ -21,7 +21,7 @@ const logFormat = format.combine(
     filename: path.join(logDir, "app-%DATE%.log"), 
     datePattern: "YYYY-MM-DD", 
     maxSize: "10m", 
-    maxFiles: "7d", 
+    maxFiles: "2d", 
     zippedArchive: true, 
   });
 

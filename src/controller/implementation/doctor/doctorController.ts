@@ -896,13 +896,13 @@ class DoctorController implements IDoctorController {
     async getRegistrationData(req: Request, res: Response): Promise<Response> {
         try {
 
-            let doctorId = req.user?.userId
+            const doctorId = req.user?.userId
 
             if (!doctorId) {
                 throw new CustomError("DoctorId is required", StatusCode.BAD_REQUEST)
             }
 
-            let doctor = await this._doctorService.getRegistrationData(doctorId)
+            const doctor = await this._doctorService.getRegistrationData(doctorId)
 
             return res.status(StatusCode.OK).json(generateSuccessResponse("registration data fetched successfully", doctor))
 

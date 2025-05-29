@@ -19,8 +19,7 @@ import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
 import { AddEducationDTO } from "../../../types/doctor";
 import { INotification } from "../../../model/notification/notificationModel";
-import { emit } from "process";
-import { Roles } from "../../../types/roles";
+
 
 class DoctorService implements IDoctorService {
     private _doctorRepository: IDoctorRepository;
@@ -431,7 +430,7 @@ class DoctorService implements IDoctorService {
                     throw new Error("updated doctor email not found")
                 }
 
-                let updatedRes = await this._doctorRepository.update(doctorId,{rejectReason:reason})
+                  await this._doctorRepository.update(doctorId,{rejectReason:reason})
 
 
 

@@ -63,7 +63,7 @@ class DoctorServiceRepository
 
         } catch (error) {
             
-            console.error("error in alreday exisitign service checking");
+            console.error("error in alreday exisitign service checking : ",error);
             throw new CustomError("error in alreday exisitign service checking",StatusCode.INTERNAL_SERVER_ERROR)
             
         }

@@ -81,7 +81,7 @@ class SubscriptionService implements ISubscriptionService {
 
         }
     }
-    async getSubscriptionPlans(page: number = 1, limit: number = 10): Promise<ISubscription[]> {
+    async getSubscriptionPlans(): Promise<ISubscription[]> {
         try {
             const subscriptionPlans = await this._subscriptionRepository.findAll();
 

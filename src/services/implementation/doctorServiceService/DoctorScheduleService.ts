@@ -14,8 +14,8 @@ import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule
 import ConsultationAppointmentModal from "../../../model/consultationBooking/consultationBooking";
 import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRepository";
 import { sendAppointmentCancellationEmail } from "../../../utils/emailUtils";
-import { RecurringSlotRequest, GeneratedScheduleBlock, GeneratedSlot, CreateMultiDayScheduleRequest } from "../../../types/bookingTypes";
-import { fromISTToUTC } from "../../../utils/controllerErrorHandler";
+import { RecurringSlotRequest, GeneratedScheduleBlock, CreateMultiDayScheduleRequest } from "../../../types/bookingTypes";
+
 
 class DoctorScheduleService implements IDoctorScheduleService {
     private _doctorScheduleRepository: IDoctorScheduleRepository;

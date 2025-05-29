@@ -5,6 +5,7 @@ import { ERROR_MESSAGES, StatusCode } from "../../../constants/statusCode";
 import { handleErrorResponse } from "../../../utils/errorHandler";
 import { generateSuccessResponse } from "../../../utils/response";
 import { handleControllerError } from "../../../utils/controllerErrorHandler";
+import { CustomError } from "../../../utils/CustomError";
 
 class DepartmentController implements IDepartmentController {
     private _departmentService: IDepartmentService;
@@ -12,11 +13,11 @@ class DepartmentController implements IDepartmentController {
     constructor(departmentService: IDepartmentService) {
         this._departmentService = departmentService;
     }
-    
+
 
     async createDepartment(req: Request, res: Response): Promise<void> {
         try {
-            
+
 
             console.log(req.body);
 
@@ -34,7 +35,7 @@ class DepartmentController implements IDepartmentController {
         }
     }
 
-    
+
     async getAllDepatments(req: Request, res: Response): Promise<void> {
         try {
             const departments = await this._departmentService.getAllDepartments();
@@ -115,15 +116,15 @@ class DepartmentController implements IDepartmentController {
             const limit = parseInt(req.query.limit as string) || 10
 
 
-            const departments = await this._departmentService.getAllPaginatedDepartments(page,limit)
+            const departments = await this._departmentService.getAllPaginatedDepartments(page, limit)
 
-             res.status(StatusCode.OK)
-              .json(generateSuccessResponse("All active departments featched successfully",departments))
-            
+            res.status(StatusCode.OK)
+                .json(generateSuccessResponse("All active departments featched successfully", departments))
+
         } catch (error) {
 
-             res.status(StatusCode.INTERNAL_SERVER_ERROR).json(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
-            
+            res.status(error instanceof CustomError ? error.statusCode : StatusCode.INTERNAL_SERVER_ERROR).json(error instanceof CustomError ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+
         }
     }
 }
