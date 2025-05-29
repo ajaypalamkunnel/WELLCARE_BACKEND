@@ -38,7 +38,7 @@ app.use(morganMiddleware);
 
 // CORS
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "https://wellcare.space",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -48,7 +48,7 @@ app.use(cors({
 // Session
 app.use(
     session({
-        secret: "wellcare",
+        secret: process.env.SESSION_SECRET || "default_session",
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false, httpOnly: true }
@@ -62,7 +62,7 @@ app.use(passport.session())
 // Socket.io
 export const io = new SocketIOServer(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || "https://wellcare.space",
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"]
