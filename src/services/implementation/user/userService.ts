@@ -282,6 +282,7 @@ class UserService implements IUserService {
         const accessToken = JwtUtils.generateAccesToken({
             userId: user._id,
             email: user.email,
+            role:'user'
         });
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id });
 
