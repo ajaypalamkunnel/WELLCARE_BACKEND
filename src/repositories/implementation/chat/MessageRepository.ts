@@ -5,7 +5,7 @@ import { IMessageRepository } from "../../interfaces/chat/IMessageRepository";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
 import { ChatInboxItemDTO } from "../../../types/chat";
-import { onlineUsers } from "../../..";
+import { onlineUsers } from "../../../utils/chatSocket"; 
 
 class MessageRepository
     extends BaseRepository<IMessage>

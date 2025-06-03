@@ -1,5 +1,5 @@
 import { Socket, Server } from "socket.io";
-import { onlineUsers } from "../..";
+import { onlineUsers } from "../chatSocket"; 
 
 
 export const registerWebRTCSocketHandlers = (io: Server, socket: Socket) => {
