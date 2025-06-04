@@ -18,7 +18,7 @@ import morganMiddleware from "./middleware/morganMiddleware";
 import agoraRouter from "./routes/agora/agoraTokenRoute";
 import { startPendingSlotCleanupJob } from "./jobs/pendingSlotCleanup";
 import { initializeSocket } from "./utils/chatSocket";
-
+// import sharedsession from "express-socket.io-session";
 
 connectDB();
 const app = express();
@@ -105,7 +105,7 @@ const wrap = (middleware: RequestHandler) => (socket: Socket, next: (err?: any) 
 
 io.use(wrap(sessionMiddleWare));
 
-//initilize socket separate file
+//initilize socket
 initializeSocket(io);
 
 // Routes
