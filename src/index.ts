@@ -269,3 +269,7 @@ app.get('/', (req, res) => {
 startPendingSlotCleanupJob().then(()=>{
     console.log("🕒 Pending slot cleanup cron initialized");
 })
+
+
+
+server.listen(PORT, () => console.log(`Server connected on port ${PORT}`));
