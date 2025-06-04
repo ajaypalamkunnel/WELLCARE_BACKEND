@@ -5,7 +5,7 @@ import MessageController from "../../controller/implementation/chat/MessageContr
 import authMiddleWare from "../../middleware/authMiddleware";
 import { Types } from "mongoose";
 import { StatusCode } from "../../constants/statusCode";
-import { onlineUsers } from "../../utils/chatSocket"; 
+import { onlineUsers } from "../.."; 
 
 
 const router = Router()

@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { saveNotification } from "./notification";
-import { onlineUsers } from "../chatSocket"; 
+import { onlineUsers } from "../.."; 
 
 
 export const sendNotificationToUser = async(

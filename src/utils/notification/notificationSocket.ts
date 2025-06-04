@@ -1,7 +1,7 @@
 
 import { Server, Socket } from "socket.io";
 import { saveNotification } from "./notification";
-import { onlineUsers } from "../chatSocket"; 
+import { onlineUsers } from "../..";  
 
 export const registerNotificationSocketHandlers = (io: Server, socket: Socket) => {
 
