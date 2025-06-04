@@ -59,6 +59,8 @@ app.use(cors({
   exposedHeaders: ["set-cookie"],
 }));
 
+app.options("*",cors())
+
 // Middleware
 app.use(cookieParser())
 app.use(express.json({ limit: '100mb' }))
