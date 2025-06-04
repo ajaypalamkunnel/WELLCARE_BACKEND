@@ -59,6 +59,7 @@ app.use(cors({
   exposedHeaders: ["set-cookie"],
 }));
 
+//options
 app.options("*",cors())
 
 // Middleware
