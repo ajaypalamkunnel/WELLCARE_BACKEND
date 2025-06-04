@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, RequestHandler, Response } from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import http from "http";
@@ -12,13 +12,13 @@ import chatRouter from "./routes/chat/chatRoutes";
 import doctorRouter from "./routes/doctor/doctorRoutes";
 import session from "express-session";
 import passport from "passport";
-import { Server as SocketIOServer } from "socket.io";
+import { Socket, Server as SocketIOServer } from "socket.io";
 import "./config/passport";
 import morganMiddleware from "./middleware/morganMiddleware";
 import agoraRouter from "./routes/agora/agoraTokenRoute";
 import { startPendingSlotCleanupJob } from "./jobs/pendingSlotCleanup";
 import { initializeSocket } from "./utils/chatSocket";
-import sharedsession from "express-socket.io-session";
+
 
 connectDB();
 const app = express();
@@ -31,8 +31,38 @@ const sessionMiddleWare = session({
     secret: "wellcare",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true },
+    cookie: { secure: true, httpOnly: true },
 });
+
+// CORS
+// app.use(cors({
+//     origin: process.env.FRONTEND_URL || "https://wellcare.space",
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     exposedHeaders: ["set-cookie"],
+// }))
+
+app.use(cors({
+    origin: function (origin, callback) {
+        console.log("CORS origin:", origin);
+
+        const allowedOrigins = [
+            "https://www.wellcare.space",
+            "https://wellcare.space"
+        ];
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, origin);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["set-cookie"],
+}));
 
 // Middleware
 app.use(cookieParser());
@@ -41,10 +71,11 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(bodyParser.json());
 app.use(morganMiddleware);
 
-// CORS
+
+// Session
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || "https://wellcare.space",
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
@@ -60,21 +91,21 @@ app.use(passport.session());
 // Socket.io
 export const io = new SocketIOServer(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || "https://wellcare.space",
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
     },
 });
 
-// Attach session to socket
+const wrap = (middleware: RequestHandler) => (socket: Socket, next: (err?: any) => void) => {
+    middleware(socket.request as Request, {} as Response, next);
+}
 
-io.use(
-    sharedsession(sessionMiddleWare, {
-        autoSave: true,
-    })
-);
 
+io.use(wrap(sessionMiddleWare));
+
+//initilize socket separate file
 initializeSocket(io);
 
 // Routes
