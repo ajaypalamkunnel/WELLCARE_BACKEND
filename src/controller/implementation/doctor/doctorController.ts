@@ -109,6 +109,8 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
@@ -116,6 +118,8 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             });
 
@@ -211,6 +215,8 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             })
 
@@ -242,6 +248,8 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
@@ -271,6 +279,8 @@ class DoctorController implements IDoctorController {
             res.clearCookie("doctorRefreshToken", {
                 httpOnly: true,
                 secure: process.env.NODE === "production",
+                domain: ".wellcare.space",
+                path:"/",
                 sameSite: true,
             });
 
@@ -278,6 +288,8 @@ class DoctorController implements IDoctorController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 expires: new Date(0), // Expire the cookie immediately
             });
 

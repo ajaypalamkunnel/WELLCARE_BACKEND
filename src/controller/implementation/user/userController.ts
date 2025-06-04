@@ -106,6 +106,8 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.REFRESH_TOKEN_MAX_AGE || "604800000", 10),
             });
 
@@ -113,6 +115,8 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge:parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             });
 
@@ -156,6 +160,8 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: parseInt(process.env.ACCESS_TOKEN_MAX_AGE || "7200000", 10),
             });
 
@@ -241,6 +247,8 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
 
@@ -248,6 +256,8 @@ class UserController implements IUserController {
                 httpOnly: true, // Prevents client-side access
                 secure: process.env.NODE_ENV === "production", // HTTPS only in production
                 sameSite: "strict", // Prevents CSRF attacks
+                domain: ".wellcare.space",
+                path:"/",
                 maxAge: 2 * 60 * 60 * 1000, // 15 minutes (short-lived access token)
             });
 
@@ -289,6 +299,8 @@ class UserController implements IUserController {
             res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
+                domain: ".wellcare.space",
+                path:"/",
                 sameSite: "strict",
             });
 
@@ -296,12 +308,16 @@ class UserController implements IUserController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
+                domain: ".wellcare.space",
+                path:"/",
                 expires: new Date(0), // Expire the cookie immediately
             });
 
             res.clearCookie("connect.sid", {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
+                domain: ".wellcare.space",
+                path:"/",
                 sameSite: "strict",
             });
 
