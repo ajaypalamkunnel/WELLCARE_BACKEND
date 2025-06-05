@@ -8,5 +8,5 @@ export interface IDepartmentService {
     getAllDepartments(): Promise<IDepartment[]>;
     updateDeptStatus(deptId: string, status: boolean): Promise<DepartmentTpe>;
     getAllActiveDepartments(): Promise<IDepartment[]>;
-    getAllPaginatedDepartments(page: number, limit: number): Promise<IDepartment[]>
+    getAllPaginatedDepartments(page: number, limit: number): Promise<{data:IDepartment[],totalPages:number,currentPage:number}>
 }

@@ -110,11 +110,13 @@ class SubscriptionController implements ISubscriptionController {
         try {
 
             const page = parseInt(req.query.page as string) || 1
-            const limit = parseInt(req.query.limt as string) || 10
+            const limit = parseInt(req.query.limit as string) || 10
 
 
             const subscriptionPlans =
                 await this._subscriptionService.getAllSubscriptionPlansPaginated(page,limit);
+
+            
 
             return res
                 .status(StatusCode.OK)

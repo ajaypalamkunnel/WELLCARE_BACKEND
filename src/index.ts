@@ -15,14 +15,10 @@ import passport from "passport";
 import { Server as SocketIOServer } from "socket.io";
 import "./config/passport";
 import morganMiddleware from "./middleware/morganMiddleware";
-import MessageRepository from "./repositories/implementation/chat/MessageRepository";
-import ChatService from "./services/implementation/chat/messageService";
-import { Types } from "mongoose";
-import { registerWebRTCSocketHandlers } from "./utils/socket/webrtcSocket";
-import { registerNotificationSocketHandlers } from "./utils/notification/notificationSocket";
-import { sendNotificationToUser } from "./utils/notification/sendNotification";
 import agoraRouter from "./routes/agora/agoraTokenRoute";
 import { startPendingSlotCleanupJob } from "./jobs/pendingSlotCleanup";
+import { initializeSocketServer } from "./utils/chatSocket";
+import { ROUTE_PATH } from "./constants/routePaths";
 
 connectDB();
 const app = express();
@@ -36,7 +32,7 @@ app.use(
 
             const allowedOrigins = [
                 "https://www.wellcare.space",
-                "https://wellcare.space",
+                "https://wellcare.space"
             ];
 
             if (!origin || allowedOrigins.includes(origin)) {
@@ -86,172 +82,14 @@ export const io = new SocketIOServer(server, {
     },
 });
 
-const messageRepo = new MessageRepository();
-const chatService = new ChatService(messageRepo);
-
-export const onlineUsers = new Map<string, Set<string>>();
-
-io.on("connection", (socket) => {
-    console.log(" User connected:", socket.id);
-    console.log("Cookies:", socket.handshake.headers.cookie);
-
-    socket.on("error", (err) => {
-        console.error("Socket error:", err);
-    });
-
-    socket.on("user-online", ({ userId }) => {
-        if (!userId) return;
-
-        const existingSockets = onlineUsers.get(userId) || new Set();
-        existingSockets.add(socket.id);
-
-        onlineUsers.set(userId, existingSockets);
-        console.log(` ${userId} is online via ${socket.id}`);
-    });
-
-    socket.on(
-        "send-message",
-        async (
-            {
-                to,
-                message,
-                type = "text",
-                from,
-                fromRole,
-                toRole,
-                mediaUrl,
-                mediaType,
-            },
-            callback
-        ) => {
-            try {
-                let role: "Doctor" | "user";
-                if (toRole === "User") {
-                    role = "user";
-                } else {
-                    role = "Doctor";
-                }
-
-                if (!to || !from) {
-                    return callback({
-                        success: false,
-                        message: "Invalid message payload",
-                    });
-                }
-
-                if (!message?.trim() && !mediaUrl?.trim()) {
-                    return callback({
-                        success: false,
-                        message: "Message must contain text or media",
-                    });
-                }
-
-                const savedMessage = await chatService.sendMessage(
-                    new Types.ObjectId(from),
-                    new Types.ObjectId(to),
-                    fromRole,
-                    toRole,
-                    message,
-                    type,
-                    mediaUrl,
-                    mediaType
-                );
-
-                const receiverSocketIds = onlineUsers.get(to);
-                if (receiverSocketIds && receiverSocketIds.size > 0) {
-                    for (const sockId of receiverSocketIds) {
-                        io.to(sockId).emit("receive-message", savedMessage);
-                    }
-                    await sendNotificationToUser(io, to, role, "📩 New chat", message);
-                    console.log(`Message delivered to ${to}`);
-                } else {
-                    console.log(`📭 ${to} is offline. Message saved but not delivered`);
-                }
-
-                callback({ success: true, message: savedMessage });
-            } catch (error) {
-                console.error(" Error in send-message:", error);
-                callback({ success: false, message: "Failed to send message" });
-            }
-        }
-    );
-
-    socket.on("delete-message", async ({ messageId, userId }) => {
-        try {
-            if (!messageId || !userId) {
-                socket.emit("error", { message: "Invalid delete request" });
-                return;
-            }
-
-            const message = await messageRepo.findById(messageId);
-
-            if (!message) {
-                socket.emit("error", { message: "Message not found" });
-                return;
-            }
-
-            if (message.senderId.toString() !== userId) {
-                socket.emit("error", {
-                    message: "You can only delete your own message",
-                });
-                return;
-            }
-
-            await chatService.deleteMessage(new Types.ObjectId(messageId));
-
-            const receiverSocketIds = onlineUsers.get(message.receiverId.toString());
-            const senderSocketIds = onlineUsers.get(userId);
-
-            if (receiverSocketIds) {
-                for (const sockId of receiverSocketIds) {
-                    io.to(sockId).emit("message-deleted", { messageId });
-                }
-            }
-
-            if (senderSocketIds) {
-                for (const sockId of senderSocketIds) {
-                    io.to(sockId).emit("message-deleted", { messageId });
-                }
-            }
-        } catch (error) {
-            console.error("❌ Error in delete-message socket event:", error);
-            socket.emit("error", { message: "Failed to delete message" });
-        }
-    });
-
-    socket.on("disconnect", () => {
-        for (const [userId, socketsSet] of onlineUsers.entries()) {
-            if (socketsSet.has(socket.id)) {
-                socketsSet.delete(socket.id);
-
-                if (socketsSet.size === 0) {
-                    onlineUsers.delete(userId);
-                    console.log(`❌ ${userId} went offline (last socket disconnected)`);
-                } else {
-                    onlineUsers.set(userId, socketsSet);
-                    console.log(
-                        `✅ ${userId} disconnected socket: ${socket.id}, still online in ${socketsSet.size} tab(s)`
-                    );
-                }
-                break;
-            }
-        }
-    });
-    registerNotificationSocketHandlers(io, socket);
-    registerWebRTCSocketHandlers(io, socket);
-
-    socket.on("error", (err) => {
-        console.error("Socket error:", err);
-    });
-});
-
+initializeSocketServer(io)
 // Routes
-app.use("/", userRouter);
-app.use("/api/doctor", doctorRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/chat", chatRouter);
-app.use("/api/agora", agoraRouter);
-app.get("/", (req, res) => {
+app.use(ROUTE_PATH.USER, userRouter);
+app.use(ROUTE_PATH.DOCTOR, doctorRouter);
+app.use(ROUTE_PATH.ADMIN, adminRouter);
+app.use(ROUTE_PATH.CHAT, chatRouter);
+app.use(ROUTE_PATH.AGORA, agoraRouter);
+app.get(ROUTE_PATH.WELCOME, (req, res) => {
     res.send("Welcome to Wellcare");
 });
 

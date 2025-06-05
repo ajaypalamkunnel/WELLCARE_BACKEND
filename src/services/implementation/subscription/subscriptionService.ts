@@ -220,12 +220,18 @@ class SubscriptionService implements ISubscriptionService {
     }
 
 
-    async getAllSubscriptionPlansPaginated(page: number, limit: number): Promise<ISubscription[]> {
+    async getAllSubscriptionPlansPaginated(page: number, limit: number): Promise<{data :ISubscription[],totalPages:number,currentPage:number}> {
         try {
 
-            const plans = await this._subscriptionRepository.getAllSubscriptionsPaginated(page, limit)
+            const {data,totalCount} = await this._subscriptionRepository.getAllSubscriptionsPaginated(page, limit)
 
-            return plans
+            const totalPages = Math.ceil(totalCount/limit)
+
+            return {
+                data,
+                totalPages,
+                currentPage:page
+            }
 
         } catch (error) {
             if (error instanceof CustomError) {

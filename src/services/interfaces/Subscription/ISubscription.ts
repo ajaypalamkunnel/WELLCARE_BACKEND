@@ -10,7 +10,7 @@ export interface ISubscriptionService {
         updatedData: Partial<ISubscription>
     ): Promise<ISubscription>;
     getAllSubscriptionPlans(): Promise<ISubscription[]>;
-    getAllSubscriptionPlansPaginated(page:number,limit:number): Promise<ISubscription[]>;
+    getAllSubscriptionPlansPaginated(page:number,limit:number): Promise<{data :ISubscription[],totalPages:number,currentPage:number}>;
 
 
 }

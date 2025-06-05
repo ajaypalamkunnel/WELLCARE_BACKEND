@@ -19,11 +19,16 @@ class DepartmentRepository
         return await Department.find({ status: true });
     }
 
-    async getAllPaginatedDepartments(page: number=1, limit: number=10): Promise<IDepartment[]> {
+    async getAllPaginatedDepartments(page: number=1, limit: number=10): Promise<{data:IDepartment[],totalCount:number}> {
 
         const skip = (page - 1) * limit
 
-        return await Department.find().skip(skip).limit(limit)
+        const [data,totalCount] = await Promise.all([
+            Department.find().skip(skip).limit(limit),
+            Department.countDocuments()
+        ])
+
+        return {data,totalCount}
     }
 }
 

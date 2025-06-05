@@ -116,8 +116,18 @@ class DepartmentService implements IDepartmentService {
     }
 
 
-     getAllPaginatedDepartments(page: number, limit: number): Promise<IDepartment[]> {
-        return this._departmentRepository.getAllPaginatedDepartments(page,limit)
+     async getAllPaginatedDepartments(page: number, limit: number): Promise<{data:IDepartment[],totalPages:number,currentPage:number}> {
+
+
+        const {data,totalCount} = await this._departmentRepository.getAllPaginatedDepartments(page,limit)
+
+        const totalPages = Math.ceil(totalCount/limit)
+
+        return {
+            data,
+            totalPages,
+            currentPage:page
+        }
     }
 
 }

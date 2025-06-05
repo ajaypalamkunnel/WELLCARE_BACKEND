@@ -114,8 +114,14 @@ class DepartmentController implements IDepartmentController {
             const page = parseInt(req.query.page as string) || 1
             const limit = parseInt(req.query.limit as string) || 10
 
+            console.log("hii");
+            
+
 
             const departments = await this._departmentService.getAllPaginatedDepartments(page,limit)
+
+            console.log("---",departments);
+            
 
              res.status(StatusCode.OK)
               .json(generateSuccessResponse("All active departments featched successfully",departments))

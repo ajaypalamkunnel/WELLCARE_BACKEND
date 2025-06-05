@@ -5,5 +5,5 @@ export default interface IDepartmentRepository
     extends IBaseRepository<IDepartment> {
     findDepartmentByName(name: string): Promise<IDepartment | null>;
     getAllActiveDepartments(): Promise<IDepartment[] | null>;
-    getAllPaginatedDepartments(page:number,limit:number):Promise<IDepartment[]>
+    getAllPaginatedDepartments(page:number,limit:number):Promise<{data:IDepartment[],totalCount:number}>
 }
