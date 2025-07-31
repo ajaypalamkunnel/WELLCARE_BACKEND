@@ -1,3 +1,4 @@
+import { SubscriptionDTO } from "../../../dto/subscriptionDto/subscription.dto";
 import { ISubscription } from "../../../model/subscription/subscriptionModel";
 
 
@@ -9,7 +10,7 @@ export interface ISubscriptionService {
         planId: string,
         updatedData: Partial<ISubscription>
     ): Promise<ISubscription>;
-    getAllSubscriptionPlans(): Promise<ISubscription[]>;
+    getAllSubscriptionPlans(): Promise<SubscriptionDTO[]>;
     getAllSubscriptionPlansPaginated(page:number,limit:number): Promise<{data :ISubscription[],totalPages:number,currentPage:number}>;
 
 

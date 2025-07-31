@@ -11,6 +11,8 @@ import { isValidObjectId } from "mongoose";
 import { IScheduleResponse } from "../../../types/bookingTypes";
 import { firstChatDTO } from "../../../types/chat";
 import { INotification } from "../../../model/notification/notificationModel";
+import { mapToUserProfileDTO } from "../../../dto/mappers/user.mapper/doctorListing.mapper/userProfile.mapper";
+import { UserProfileDTO } from "../../../dto/userDto/doctorListing.dto/userProfile.dto";
 
 class UserService implements IUserService {
     private _userRepository: IUserRepository;
@@ -19,7 +21,7 @@ class UserService implements IUserService {
     constructor(userRespository: IUserRepository) {
         this._userRepository = userRespository;
     }
-    
+
 
     private generteOTP(): string {
         return Math.floor(100000 + Math.random() * 900000).toString();
@@ -60,7 +62,7 @@ class UserService implements IUserService {
         });
 
         await sendOTPEmail(email, otp);
-     
+
 
         return { user };
     }
@@ -160,7 +162,7 @@ class UserService implements IUserService {
         const user = await this._userRepository.findUserTokenById(
             decode.userId.toString()
         );
-       
+
 
         if (!user || user.refreshToken !== oldRefreshToken) {
             throw new Error("Invalid refresh token");
@@ -178,7 +180,7 @@ class UserService implements IUserService {
     }
 
     async forgotPassword(email: string): Promise<void> {
-       
+
 
         try {
             const user = await this._userRepository.findUserByEmail(email);
@@ -210,7 +212,7 @@ class UserService implements IUserService {
                 otpExpires,
             });
 
-        
+
         } catch (error) {
             console.error("Error in forgotPassword service:", error);
 
@@ -240,7 +242,7 @@ class UserService implements IUserService {
                 password: hashedPassword,
             });
         } catch (error) {
-           
+
 
             if (error instanceof Error) {
                 throw new Error(error.message);
@@ -261,7 +263,7 @@ class UserService implements IUserService {
         let user = await this._userRepository.findUserByEmail(email);
 
         if (!user) {
-            
+
             user = await this._userRepository.create({
                 fullName: name,
                 email,
@@ -282,7 +284,7 @@ class UserService implements IUserService {
         const accessToken = JwtUtils.generateAccesToken({
             userId: user._id,
             email: user.email,
-            role:'user'
+            role: 'user'
         });
         const refreshToken = JwtUtils.generateRefreshToken({ userId: user._id });
 
@@ -298,8 +300,11 @@ class UserService implements IUserService {
         await this._userRepository.removeRefreshToken(refreshToken);
     }
 
-    async getUserProfile(userId: string): Promise<IUser | null> {
-        return await this._userRepository.findUserDataById(userId);
+    async getUserProfile(userId: string): Promise<UserProfileDTO  | null> {
+        const user = await this._userRepository.findUserDataById(userId);
+        if (!user) return null;
+
+       return mapToUserProfileDTO(user);
     }
 
     async updateUserStatus(
@@ -520,9 +525,9 @@ class UserService implements IUserService {
 
             return notifications;
         } catch (error) {
-            if(error instanceof CustomError){
+            if (error instanceof CustomError) {
                 throw error
-            }else{
+            } else {
 
                 throw new CustomError(
                     "Internal server error",
@@ -533,22 +538,22 @@ class UserService implements IUserService {
     }
 
     async addReviewToDoctor(doctorId: string, patientId: string, rating: number, reviewText: string): Promise<void> {
-       try {
+        try {
 
-         
-            
 
-            await this._userRepository.addReview(doctorId,patientId,rating,reviewText)
-        
-       } catch (error) {
 
-            if(error instanceof CustomError){
+
+            await this._userRepository.addReview(doctorId, patientId, rating, reviewText)
+
+        } catch (error) {
+
+            if (error instanceof CustomError) {
                 throw error
-            }else{
-                throw new CustomError("Internal server error",StatusCode.INTERNAL_SERVER_ERROR)
+            } else {
+                throw new CustomError("Internal server error", StatusCode.INTERNAL_SERVER_ERROR)
             }
-        
-       }
+
+        }
     }
 }
 

@@ -19,6 +19,7 @@ import agoraRouter from "./routes/agora/agoraTokenRoute";
 import { startPendingSlotCleanupJob } from "./jobs/pendingSlotCleanup";
 import { initializeSocketServer } from "./utils/chatSocket";
 import { ROUTE_PATH } from "./constants/routePaths";
+import "./jobs/subscritionExpiryHandler"
 
 connectDB();
 const app = express();
@@ -32,7 +33,8 @@ app.use(
 
             const allowedOrigins = [
                 "https://www.wellcare.space",
-                "https://wellcare.space"
+                "https://wellcare.space",
+                "http://localhost:3000",
             ];
 
             if (!origin || allowedOrigins.includes(origin)) {

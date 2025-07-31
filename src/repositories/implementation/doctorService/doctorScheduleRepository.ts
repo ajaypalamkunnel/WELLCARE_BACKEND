@@ -143,7 +143,7 @@ class DoctorScheduleRepository
 
             const schedules = await DoctorSchedules.find(filter)
                 .populate("serviceId", "name fee mode")
-                .sort({ start_time: 1 })
+                .sort({ start_time: -1 })
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();

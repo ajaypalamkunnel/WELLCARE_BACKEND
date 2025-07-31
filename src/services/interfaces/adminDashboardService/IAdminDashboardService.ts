@@ -3,13 +3,13 @@ import {
   RevenueTrendDTO,
   SubscriptionOverviewDTO,
   SubscriptionReportDownloadDTO,
-} from "../../../types/admin/adminDashboardDto";
+} from "../../../dto/adminDto/adminDashboard.dto";
 import {
   DoctorAnalyticsSummaryDTO,
   RevenueDoctorTrendDTO,
   ServiceRevenueDTO,
   TopDoctorDTO,
-} from "../../../types/admin/doctorAnalytics";
+} from "../../../dto/adminDto/doctorAnalyticsDashboard.dto";
 
 interface IAdminDashboardService {
   getOverview(): Promise<SubscriptionOverviewDTO>;

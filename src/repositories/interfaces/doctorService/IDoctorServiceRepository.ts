@@ -12,6 +12,6 @@ export default interface IDoctorServiceRepository
         serviceId: string,
         updateData: Partial<IDoctorService>
     ): Promise<IDoctorService | null>;
-    isServiceAlreadyExist(doctorId:string,name:string,mode:'Online' | 'In-Person' | 'Both'):Promise<boolean>
+    isServiceAlreadyExist(doctorId:string,name:string,mode:'Online' | 'In-Person' | 'Both',excludeServiceId?:string):Promise<boolean>
 
 }

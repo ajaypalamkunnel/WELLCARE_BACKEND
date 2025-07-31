@@ -16,6 +16,8 @@ import IWalletRepository from "../../../repositories/interfaces/wallet/IWalletRe
 import { sendAppointmentCancellationEmail } from "../../../utils/emailUtils";
 import { RecurringSlotRequest, GeneratedScheduleBlock, GeneratedSlot, CreateMultiDayScheduleRequest } from "../../../types/bookingTypes";
 import { fromISTToUTC } from "../../../utils/controllerErrorHandler";
+import { DoctorScheduleDTO } from "../../../dto/doctorSchedulesDto/doctorSchedule.dto";
+import { mapDoctorSchedulesToDTO } from "../../../dto/mappers/doctorSchedules.mapper/doctorSchedule.mapper";
 
 class DoctorScheduleService implements IDoctorScheduleService {
     private _doctorScheduleRepository: IDoctorScheduleRepository;
@@ -195,13 +197,13 @@ class DoctorScheduleService implements IDoctorScheduleService {
         status?: "completed" | "upcoming",
         page: number = 1,
         limit: number = 10
-    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }> {
+    ): Promise<{ schedules: DoctorScheduleDTO[]; pagination: Pagination }> {
         try {
             // Convert dates to proper UTC for database queries
             const start = startDate ? new Date(startDate) : undefined;
             const end = endDate ? new Date(endDate) : undefined;
 
-            return await this._doctorScheduleRepository.fetchSchedules(
+            const { schedules, pagination } = await this._doctorScheduleRepository.fetchSchedules(
                 doctorId,
                 serviceId,
                 start,
@@ -210,6 +212,10 @@ class DoctorScheduleService implements IDoctorScheduleService {
                 page,
                 limit
             );
+
+            const mappedSchedules = mapDoctorSchedulesToDTO(schedules);
+
+            return { schedules: mappedSchedules, pagination };
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;

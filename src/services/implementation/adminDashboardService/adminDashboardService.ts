@@ -5,13 +5,13 @@ import {
     RevenueTrendDTO,
     SubscriptionOverviewDTO,
     SubscriptionReportDownloadDTO,
-} from "../../../types/admin/adminDashboardDto";
+} from "../../../dto/adminDto/adminDashboard.dto";
 import {
     DoctorAnalyticsSummaryDTO,
     RevenueDoctorTrendDTO,
     ServiceRevenueDTO,
     TopDoctorDTO,
-} from "../../../types/admin/doctorAnalytics";
+} from "../../../dto/adminDto/doctorAnalyticsDashboard.dto";
 import { uploadBufferToCloudinary } from "../../../utils/adminDashboard/adminDashboardCloudinary";
 import { generateSubscriptionReport } from "../../../utils/adminDashboard/subscriptionReportGenerator";
 import { CustomError } from "../../../utils/CustomError";

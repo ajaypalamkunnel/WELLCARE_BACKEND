@@ -1,3 +1,6 @@
+import { DepartmentDTO } from "../../../dto/departmentDto/Department.dto";
+import { mapDepartmentsToDto } from "../../../dto/mappers/depatment.mapper/department.mapper";
+
 import { IDepartment } from "../../../model/department/departmentModel";
 import IDepartmentRepository from "../../../repositories/interfaces/department/IDepartment";
 import { DepartmentTpe } from "../../../types/departmentTypes";
@@ -50,14 +53,14 @@ class DepartmentService implements IDepartmentService {
         }
     }
 
-    async getAllDepartments(): Promise<IDepartment[]> {
+    async getAllDepartments(): Promise<DepartmentDTO[]> {
         try {
             const departments = await this._departmentRepository.findAll();
 
             if (!departments || departments.length === 0) {
                 return [];
             }
-            return departments;
+            return mapDepartmentsToDto(departments);
         } catch (error) {
 
             console.error("Failed to fetch departments : ", error)
@@ -100,7 +103,7 @@ class DepartmentService implements IDepartmentService {
         }
     }
 
-    async getAllActiveDepartments(): Promise<IDepartment[]> {
+    async getAllActiveDepartments(): Promise<DepartmentDTO[]> {
         try {
             const departments =
                 await this._departmentRepository.getAllActiveDepartments();
@@ -108,7 +111,7 @@ class DepartmentService implements IDepartmentService {
             if (!departments || departments.length === 0) {
                 return [];
             }
-            return departments;
+            return mapDepartmentsToDto(departments);
         } catch (error) {
 
             throw new Error(`Failed to fetch departments : ${error}`);
@@ -116,15 +119,17 @@ class DepartmentService implements IDepartmentService {
     }
 
 
-     async getAllPaginatedDepartments(page: number, limit: number): Promise<{data:IDepartment[],totalPages:number,currentPage:number}> {
+     async getAllPaginatedDepartments(page: number, limit: number): Promise<{data:DepartmentDTO[],totalPages:number,currentPage:number}> {
 
 
         const {data,totalCount} = await this._departmentRepository.getAllPaginatedDepartments(page,limit)
 
         const totalPages = Math.ceil(totalCount/limit)
 
+        const mappedData = mapDepartmentsToDto(data)
+
         return {
-            data,
+            data:mappedData,
             totalPages,
             currentPage:page
         }

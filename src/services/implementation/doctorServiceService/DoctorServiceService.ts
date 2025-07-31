@@ -5,6 +5,8 @@ import { CustomError } from "../../../utils/CustomError";
 import { IDoctorService } from "../../../model/doctorService/doctorServicesModal";
 import { IDoctorServiceService } from "../../interfaces/doctorServiceService/IDoctorServiceService";
 import IDoctorSubscriptionsRepository from "../../../repositories/interfaces/doctorSubscriptions/IDoctorSubscriptions";
+import { DoctorServiceDTO } from "../../../dto/doctorServicesDto/doctorService.dto";
+import { mapDoctorServicesToDTO } from "../../../dto/mappers/doctorService.mapper/doctorService.mapper";
 
 
 class DoctorServiceService implements IDoctorServiceService {
@@ -90,7 +92,7 @@ class DoctorServiceService implements IDoctorServiceService {
         }
     }
 
-    async getServicesByDoctor(doctorId: string): Promise<IDoctorService[]> {
+    async getServicesByDoctor(doctorId: string): Promise<DoctorServiceDTO[]> {
         try {
             const doctor = await this._doctorRepository.findById(doctorId);
 
@@ -105,7 +107,9 @@ class DoctorServiceService implements IDoctorServiceService {
             //     throw new CustomError("No services found for this doctor",StatusCode.NOT_FOUND)
             // }
 
-            return services;
+            const mappedData = mapDoctorServicesToDTO(services)
+
+            return mappedData;
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
@@ -144,7 +148,7 @@ class DoctorServiceService implements IDoctorServiceService {
                 );
             }
 
-             const exists = await this._doctorServiceRepository.isServiceAlreadyExist(doctorId.toString(),updateData.name!, updateData.mode!)
+             const exists = await this._doctorServiceRepository.isServiceAlreadyExist(doctorId.toString(),updateData.name!, updateData.mode!,serviceId)
 
             if (exists) {
                 throw new CustomError(

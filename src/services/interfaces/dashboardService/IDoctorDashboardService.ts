@@ -4,7 +4,7 @@ import {
   AppointmentTrendData,
   RevenueTrendData,
   TopServiceData,
-} from "../../../types/dashboardDto";
+} from "../../../dto/doctorDto/doctorDashboard.dto";
 
 interface IDoctorDashboardService {
   getAppointmentSummary(

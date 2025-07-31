@@ -8,7 +8,7 @@ import Doctor, {
     IEducation,
 } from "../../../model/doctor/doctorModel";
 import { firstChatDTO } from "../../../types/chat";
-import { AddEducationDTO } from "../../../types/doctor";
+import { AddEducationDTO } from "../../../dto/adminDto/doctor.dto";
 import { CustomError } from "../../../utils/CustomError";
 import { BaseRepository } from "../../base/BaseRepository";
 import IDoctorRepository from "../../interfaces/doctor/IDoctor";

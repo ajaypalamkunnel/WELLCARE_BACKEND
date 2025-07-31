@@ -5,7 +5,10 @@ import {
 } from "../../../model/doctor/doctorModel";
 import { INotification } from "../../../model/notification/notificationModel";
 import { firstChatDTO } from "../../../types/chat";
-import { AddEducationDTO } from "../../../types/doctor";
+import { AddEducationDTO } from "../../../dto/adminDto/doctor.dto";
+import { DoctorProfileDTO } from "../../../dto/doctorDto/doctorProfile.dto";
+import { DoctorListDTO } from "../../../dto/userDto/doctorListing.dto/doctorList.dto";
+import { DetailedDoctorProfileDTO } from "../../../dto/userDto/doctorListing.dto/detailedDoctorProfile.dto";
 
 export interface IDoctorService {
     registerBasicDetails(
@@ -42,7 +45,7 @@ export interface IDoctorService {
 
     logoutDoctor(refreshToken: string): Promise<void>;
 
-    getDoctorProfile(userId: string): Promise<IDoctor | null>;
+    getDoctorProfile(userId: string): Promise<DoctorProfileDTO  | null>;
 
     registerDoctor(doctorDetails: Partial<IDoctor>): Promise<{ doctor: IDoctor }>;
 
@@ -74,9 +77,9 @@ export interface IDoctorService {
         sortBy?: string,
         page?: number,
         limit?: number
-    ): Promise<{ doctors: IDoctor[]; total: number; totalPages: number }>;
+    ): Promise<{ doctors: DoctorListDTO[]; total: number; totalPages: number }>;
 
-    detailedDoctorProfile(doctorId: string): Promise<Partial<IDoctor | null>>;
+    detailedDoctorProfile(doctorId: string): Promise<Partial<DetailedDoctorProfileDTO | null>>;
 
     //
     getDoctorChatInfo(doctorId: string): Promise<firstChatDTO>;

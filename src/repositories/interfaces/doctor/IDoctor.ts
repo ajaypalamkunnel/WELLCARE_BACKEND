@@ -6,7 +6,7 @@ import {
 } from "../../../model/doctor/doctorModel";
 import { IBaseRepository } from "../../base/IBaseRepository";
 import { firstChatDTO } from "../../../types/chat";
-import { AddEducationDTO } from "../../../types/doctor";
+import { AddEducationDTO } from "../../../dto/adminDto/doctor.dto";
 import { INotification } from "../../../model/notification/notificationModel";
 
 export default interface IDoctorRepository extends IBaseRepository<IDoctor> {

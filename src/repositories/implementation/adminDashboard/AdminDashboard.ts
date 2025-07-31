@@ -8,8 +8,8 @@ import {
     IDoctorSubscriptionPopulated,
     PlanDistributionDTO,
     RevenueTrendDTO,
-} from "../../../types/admin/adminDashboardDto";
-import { DoctorAnalyticsSummaryDTO, RevenueDoctorTrendDTO, ServiceRevenueDTO, TopDoctorDTO } from "../../../types/admin/doctorAnalytics";
+} from "../../../dto/adminDto/adminDashboard.dto";
+import { DoctorAnalyticsSummaryDTO, RevenueDoctorTrendDTO, ServiceRevenueDTO, TopDoctorDTO } from "../../../dto/adminDto/doctorAnalyticsDashboard.dto";
 
 import { CustomError } from "../../../utils/CustomError";
 import IAdminDashboardRepository from "../../interfaces/adminDashboard/IAdminDashboard";

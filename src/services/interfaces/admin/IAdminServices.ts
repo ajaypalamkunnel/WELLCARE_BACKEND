@@ -1,3 +1,5 @@
+import { DoctorDTO } from "../../../dto/adminDto/doctor.dto";
+import { UserDTO } from "../../../dto/adminDto/User.dto";
 import { IAdmin } from "../../../model/admin/AdminModel";
 import { IDoctor } from "../../../model/doctor/doctorModel";
 import { IUser } from "../../../model/user/userModel";
@@ -18,12 +20,12 @@ export interface IAdminService {
       limit: number,
       searchTerm?: string,
       filters?: DoctorFilter
-   ): Promise<{ data: IDoctor[]; total: number }>;
+   ): Promise<{ data: DoctorDTO[]; total: number }>;
    getAllUsers(
       page: number,
       limit: number,
       searchTerm?: string
-   ): Promise<{ users: IUser[]; totalUsers: number | null }>;
+   ): Promise<{ users: UserDTO[]; totalUsers: number | null }>;
    updateDoctorStatus(doctorId: string, status: number): Promise<IDoctor>;
 
    

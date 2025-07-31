@@ -27,6 +27,7 @@ class DoctorController implements IDoctorController {
 
     //------------------ Docotor basic registration at signup-----------------------------
 
+    // Handles doctor basic registration at signup.
     async registerBasicDetails(req: Request, res: Response): Promise<void> {
         try {
             const { doctor } = await this._doctorService.registerBasicDetails(
@@ -46,6 +47,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Resends OTP to the doctor's email for verification.
     async resendOtp(req: Request, res: Response): Promise<Response> {
         try {
             const { email } = req.body;
@@ -69,6 +71,7 @@ class DoctorController implements IDoctorController {
             });
         }
     }
+    // Verifies the OTP sent to the doctor's email.
     async verifyOtp(req: Request, res: Response): Promise<void> {
         try {
             const { email, otp } = req.body;
@@ -91,6 +94,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Handles doctor login and sets authentication cookies.
     async postLogin(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body;
@@ -144,6 +148,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Sends a new OTP to the doctor's email for password reset.
     async forgotPasswordDoctor(req: Request, res: Response): Promise<void> {
         try {
             const { email } = req.body;
@@ -170,6 +175,7 @@ class DoctorController implements IDoctorController {
             });
         }
     }
+    // Updates the doctor's password after verification.
     async updatePasswordDoctor(req: Request, res: Response): Promise<void> {
         try {
             const { email, password } = req.body;
@@ -195,6 +201,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Renews authentication tokens using the refresh token.
     async renewAuthTokens(req: Request, res: Response): Promise<void> {
         try {
 
@@ -232,6 +239,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Handles Google OAuth callback for doctor authentication.
     async googleAuthCallback(req: Request, res: Response): Promise<void> {
         try {
             const doctor = req.user;
@@ -263,6 +271,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Logs out the doctor and clears authentication cookies.
     async logoutDoctor(req: Request, res: Response): Promise<void> {
         try {
             const refreshToken = req.cookies.doctorRefreshToken;
@@ -305,6 +314,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves the profile of the currently authenticated doctor.
     async getProfile(req: Request, res: Response): Promise<void> {
         try {
             if (!req.user) {
@@ -327,6 +337,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Registers a new doctor with all required details.
     async registerDoctor(req: Request, res: Response): Promise<void> {
         try {
             const {
@@ -384,6 +395,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Updates the status (block/unblock) of a doctor.
     async updateDoctorStatus(req: Request, res: Response): Promise<void> {
         try {
             const { doctorId, status } = req.body;
@@ -423,6 +435,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Verifies or rejects a doctor's application.
     async verifyDoctor(req: Request, res: Response): Promise<void> {
         try {
             const { doctorId, isVerified, reason } = req.body;
@@ -463,6 +476,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Updates the profile information of a doctor.
     async updateProfile(req: Request, res: Response): Promise<void> {
         try {
             const { doctorId, updateData } = req.body;
@@ -494,6 +508,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Changes the password for a doctor.
     async changePassword(req: Request, res: Response): Promise<Response> {
         try {
             const { doctorId, oldPassword, newPassword } = req.body;
@@ -520,6 +535,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves a list of doctors with filtering and pagination options.
     async getDoctors(req: Request, res: Response): Promise<Response> {
         try {
             const {
@@ -557,6 +573,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves detailed profile information for a specific doctor.
     async getDoctorProfile(req: Request, res: Response): Promise<Response> {
         try {
             const { doctorId } = req.params;
@@ -584,6 +601,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves doctor information formatted for chat functionality.
     async getDoctorInfoForChat(req: Request, res: Response): Promise<Response> {
         try {
             const { doctorId } = req.params;
@@ -625,6 +643,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Adds an education entry to the doctor's profile.
     async addEducation(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -666,6 +685,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Adds a certification to the doctor's profile.
     async addCertification(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -720,6 +740,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Edits an existing education entry for the doctor.
     async editEducation(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -766,6 +787,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Edits an existing certification for the doctor.
     async editCertification(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -808,6 +830,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves the wallet summary for the doctor, including transactions.
     async getWalletSummary(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -844,6 +867,7 @@ class DoctorController implements IDoctorController {
                 );
         }
     }
+    // Handles withdrawal requests from the doctor's wallet.
     async witdraw(req: Request, res: Response): Promise<Response> {
         try {
             const doctorId = req.user?.userId;
@@ -877,6 +901,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Lists notifications for the doctor.
     async listNotifications(req: Request, res: Response): Promise<Response> {
         try {
             const userId = req.user?.userId;
@@ -905,6 +930,7 @@ class DoctorController implements IDoctorController {
         }
     }
 
+    // Retrieves registration data for the currently authenticated doctor.
     async getRegistrationData(req: Request, res: Response): Promise<Response> {
         try {
 

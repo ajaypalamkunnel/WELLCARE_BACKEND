@@ -12,11 +12,12 @@ class DepartmentController implements IDepartmentController {
     constructor(departmentService: IDepartmentService) {
         this._departmentService = departmentService;
     }
-    
 
+
+    // Handles creation of a new department. Expects department data in the request body and returns the created department.
     async createDepartment(req: Request, res: Response): Promise<void> {
         try {
-            
+
 
             console.log(req.body);
 
@@ -34,7 +35,8 @@ class DepartmentController implements IDepartmentController {
         }
     }
 
-    
+
+    // Retrieves all departments from the database and returns them in the response.
     async getAllDepatments(req: Request, res: Response): Promise<void> {
         try {
             const departments = await this._departmentService.getAllDepartments();
@@ -49,6 +51,7 @@ class DepartmentController implements IDepartmentController {
         }
     }
 
+    // Updates the status (active/inactive) of a department. Expects deptId and status in the request body.
     async updateDepartmentStatus(req: Request, res: Response): Promise<void> {
         try {
             const { deptId, status } = req.body;
@@ -87,6 +90,7 @@ class DepartmentController implements IDepartmentController {
         }
     }
 
+    // Fetches all departments that are currently active and returns them in the response.
     async getAllActiveDepartments(
         req: Request,
         res: Response
@@ -108,6 +112,7 @@ class DepartmentController implements IDepartmentController {
         }
     }
 
+    // Retrieves departments in a paginated format. Expects 'page' and 'limit' as query parameters.
     async getAllPaginatedDepatments(req: Request, res: Response): Promise<void> {
         try {
 
@@ -115,21 +120,21 @@ class DepartmentController implements IDepartmentController {
             const limit = parseInt(req.query.limit as string) || 10
 
             console.log("hii");
-            
 
 
-            const departments = await this._departmentService.getAllPaginatedDepartments(page,limit)
 
-            console.log("---",departments);
-            
+            const departments = await this._departmentService.getAllPaginatedDepartments(page, limit)
 
-             res.status(StatusCode.OK)
-              .json(generateSuccessResponse("All active departments featched successfully",departments))
-            
+            console.log("---", departments);
+
+
+            res.status(StatusCode.OK)
+                .json(generateSuccessResponse("All active departments featched successfully", departments))
+
         } catch (error) {
 
-             res.status(StatusCode.INTERNAL_SERVER_ERROR).json(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
-            
+            res.status(StatusCode.INTERNAL_SERVER_ERROR).json(ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+
         }
     }
 }

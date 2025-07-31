@@ -50,16 +50,22 @@ class DoctorServiceRepository
     }
 
     
-   async isServiceAlreadyExist(doctorId: string, name: string, mode: "Online" | "In-Person" | "Both"): Promise<boolean> {
+   async isServiceAlreadyExist(doctorId: string, name: string, mode: "Online" | "In-Person" | "Both",excludeServiceId?:string): Promise<boolean> {
         try {
             
-            const existing = await Services.findOne({
-                doctorId,
-                name:{$regex: new RegExp(`^${name}$`, 'i')},
-                mode
-            })
+            const query: any = {
+            doctorId,
+            name: { $regex: new RegExp(`^${name}$`, "i") },
+            mode,
+        };
 
-            return !!existing
+        if (excludeServiceId) {
+            query._id = { $ne: excludeServiceId };
+        }
+
+        const existing = await Services.findOne(query);
+
+        return !!existing;
 
         } catch (error) {
             

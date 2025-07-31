@@ -10,6 +10,10 @@ import UserRepository from "../../../repositories/implementation/user/userReposi
 import { DoctorFilter } from "../../../types/bookingTypes";
 import { CustomError } from "../../../utils/CustomError";
 import { StatusCode } from "../../../constants/statusCode";
+import { DoctorDTO } from "../../../dto/adminDto/doctor.dto";
+import { mapDoctorToDTO } from "../../../dto/mappers/admin.mapper/doctor.mapper";
+import { UserDTO } from "../../../dto/adminDto/User.dto";
+import { mapUserToDTO } from "../../../dto/mappers/admin.mapper/user.mapper";
 
 export class AdminService implements IAdminService {
     private _adminRepository: AdminRepository;
@@ -111,16 +115,18 @@ export class AdminService implements IAdminService {
         limit: number,
         searchTerm?: string,
         filters?: DoctorFilter
-    ): Promise<{ data: IDoctor[]; total: number }> {
+    ): Promise<{ data: DoctorDTO[]; total: number }> {
         try {
-            const result = this._adminRepository.findAllDoctors(
+            const result = await this._adminRepository.findAllDoctors(
                 page,
                 limit,
                 searchTerm,
                 filters
             );
 
-            return result;
+            const mappedDoctors: DoctorDTO[] = result.data.map(mapDoctorToDTO);
+
+            return { data: mappedDoctors, total: result.total };
         } catch (error) {
             console.error("Error fetching doctors:", error);
             throw new Error("Failed to fetch doctors");
@@ -131,7 +137,7 @@ export class AdminService implements IAdminService {
         page: number,
         limit: number,
         searchTerm?: string
-    ): Promise<{ users: IUser[]; totalUsers: number | null }> {
+    ): Promise<{ users: UserDTO[]; totalUsers: number | null }> {
         try {
 
             const result = await this._adminRepository.getAllUsers(
@@ -139,10 +145,12 @@ export class AdminService implements IAdminService {
                 limit,
                 searchTerm
             );
-          
+
+            const mappedUsers: UserDTO[] = result.users.map(mapUserToDTO);
+
             return {
-                users: result.users,
-                totalUsers: result.totalUsers ?? null,
+                users: mappedUsers,
+                totalUsers: result.totalUsers ?? null
             };
         } catch (error) {
             console.error(
@@ -185,5 +193,5 @@ export class AdminService implements IAdminService {
         }
     }
 
-   
+
 }

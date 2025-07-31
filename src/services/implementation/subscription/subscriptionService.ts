@@ -1,11 +1,14 @@
 
+import { dash } from "pdfkit";
 import { StatusCode } from "../../../constants/statusCode";
+import { SubscriptionDTO } from "../../../dto/subscriptionDto/subscription.dto";
 import {
     ISubscription,
 } from "../../../model/subscription/subscriptionModel";
 import ISubscriptionRepository from "../../../repositories/interfaces/subscription/ISubscription";
 import { CustomError } from "../../../utils/CustomError";
 import { ISubscriptionService } from "../../interfaces/Subscription/ISubscription";
+import { mapSubscriptionToDTO } from "../../../dto/mappers/subscription.mapper/subscription.mapper";
 
 class SubscriptionService implements ISubscriptionService {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -199,7 +202,7 @@ class SubscriptionService implements ISubscriptionService {
         }
     }
 
-    async getAllSubscriptionPlans(): Promise<ISubscription[]> {
+    async getAllSubscriptionPlans(): Promise<SubscriptionDTO[]> {
         try {
             const plans = await this._subscriptionRepository.getAllActivePlans();
 
@@ -207,7 +210,9 @@ class SubscriptionService implements ISubscriptionService {
                 throw new CustomError("No active subscription plans available", 404);
             }
 
-            return plans;
+            let mappedData = plans.map(mapSubscriptionToDTO)
+
+            return mappedData;
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error

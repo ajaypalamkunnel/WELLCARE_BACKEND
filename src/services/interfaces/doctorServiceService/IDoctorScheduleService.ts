@@ -5,6 +5,7 @@ import {
 import { IDoctorAvailability } from "../../../model/doctorService/doctorSchedule";
 import { Pagination } from "../../../repositories/interfaces/doctorService/IDoctorScheduleRepository";
 import { CreateMultiDayScheduleRequest, GeneratedScheduleBlock, RecurringSlotRequest } from "../../../types/bookingTypes";
+import { DoctorScheduleDTO } from "../../../dto/doctorSchedulesDto/doctorSchedule.dto";
 
 
 interface IDoctorScheduleService {
@@ -45,7 +46,7 @@ interface IDoctorScheduleService {
         status?: "completed" | "upcoming",
         page?: number,
         limit?: number
-    ): Promise<{ schedules: IDoctorAvailability[]; pagination: Pagination }>;
+    ): Promise<{ schedules: DoctorScheduleDTO[]; pagination: Pagination }>;
 
     cancelDoctorSchedule(
         scheduleId: string,

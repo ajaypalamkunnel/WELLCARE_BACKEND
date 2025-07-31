@@ -343,6 +343,8 @@ class UserController implements IUserController {
             }
 
             const user = await this._userService.getUserProfile(req.user.userId);
+           
+            
             if (!user) {
                 res.status(404).json({ error: "User not found" });
             }

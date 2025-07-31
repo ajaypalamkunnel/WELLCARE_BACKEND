@@ -1,4 +1,5 @@
 
+import { UserProfileDTO } from "../../../dto/userDto/doctorListing.dto/userProfile.dto";
 import { INotification } from "../../../model/notification/notificationModel";
 import { IAddress, IUser } from "../../../model/user/userModel";
 import { IScheduleResponse } from "../../../types/bookingTypes";
@@ -35,7 +36,7 @@ export interface IUserService {
 
     logoutUser(refreshToken: string): Promise<void>;
 
-    getUserProfile(userId: string): Promise<IUser | null>;
+    getUserProfile(userId: string): Promise<UserProfileDTO | null>;
     updateUserStatus(userId: string, status: number): Promise<IUser | null>;
 
     changePassword(

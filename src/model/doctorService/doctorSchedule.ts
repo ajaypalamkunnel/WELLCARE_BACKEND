@@ -1,4 +1,5 @@
     import mongoose,{Schema,Document} from "mongoose";
+import { ObjectId } from "mongoose";
 
 
 
@@ -22,6 +23,7 @@
 
 
     export interface IDoctorAvailability extends Document {
+         _id:ObjectId
         doctorId: mongoose.Types.ObjectId;
         serviceId: mongoose.Types.ObjectId;
         date: Date;

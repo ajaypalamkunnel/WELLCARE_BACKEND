@@ -1,6 +1,7 @@
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose,{Schema,Document, ObjectId} from "mongoose";
 
 export interface IDepartment extends Document{
+    _id:ObjectId
     name:string;
     icon:string;
     status:boolean;
@@ -10,6 +11,7 @@ export interface IDepartment extends Document{
 
 const DepartmentSchema = new Schema<IDepartment>(
     {
+      
         name:{type:String,required:true},
         icon:{type:String,required:true},
         status:{type:Boolean,required:true},

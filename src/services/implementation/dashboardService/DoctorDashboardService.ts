@@ -3,7 +3,7 @@ import {
     AppointmentStatusSummary,
     RevenueTrendData,
     TopServiceData,
-} from "../../../types/dashboardDto";
+} from "../../../dto/doctorDto/doctorDashboard.dto";
 import IDoctorDashboardService from "../../interfaces/dashboardService/IDoctorDashboardService";
 import IDoctorDashboardRepository from "../../../repositories/interfaces/dashboard/IDoctorDashboardRepository";
 import { StatusCode } from "../../../constants/statusCode";

@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 
 export interface IDoctorService extends Document {
+    _id:ObjectId
     name: string,
     mode: 'Online' | 'In-Person' | 'Both',
     fee:number

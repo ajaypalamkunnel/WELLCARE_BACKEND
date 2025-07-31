@@ -72,7 +72,10 @@ class AdminRepository
                 .populate({ path: "departmentId", select: "name" })
                 .select("-password -refreshToken -otp -otpExpires")
                 .skip(skip)
-                .limit(limit),
+                .limit(limit)
+                .sort({createdAt:-1})
+
+                ,
             Doctor.countDocuments(query),
         ]);
 

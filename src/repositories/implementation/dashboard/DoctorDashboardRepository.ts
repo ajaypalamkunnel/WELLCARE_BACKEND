@@ -4,7 +4,7 @@ import {
     AppointmentTrendData,
     RevenueTrendData,
     TopServiceData,
-} from "../../../types/dashboardDto";
+} from "../../../dto/doctorDto/doctorDashboard.dto";
 import IDoctorDashboardRepository from "../../interfaces/dashboard/IDoctorDashboardRepository";
 import ConsultationAppointmentModal, {
     IConsultationAppointment,

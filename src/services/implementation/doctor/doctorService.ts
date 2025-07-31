@@ -17,10 +17,16 @@ import { CustomError } from "../../../utils/CustomError";
 import mongoose, { FilterQuery } from "mongoose";
 import { StatusCode } from "../../../constants/statusCode";
 import { firstChatDTO } from "../../../types/chat";
-import { AddEducationDTO } from "../../../types/doctor";
+import { AddEducationDTO } from "../../../dto/adminDto/doctor.dto";
 import { INotification } from "../../../model/notification/notificationModel";
 import { emit } from "process";
 import { Roles } from "../../../types/roles";
+import { DoctorProfileDTO } from "../../../dto/doctorDto/doctorProfile.dto";
+import { mapDoctorProfileToDTO } from "../../../dto/mappers/doctor.mapper/doctorProfile.mapper";
+import { DoctorListDTO } from "../../../dto/userDto/doctorListing.dto/doctorList.dto";
+import { mapDoctorListToDTO } from "../../../dto/mappers/user.mapper/doctorListing.mapper/doctorList.mapper";
+import { mapToDetailedDoctorProfileDTO } from "../../../dto/mappers/user.mapper/doctorListing.mapper/detailedDoctorProfile.mapper";
+import { DetailedDoctorProfileDTO } from "../../../dto/userDto/doctorListing.dto/detailedDoctorProfile.dto";
 
 class DoctorService implements IDoctorService {
     private _doctorRepository: IDoctorRepository;
@@ -304,8 +310,10 @@ class DoctorService implements IDoctorService {
         await this._doctorRepository.removeRefreshToken(refreshToken);
     }
 
-    async getDoctorProfile(userId: string): Promise<IDoctor | null> {
-        return await this._doctorRepository.findUserDataById(userId);
+    async getDoctorProfile(userId: string): Promise<DoctorProfileDTO  | null> {
+         const doctor = await this._doctorRepository.findUserDataById(userId);
+         if(!doctor)return null
+          return mapDoctorProfileToDTO(doctor);
     }
 
     async registerDoctor(
@@ -555,7 +563,7 @@ class DoctorService implements IDoctorService {
         sortBy?: string,
         page: number = 1,
         limit: number = 10
-    ): Promise<{ doctors: IDoctor[]; total: number; totalPages: number }> {
+    ): Promise<{ doctors: DoctorListDTO[]; total: number; totalPages: number }> {
         try {
             const filters: FilterQuery<IDoctor> = { isSubscribed: true };
 
@@ -602,8 +610,10 @@ class DoctorService implements IDoctorService {
                     limit
                 );
 
+                 const doctorDTOs: DoctorListDTO[] = doctors.map(mapDoctorListToDTO);
+
             return {
-                doctors,
+                doctors:doctorDTOs,
                 total,
                 totalPages: Math.ceil(total / limit),
             };
@@ -615,7 +625,7 @@ class DoctorService implements IDoctorService {
 
     async detailedDoctorProfile(
         doctorId: string
-    ): Promise<Partial<IDoctor | null>> {
+    ): Promise<Partial<DetailedDoctorProfileDTO | null>> {
         try {
             const doctor = await this._doctorRepository.getDoctorProfile(doctorId);
 
@@ -623,7 +633,7 @@ class DoctorService implements IDoctorService {
                 throw new CustomError("doctor not found", StatusCode.NOT_FOUND);
             }
 
-            return doctor;
+            return mapToDetailedDoctorProfileDTO(doctor);
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
